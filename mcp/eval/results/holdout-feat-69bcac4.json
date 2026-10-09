@@ -1,0 +1,2756 @@
+{
+  "label": "feat-69bcac4",
+  "commit": "69bcac477fc11dd9c96b295b5d87ad40981d0709",
+  "casesPath": "/tmp/feat-69bcac4/mcp/eval/holdout-cases.json",
+  "searchedAt": "2026-10-09T07:08:04.815Z",
+  "limit": 8,
+  "metrics": {
+    "relevant": 45,
+    "noGoodMatch": 5,
+    "hitAt1": 0.4888888888888889,
+    "hitAt3": 0.5777777777777777,
+    "mrr": 0.553042328042328,
+    "noGoodMatchPrecision": null,
+    "noGoodMatchRecall": 0,
+    "abstentions": 0,
+    "falseAccepts": [
+      "s600-k3s-bpu",
+      "x5-livox-mid360",
+      "x5-tensorrt-engine",
+      "s100-ros-kilted",
+      "x3-libgpiod-gpioset"
+    ],
+    "latencyMs": {
+      "mean": 10.6,
+      "p50": 9.3,
+      "p95": 20.2
+    }
+  },
+  "misses": [
+    {
+      "id": "x5-wifi-rescan",
+      "rank": null,
+      "query": "x5 的wifi老是搜不到，我敲 sudo nmcli devise wifi rescan 它回 Error: Scanning not allowed immediatly following previous scan，要等多久才能再扫啊",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/System_configuration/network_blueteeth"
+      ],
+      "top": [
+        {
+          "title": "1. ESKF（Error State Kalman Filter）",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Application_case/amr#1-eskferror-state-kalman-filter",
+          "score": 3.8,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "4.5.8. Wi-Fi 性能测试",
+          "url": "https://developer.d-robotics.cc/x5_sdk_doc/linux_development/chip_base_test/6-wifi_performance.html",
+          "score": 3.59,
+          "manual": "x5-sdk"
+        },
+        {
+          "title": "4.3.21. Wi-Fi 驱动调试指南",
+          "url": "https://developer.d-robotics.cc/x5_sdk_doc/linux_development/driver_develop_guide/33-WIFI_Driver_Debug_Guide.html",
+          "score": 3.55,
+          "manual": "x5-sdk"
+        }
+      ]
+    },
+    {
+      "id": "x5-mipi-yolo-demo",
+      "rank": 4,
+      "query": "rdk x5 想用板载 mipi 摄像头跑实时 yolov5，官方 python demo 是不是在 /app/pydev_demo 里，目录名我忘了",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/vision/RDK_X5/mipi_camera"
+      ],
+      "top": [
+        {
+          "title": "Q32: 运行 RDK X5 的 /app/pydev_demo/02_camera_hdmi_output 或 03_yolov5_camera_hdmi_output 示例时，HDMI 输出的图像是倒向的，或者不显示 YOLOv5 的检测框，是什么情况？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system#q32-运行-rdk-x5-的-apppydev_demo02_camera_hdmi_output-或-03_yolov5_camera_hdmi_output-示例时hdmi-输出的图像是倒向的或者不显示-yolov5-的检测框是什么情况",
+          "score": 21.03,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "Q12: 运行 RDK 板载的 /app/pydev_demo/07_yolov5_sample 示例时，如果使用自己的模型，报 Segmentation fault (段错误)，怎么办？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/toolchain#q12-运行-rdk-板载的-apppydev_demo07_yolov5_sample-示例时如果使用自己的模型报-segmentation-fault-段错误怎么办",
+          "score": 18.9,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "MIPI 摄像头实时检测",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/pydev_demo_sample/RDK_X5/mipi_camera_sample",
+          "score": 13.5,
+          "manual": "rdk-x"
+        }
+      ]
+    },
+    {
+      "id": "s100-mipi-sensors",
+      "rank": null,
+      "query": "s100 那个 mipi sample 只认哪几个 sensor，imx219 和 sc230ai 都能出图吗，别的型号呢",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/Image/mipi_camera"
+      ],
+      "top": [
+        {
+          "title": "2v imx219 + MIPI + CIM + ISP + PYM + STITCH 拼接后编码 sample",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Advanced_development/multimedia_development/multimedia_development/camsys#2v-imx219--mipi--cim--isp--pym--stitch-拼接后编码-sample",
+          "score": 19.26,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "Q29: IMX219等 MIPI 摄像头如何连接到 RDK S100? 连接后如何验证？",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/hardware_and_system#q29-imx219等-mipi-摄像头如何连接到-rdk-s100-连接后如何验证",
+          "score": 17.25,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "HBN mipi sensor 点亮",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Advanced_development/multimedia_development/multimedia_development/camera_bringup#hbn-mipi-sensor-点亮",
+          "score": 13.39,
+          "manual": "rdk-s"
+        }
+      ]
+    },
+    {
+      "id": "s600-gmsl-board",
+      "rank": 4,
+      "query": "s600 相机扩展板到底是几路 gmsl，能不能当 mipi csi 用，这个板子能插到 s100 上吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/hardware_introduction/rdk_s600/rdk_s600_camera_expansion_board"
+      ],
+      "top": [
+        {
+          "title": "MIPI CSI 接口",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/interface#mipi-csi-接口",
+          "score": 24.54,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "1.1.2.2 RDK S100 相机扩展板",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/hardware_introduction/rdk_s100/rdk_s100_camera_expansion_board/rdk_s100_camera_expansion_board",
+          "score": 20.49,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "1.1.2.2 RDK S100 相机扩展板 12 通道",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/hardware_introduction/rdk_s100/rdk_s100_camera_expansion_board/rdk_s100_camera_expansion_board_12l#gmsl-相机接口j2100j2200j2300",
+          "score": 18.21,
+          "manual": "rdk-s"
+        }
+      ]
+    },
+    {
+      "id": "x5-uart-not-debug",
+      "rank": 7,
+      "query": "x5 40pin 串口应用测哪一个设备节点，/dev/ttyS0 能不能拿来跟 ttl 模块对发，手册里 x5 推荐的是 ttyS 几",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/uart"
+      ],
+      "top": [
+        {
+          "title": "推荐做法",
+          "url": "https://developer.d-robotics.cc/rdk_studio_doc/faq/multi-device-issue#推荐做法",
+          "score": 9.17,
+          "manual": "rdk-studio"
+        },
+        {
+          "title": "40PIN 接口",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/hardware_introduction/rdk_x5#40pin-接口",
+          "score": 7.78,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "Q10: 开发板接入 USB 遥控手柄（Gamepad/Joystick）后无法使用，没有生成 /dev/input/js0 设备节点，如何解决？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/interface#q10-开发板接入-usb-遥控手柄gamepadjoystick后无法使用没有生成-devinputjs0-设备节点如何解决",
+          "score": 7.65,
+          "manual": "rdk-x"
+        }
+      ]
+    },
+    {
+      "id": "x5-thermal-trip",
+      "rank": 3,
+      "query": "x5 满载降频，thermal zone 的 trip point 默认多少度开始降 cpu 和 bpu，启动温度和降频温度分别 cat 哪个节点",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/System_configuration/frequency_management"
+      ],
+      "top": [
+        {
+          "title": "4.3.14. Thermal 系统",
+          "url": "https://developer.d-robotics.cc/x5_sdk_doc/linux_development/driver_develop_guide/17-thermal_Usage.html",
+          "score": 18.39,
+          "manual": "x5-sdk"
+        },
+        {
+          "title": "BPU sysfs 节点说明",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/driver_development/driver_bpu_sysfs_dev#bpu-sysfs-节点说明",
+          "score": 11.7,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "2.4 Thermal 和 CPU 频率管理",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/System_configuration/frequency_management#thermal",
+          "score": 11.69,
+          "manual": "rdk-x"
+        }
+      ]
+    },
+    {
+      "id": "x3-typec-amps",
+      "rank": null,
+      "query": "x3 用电脑 usb 口供电老重启，type-c 最低要几安，qc/pd 充电宝行不行",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system"
+      ],
+      "top": [
+        {
+          "title": "2.3.1 Type-C 直连",
+          "url": "https://developer.d-robotics.cc/rdk_studio_doc/quick-start/connect-device/typec-flash",
+          "score": 13.61,
+          "manual": "rdk-studio"
+        },
+        {
+          "title": "Type-C 直连后电脑上不了网",
+          "url": "https://developer.d-robotics.cc/rdk_studio_doc/quick-start/configure-network#type-c-直连后电脑上不了网",
+          "score": 10.72,
+          "manual": "rdk-studio"
+        },
+        {
+          "title": "USB 接口",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/hardware_introduction/rdk_x3#usb-接口",
+          "score": 8.26,
+          "manual": "rdk-x"
+        }
+      ]
+    },
+    {
+      "id": "s100-docker-legacy-iptables",
+      "rank": null,
+      "query": "s100 上 docker 装完 systemctl restart docker 还是起不来，是不是要 sudo update-alternatives --set iptables /usr/sbin/iptables-legacy 这种",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/FAQ/hardware_and_system"
+      ],
+      "top": [
+        {
+          "title": "Docker Image",
+          "url": "https://developer.d-robotics.cc/oe_s_doc/en/guide/advanced_content/hat/examples/docker",
+          "score": 11.06,
+          "manual": "oe-s"
+        },
+        {
+          "title": "Update",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/System_configuration/srpi-config#update",
+          "score": 9.59,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "CPU Docker 环境",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Release_Note/s100/v4_0_2#cpu-docker-环境",
+          "score": 9.11,
+          "manual": "rdk-s"
+        }
+      ]
+    },
+    {
+      "id": "x5-rufus-sd",
+      "rank": 2,
+      "query": "windows 上把 x5 的 ubuntu 镜像烧进 sd 卡，用 rufus 能不能直接选压缩包，xburn 是不是必须先解压成 img",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/burn-sd-card"
+      ],
+      "top": [
+        {
+          "title": "Windows 环境",
+          "url": "https://developer.d-robotics.cc/xburn_doc/environment/windows-setup",
+          "score": 17.11,
+          "manual": "xburn"
+        },
+        {
+          "title": "烧录系统镜像",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/burn-sd-card#使用-rufus-烧录",
+          "score": 16,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "XBurn 概述",
+          "url": "https://developer.d-robotics.cc/xburn_doc/overview",
+          "score": 15.9,
+          "manual": "xburn"
+        }
+      ]
+    },
+    {
+      "id": "x3-emmc-full-image",
+      "rank": null,
+      "query": "x3 不是烧 sd，我要把全镜像写进 emmc，官方步骤在哪，别给我 module 的 nand 流程",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/install_os/rdk_x3/system_burn"
+      ],
+      "top": [
+        {
+          "title": "从 SD 卡启动切换回从 eMMC 启动",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/install_os/rdk_x3_module/boot_system#从-sd-卡启动切换回从-emmc-启动",
+          "score": 18.98,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "烧录 eMMC",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/install_os/rdk_x3_module/system_burn#x3md-emmc-system-burn",
+          "score": 18.38,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "eMMC 烧录",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/burn-sd-card#emmc-烧录",
+          "score": 15.55,
+          "manual": "rdk-x"
+        }
+      ]
+    },
+    {
+      "id": "x5-miniboot-no-downgrade",
+      "rank": 2,
+      "query": "x5 能正常进系统，想升 miniboot，是 rdk-miniboot-update 吗，能不能刷回旧版",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/upgrade-miniboot"
+      ],
+      "top": [
+        {
+          "title": "rdk-miniboot-update",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Appendix/rdk-command-manual/cmd_rdk-miniboot-update",
+          "score": 49.13,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "升级 miniboot",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/upgrade-miniboot#使用-rdk-miniboot-update-命令",
+          "score": 42.5,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "Q39: 如何升级 RDK X5 的 MiniBoot？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system#q39-如何升级-rdk-x5-的-miniboot",
+          "score": 25.99,
+          "manual": "rdk-x"
+        }
+      ]
+    },
+    {
+      "id": "tros-humble-apt",
+      "rank": 8,
+      "query": "how do I apt-install TogetheROS humble on the board? is the package tros-humble or just tros, and do I ssh in as root",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/tros_doc/quick_start/install_tros"
+      ],
+      "top": [
+        {
+          "title": "tros-humble",
+          "url": "https://developer.d-robotics.cc/tros_doc/quick_start/changelog#tros-humble",
+          "score": 43.08,
+          "manual": "tros"
+        },
+        {
+          "title": "Install the other files in the deployment package",
+          "url": "https://developer.d-robotics.cc/oe_llm_s100p_doc/en/guide/env_install#install-the-other-files-in-the-deployment-package",
+          "score": 24.68,
+          "manual": "oe-llm-s100"
+        },
+        {
+          "title": "Prepare the Development Package",
+          "url": "https://developer.d-robotics.cc/oe_llm_s600_doc/en/guide/env_install/x86_env#prepare-the-development-package",
+          "score": 10.45,
+          "manual": "oe-llm-s600"
+        }
+      ]
+    },
+    {
+      "id": "tros-nav2-humble",
+      "rank": null,
+      "query": "地图已经有了，tros humble 上装 nav2 之前要 source 哪个 setup.bash，pc 上 gazebo 小车是 waffle 吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/tros_doc/apps/navigation2"
+      ],
+      "top": [
+        {
+          "title": "8.6 TROS/ROS 开发",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/tros_ros#q2-tros-和标准的-ros2有什么区别tros-foxy-版本如何升级到-tros-humble-版本",
+          "score": 13.04,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "PC",
+          "url": "https://developer.d-robotics.cc/oe_llm_s600_doc/en/guide/quickstart/vla_model/smol#pc",
+          "score": 11.2,
+          "manual": "oe-llm-s600"
+        },
+        {
+          "title": "Environment Setup",
+          "url": "https://developer.d-robotics.cc/oe_llm_s100p_doc/en/guide/quickstart/S100P/internlm2/advanced_development_internlm2#environment-setup",
+          "score": 8.95,
+          "manual": "oe-llm-s100"
+        }
+      ]
+    },
+    {
+      "id": "tros-zero-copy-hbmem",
+      "rank": null,
+      "query": "tros humble 大块图像零拷贝怎么写，是 hbmem 那套自定义 msg 吗，foxy 也一样吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/tros_doc/tros_dev/zero_copy"
+      ],
+      "top": [
+        {
+          "title": "8.6 TROS/ROS 开发",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/tros_ros#q2-tros-和标准的-ros2有什么区别tros-foxy-版本如何升级到-tros-humble-版本",
+          "score": 30.76,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "5.4. 内存管理 - hbmem",
+          "url": "https://developer.d-robotics.cc/x5_sdk_doc/multimedia_development/3-Hbmem_index_zh_CN.html",
+          "score": 7.73,
+          "manual": "x5-sdk"
+        },
+        {
+          "title": "hbmem sample 使用说明",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Advanced_development/multimedia_development/S600_multimedia_application/hbmem_sample_guide",
+          "score": 4.71,
+          "manual": "rdk-s"
+        }
+      ]
+    },
+    {
+      "id": "tros-cross-docker-wget",
+      "rank": null,
+      "query": "在开发机上交叉编译 tros，官方 docker 镜像是 wget archive.d-robotics.cc 那个 tar.gz 吗，foxy humble jazzy 是不是同一个文件",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/tros_doc/quick_start/cross_compile"
+      ],
+      "top": [
+        {
+          "title": "Q2: TROS 和标准的 ROS2有什么区别？TROS Foxy 版本如何升级到 TROS Humble 版本？",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/tros_ros#q2-tros-和标准的-ros2有什么区别tros-foxy-版本如何升级到-tros-humble-版本",
+          "score": 23.84,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "Docker 镜像",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/toolchain_development/rdk_x3/oe_toolchain_v2_6_6#docker-镜像",
+          "score": 18.52,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "Docker 镜像",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/toolchain_development/rdk_x5/oe_toolchain_v1_2_8#docker-镜像",
+          "score": 18.39,
+          "manual": "rdk-x"
+        }
+      ]
+    },
+    {
+      "id": "oe-x5-calib-count",
+      "rank": 7,
+      "query": "x5 ptq 校准集要多少张，20 到 100 是不是官方建议，纯色图能不能拿来当标定样本，preprocess_on 关掉时前处理谁做",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_usage/prepare_calibration_data.html"
+      ],
+      "top": [
+        {
+          "title": "6.2. PTQ 转换工具",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_tool/ptq_tool.html",
+          "score": 14.03,
+          "manual": "oe-x5"
+        },
+        {
+          "title": "6.1. PTQ 转换原理及流程",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_workflow.html",
+          "score": 12.53,
+          "manual": "oe-x5"
+        },
+        {
+          "title": "6. 训练后量化（PTQ）",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq.html",
+          "score": 12.4,
+          "manual": "oe-x5"
+        }
+      ]
+    },
+    {
+      "id": "oe-x5-dynamic-shape-error",
+      "rank": null,
+      "query": "hb_mapper checker 报 ERROR The shape of model input:input is [xxx] which has dimensions of 0. Please specify input-shape parameter. 动态 shape 要怎么处理",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_faq_troubleshooting/troubleshooting.html"
+      ],
+      "top": [
+        {
+          "title": "ERROR The input model is invalid",
+          "url": "https://developer.d-robotics.cc/oe_s_doc/guide/ptq/ptq_faq_troubleshooting/troubleshooting#error-the-input-model-is-invalid",
+          "score": 40.44,
+          "manual": "oe-s"
+        },
+        {
+          "title": "S600 Benchmark of Model Performance",
+          "url": "https://developer.d-robotics.cc/oe_s_doc/en/guide/benchmark/j6ph_benchmark",
+          "score": 11.25,
+          "manual": "oe-s"
+        },
+        {
+          "title": "S100 Benchmark of Model Performance",
+          "url": "https://developer.d-robotics.cc/oe_s_doc/en/guide/benchmark/j6em_benchmark",
+          "score": 11.08,
+          "manual": "oe-s"
+        }
+      ]
+    },
+    {
+      "id": "oe-x5-accuracy-drop",
+      "rank": null,
+      "query": "x5 ptq 量化完精度掉了 4% 以上，官方让先查 pipeline 还是先改校准方式，1.5% 到 3% 的小损失呢",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/tune_content/accuracy_tune.html"
+      ],
+      "top": [
+        {
+          "title": "5.1. PTQ、QAT 简介",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/faststart/ptq_qat_overview.html",
+          "score": 14.28,
+          "manual": "oe-x5"
+        },
+        {
+          "title": "6.6.1. 训练后量化（PTQ）常见问题",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_faq_troubleshooting/ptq_faq.html",
+          "score": 12.25,
+          "manual": "oe-x5"
+        },
+        {
+          "title": "6. 训练后量化（PTQ）",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq.html",
+          "score": 11.73,
+          "manual": "oe-x5"
+        }
+      ]
+    },
+    {
+      "id": "oe-x3-docker-host",
+      "rank": null,
+      "query": "x3 算法工具链的 docker 是装在开发机上还是板子上，oe 发布包的容器部署步骤在哪",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/oe_x3_doc/cn/oe_mapper/source/env_install/env_deploy.html"
+      ],
+      "top": [
+        {
+          "title": "7.4.1.1 算法工具链 V2.6.6",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/toolchain_development/rdk_x3/oe_toolchain_v2_6_6#docker-镜像",
+          "score": 31.65,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "X3 算法工具链",
+          "url": "https://developer.d-robotics.cc/oe_x3_doc/cn/",
+          "score": 18.8,
+          "manual": "oe-x3"
+        },
+        {
+          "title": "i. 下载 docker 文件",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Application_case/amr#i-下载-docker-文件",
+          "score": 13.25,
+          "manual": "rdk-x"
+        }
+      ]
+    },
+    {
+      "id": "bmi088-ros2-topic",
+      "rank": 7,
+      "query": "bmi088 imu 模组的 ros2 包 colcon 之前要先编 c-api 吗，launch 是 rdk_imu.launch.py 吗，topic 是不是 /rdkimu/data",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/accessories_bmi088_doc/software/ros2"
+      ],
+      "top": [
+        {
+          "title": "RDK IMU Module（BMI088）",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/accessory_instructions/rdk_x5/imu/rdk_imu_module",
+          "score": 21.43,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "C-API 使用说明",
+          "url": "https://developer.d-robotics.cc/accessories_bmi088_doc/software/c_api#读取-imu-数据",
+          "score": 18.24,
+          "manual": "bmi088"
+        },
+        {
+          "title": "适配模组",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/hardware_introduction/rdk_s100/rdk_s100_camera_expansion_board/rdk_s100_camera_expansion_board#适配模组",
+          "score": 9.53,
+          "manual": "rdk-s"
+        }
+      ]
+    },
+    {
+      "id": "s600-qwen-ion",
+      "rank": null,
+      "query": "s600 上跑 qwen3-8b，是不是要先 hb_switch_ion.sh balanced 再 reboot，sdk 包名 D-Robotics_LLM_S600 从哪下",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/case_doc/basic/llm"
+      ],
+      "top": [
+        {
+          "title": "大模型工具链_v1.0.5",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Advanced_development/toolchain_development/LLM_Toolchain/rdk_s600/s100_LLM_Toolchain_v1_0_5",
+          "score": 13.81,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "On-device Environment Configuration",
+          "url": "https://developer.d-robotics.cc/oe_llm_s600_doc/en/guide/env_install/arm_env",
+          "score": 11.88,
+          "manual": "oe-llm-s600"
+        },
+        {
+          "title": "LLM 端侧运行",
+          "url": "https://developer.d-robotics.cc/oe_llm_s600_doc/guide/quickstart/llm_model/llm",
+          "score": 11.84,
+          "manual": "oe-llm-s600"
+        }
+      ]
+    },
+    {
+      "id": "x5-preempt-rt",
+      "rank": 2,
+      "query": "does x5 have a preempt-rt kernel? which apt packages, hobot-kernel-headers with the ~rt suffix?",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/realtime_kernel"
+      ],
+      "top": [
+        {
+          "title": "2 安装 packages",
+          "url": "https://developer.d-robotics.cc/tros_doc/quick_start/ros_pkg#2-安装-packages",
+          "score": 11.77,
+          "manual": "tros"
+        },
+        {
+          "title": "7.2.6 应用实时内核",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/realtime_kernel#安装-rt-tests-工具",
+          "score": 10.92,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "配置 uboot 和 kernel 选项参数",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/driver_development_x5/uboot_kernel_config#kernel-设备树",
+          "score": 10.91,
+          "manual": "rdk-x"
+        }
+      ]
+    },
+    {
+      "id": "s100-static-nmcli",
+      "rank": null,
+      "query": "s100 桌面版想把有线网改成静态 ip，是 nmcli 写进 NetworkManager 吗，netplan 的连接文件在 /etc/NetworkManager/system-connections 下吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/System_configuration/network_bluetooth"
+      ],
+      "top": [
+        {
+          "title": "方案二：使用 netplan 将 eth0 配置为静态 IP 地址",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Advanced_development/linux_development/driver_development_super/driver_ethernet/ethercat#方案二使用-netplan-将-eth0-配置为静态-ip-地址",
+          "score": 13.83,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "SYSTEM（橙色）",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/01_Quick_start/01_hardware_introduction/01_rdk_s100/01_rdk_s100_kit#system橙色",
+          "score": 12.42,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "ip",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Appendix/linux-command-manual/cmd_ip",
+          "score": 9.26,
+          "manual": "rdk-s"
+        }
+      ]
+    }
+  ],
+  "noGoodMatchAccepted": [
+    {
+      "id": "s600-k3s-bpu",
+      "query": "s600 上装 k3s，把 bpu 做成 kubernetes device plugin，yaml 官方有没有",
+      "why": "资料中心没有 k3s、Kubernetes 或 BPU device plugin。",
+      "top": [
+        {
+          "title": "Pi Simulation and On-Device Execution",
+          "url": "https://developer.d-robotics.cc/oe_llm_s600_doc/en/guide/quickstart/vla_model/pi#s600-on-device-deployment",
+          "score": 11.39,
+          "manual": "oe-llm-s600"
+        },
+        {
+          "title": "Smolvla Simulation and On-Device Execution",
+          "url": "https://developer.d-robotics.cc/oe_llm_s600_doc/en/guide/quickstart/vla_model/smol#s600-on-device-deployment",
+          "score": 11.39,
+          "manual": "oe-llm-s600"
+        },
+        {
+          "title": "Correspondence between BPU Architecture and Processor",
+          "url": "https://developer.d-robotics.cc/oe_s_doc/en/guide/plugin/terminology#correspondence-between-bpu-architecture-and-processor",
+          "score": 9.94,
+          "manual": "oe-s"
+        }
+      ]
+    },
+    {
+      "id": "x5-livox-mid360",
+      "query": "how do I build the Livox Mid-360 ROS 2 humble driver on an RDK X5, and what is the pointcloud topic name",
+      "why": "手册没有 Livox 或 Mid-360。",
+      "top": [
+        {
+          "title": "输入 topic",
+          "url": "https://developer.d-robotics.cc/tros_doc/boxs/spatial/hobot_vio#输入-topic",
+          "score": 8.92,
+          "manual": "tros"
+        },
+        {
+          "title": "D-Robotics RDK 套件",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/RDK#rdk-x5",
+          "score": 8.05,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "开发 RDK X5",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/environment_build#开发-rdk-x5",
+          "score": 7.95,
+          "manual": "rdk-x"
+        }
+      ]
+    },
+    {
+      "id": "x5-tensorrt-engine",
+      "query": "把 yolov8 转成 TensorRT engine 在 x5 的 gpu 上跑，trtexec 的命令官方写在哪",
+      "why": "X5 部署走 BPU 工具链。手册没有 TensorRT、trtexec 或 NVIDIA GPU。",
+      "top": [
+        {
+          "title": "目标检测",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/pydev_demo_sample/RDK_X5/detection_sample#yolov8-执行效果",
+          "score": 13.91,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "openssl engine",
+          "url": "https://developer.d-robotics.cc/x5_sdk_doc/linux_development/system_component_development/security_development/crypto_algo/3-openssl_engine.html",
+          "score": 12.79,
+          "manual": "x5-sdk"
+        },
+        {
+          "title": "7.4.2.1 算法工具链 V1.2.8",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/toolchain_development/rdk_x5/oe_toolchain_v1_2_8#gpu-docker",
+          "score": 12.48,
+          "manual": "rdk-x"
+        }
+      ]
+    },
+    {
+      "id": "s100-ros-kilted",
+      "query": "s100 要装 ROS 2 Kilted Kaiju，apt 源和 tros 冲突怎么处理，有没有官方步骤",
+      "why": "TROS 文档只到 Foxy、Humble、Jazzy，没有 Kilted。",
+      "top": [
+        {
+          "title": "1 添加 ROS apt 源",
+          "url": "https://developer.d-robotics.cc/tros_doc/quick_start/ros_pkg#1-添加-ros-apt-源",
+          "score": 23.18,
+          "manual": "tros"
+        },
+        {
+          "title": "8.6 TROS/ROS 开发",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/tros_ros#q13-除了-d-robotics-官方的-apt-源是否有其他-ros2的公开软件源可以使用",
+          "score": 17.93,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "Q6: apt update 命令执行失败或报错如何处理？",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/hardware_and_system#q6-apt-update-命令执行失败或报错如何处理",
+          "score": 10.36,
+          "manual": "rdk-s"
+        }
+      ]
+    },
+    {
+      "id": "x3-libgpiod-gpioset",
+      "query": "x3 用 libgpiod 的 gpioset 拉高 40pin，官方例子在哪，别给我 python 的 Hobot.GPIO",
+      "why": "40PIN 只文档化了 Hobot.GPIO。没有 libgpiod 或 gpioset 页面，用户明确不要 Hobot.GPIO。",
+      "top": [
+        {
+          "title": "GPIO 应用",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/gpio#导入-gpio-python-库",
+          "score": 34.66,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "Q37: 如何在 Conda 虚拟环境中获取和使用地瓜机器人 RDK 特定的 Python 包（如 hobot.GPIO, hobot_dnn 等）？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system#q37-如何在-conda-虚拟环境中获取和使用地瓜机器人-rdk-特定的-python-包如-hobotgpio-hobot_dnn-等",
+          "score": 21.91,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "GPIO 调试指南",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/driver_development/driver_gpio_dev#gpio-使用",
+          "score": 11.64,
+          "manual": "rdk-x"
+        }
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "x5-wifi-rescan",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 的wifi老是搜不到，我敲 sudo nmcli devise wifi rescan 它回 Error: Scanning not allowed immediatly following previous scan，要等多久才能再扫啊",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/System_configuration/network_blueteeth"
+      ],
+      "why": "X 系列网络配置写了这条 nmcli 扫描过于频繁的报错，以及稍后重试。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0,
+      "abstained": false,
+      "latencyMs": 20.2,
+      "top": [
+        {
+          "title": "1. ESKF（Error State Kalman Filter）",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Application_case/amr#1-eskferror-state-kalman-filter",
+          "score": 3.8,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "4.5.8. Wi-Fi 性能测试",
+          "url": "https://developer.d-robotics.cc/x5_sdk_doc/linux_development/chip_base_test/6-wifi_performance.html",
+          "score": 3.59,
+          "manual": "x5-sdk"
+        },
+        {
+          "title": "4.3.21. Wi-Fi 驱动调试指南",
+          "url": "https://developer.d-robotics.cc/x5_sdk_doc/linux_development/driver_develop_guide/33-WIFI_Driver_Debug_Guide.html",
+          "score": 3.55,
+          "manual": "x5-sdk"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "x3-module-mipi-ribbon",
+      "board": "x3",
+      "noGoodMatch": false,
+      "query": "x3 module 载板上那两路 15pin mipi，ov5647 和 imx219 排线蓝面朝上还是朝下，插反会怎样",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/hardware_development/rdk_x3_module/camera"
+      ],
+      "why": "X3 Module 摄像头页写明 CAM0/CAM2 支持 OV5647、IMX219、IMX477，排线蓝面朝上。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 14.8,
+      "top": [
+        {
+          "title": "摄像头使用",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/hardware_development/rdk_x3_module/camera",
+          "score": 11.01,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "IMX219 摄像头分辨率支持",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/accessory#imx219-摄像头分辨率支持",
+          "score": 7.82,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "MIPI CSI 接口",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/hardware_development/rdk_x3_module/interface#mipi-csi-接口",
+          "score": 7.74,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "x5-mipi-yolo-demo",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "rdk x5 想用板载 mipi 摄像头跑实时 yolov5，官方 python demo 是不是在 /app/pydev_demo 里，目录名我忘了",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/vision/RDK_X5/mipi_camera"
+      ],
+      "why": "X5 MIPI 摄像头页给出 /app/pydev_demo/08_mipi_camera_sample，模型是 YOLOv5x。",
+      "rank": 4,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0.25,
+      "abstained": false,
+      "latencyMs": 21.8,
+      "top": [
+        {
+          "title": "Q32: 运行 RDK X5 的 /app/pydev_demo/02_camera_hdmi_output 或 03_yolov5_camera_hdmi_output 示例时，HDMI 输出的图像是倒向的，或者不显示 YOLOv5 的检测框，是什么情况？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system#q32-运行-rdk-x5-的-apppydev_demo02_camera_hdmi_output-或-03_yolov5_camera_hdmi_output-示例时hdmi-输出的图像是倒向的或者不显示-yolov5-的检测框是什么情况",
+          "score": 21.03,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "Q12: 运行 RDK 板载的 /app/pydev_demo/07_yolov5_sample 示例时，如果使用自己的模型，报 Segmentation fault (段错误)，怎么办？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/toolchain#q12-运行-rdk-板载的-apppydev_demo07_yolov5_sample-示例时如果使用自己的模型报-segmentation-fault-段错误怎么办",
+          "score": 18.9,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "MIPI 摄像头实时检测",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/pydev_demo_sample/RDK_X5/mipi_camera_sample",
+          "score": 13.5,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "s100-mipi-sensors",
+      "board": "s100",
+      "noGoodMatch": false,
+      "query": "s100 那个 mipi sample 只认哪几个 sensor，imx219 和 sc230ai 都能出图吗，别的型号呢",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/Image/mipi_camera"
+      ],
+      "why": "S 系列 MIPI 页写明该 sample 仅支持 IMX219 和 SC230AI。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0,
+      "abstained": false,
+      "latencyMs": 17,
+      "top": [
+        {
+          "title": "2v imx219 + MIPI + CIM + ISP + PYM + STITCH 拼接后编码 sample",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Advanced_development/multimedia_development/multimedia_development/camsys#2v-imx219--mipi--cim--isp--pym--stitch-拼接后编码-sample",
+          "score": 19.26,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "Q29: IMX219等 MIPI 摄像头如何连接到 RDK S100? 连接后如何验证？",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/hardware_and_system#q29-imx219等-mipi-摄像头如何连接到-rdk-s100-连接后如何验证",
+          "score": 17.25,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "HBN mipi sensor 点亮",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Advanced_development/multimedia_development/multimedia_development/camera_bringup#hbn-mipi-sensor-点亮",
+          "score": 13.39,
+          "manual": "rdk-s"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "gs130w-ffc",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "官方双目 GS130W 接到 x5 上，ffc 排线触点朝哪边，和 gs130wi 是不是反的，插的时候板子要断电吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/accessories_stereo_camera_doc/stereo_camera_gs130w/installation"
+      ],
+      "why": "GS130W 安装页要求断电再插 FFC，并写明和 GS130WI 触点方向相反。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 12.2,
+      "top": [
+        {
+          "title": "安装方法",
+          "url": "https://developer.d-robotics.cc/accessories_stereo_camera_doc/stereo_camera_gs130w/installation#将-ffcfpc-线缆��接入-gs130w-模组",
+          "score": 16.9,
+          "manual": "stereo-camera"
+        },
+        {
+          "title": "安装方法",
+          "url": "https://developer.d-robotics.cc/accessories_stereo_camera_doc/stereo_camera_gs130wi/installation#将-ffcfpc-线缆接入-gs130wi-模组",
+          "score": 16.66,
+          "manual": "stereo-camera"
+        },
+        {
+          "title": "硬件说明",
+          "url": "https://developer.d-robotics.cc/accessories_stereo_camera_doc/stereo_camera_gs130w/hardware",
+          "score": 4.94,
+          "manual": "stereo-camera"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "s600-gmsl-board",
+      "board": "s600",
+      "noGoodMatch": false,
+      "query": "s600 相机扩展板到底是几路 gmsl，能不能当 mipi csi 用，这个板子能插到 s100 上吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/hardware_introduction/rdk_s600/rdk_s600_camera_expansion_board"
+      ],
+      "why": "S600 相机扩展板页写的是 8 路 GMSL，并声明只适配 S600。",
+      "rank": 4,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0.25,
+      "abstained": false,
+      "latencyMs": 14.5,
+      "top": [
+        {
+          "title": "MIPI CSI 接口",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/interface#mipi-csi-接口",
+          "score": 24.54,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "1.1.2.2 RDK S100 相机扩展板",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/hardware_introduction/rdk_s100/rdk_s100_camera_expansion_board/rdk_s100_camera_expansion_board",
+          "score": 20.49,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "1.1.2.2 RDK S100 相机扩展板 12 通道",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/hardware_introduction/rdk_s100/rdk_s100_camera_expansion_board/rdk_s100_camera_expansion_board_12l#gmsl-相机接口j2100j2200j2300",
+          "score": 18.21,
+          "manual": "rdk-s"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "mipi-lt8618-error",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "跑 mipi 摄像头示例直接炸了：ValueError: invalid literal for int() with base 10: b'open device /dev/lt8618_ioctl failed\\ndevice not open\\n1080' 这是 x5 上的，啥意思",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/FAQ/interface",
+        "https://developer.d-robotics.cc/rdk_s_doc/FAQ/interface"
+      ],
+      "why": "X 与 S 的接口 FAQ 都收录了这条 lt8618_ioctl 报错。两页正文相同，都算答对。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 18,
+      "top": [
+        {
+          "title": "Q12: 运行 MIPI 摄像头示例程序时报错 ValueError: invalid literal for int() with base 10: b'open device /dev/lt8618_ioctl failed\\ndevice not open\\n1080'，如何解决？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/interface#q12-运行-mipi-摄像头示例程序时报错-valueerror-invalid-literal-for-int-with-base-10-bopen-device-devlt8618_ioctl-failedndevice-not-openn1080如何解决",
+          "score": 130.5,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "MIPI 摄像头使用",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/vision/RDK_X5/mipi_camera",
+          "score": 6.08,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "MIPI 摄像头实时检测",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/pydev_demo_sample/RDK_X5/mipi_camera_sample",
+          "score": 5.38,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "x5-gpio-python",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 40pin 想用 python 点灯，库是 import Hobot.GPIO 还是 RPi.GPIO，引脚编码用 BOARD 还是 BCM",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/gpio"
+      ],
+      "why": "GPIO 应用页预置 Hobot.GPIO，并推荐 BOARD 编码。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 21.3,
+      "top": [
+        {
+          "title": "GPIO 应用",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/gpio#导入-gpio-python-库",
+          "score": 31.97,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "Q37: 如何在 Conda 虚拟环境中获取和使用地瓜机器人 RDK 特定的 Python 包（如 hobot.GPIO, hobot_dnn 等）？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system#q37-如何在-conda-虚拟环境中获取和使用地瓜机器人-rdk-特定的-python-包如-hobotgpio-hobot_dnn-等",
+          "score": 17.65,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "GPIO 调试指南",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/driver_development_x5/driver_gpio_dev#x5-gpio-irq",
+          "score": 15.03,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "x5-i2c-buses",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 40pin 默认开了哪几路 i2c，pin3/5 是 i2c5 吗，27/28 那组是不是另一条，电压 3.3 还是 1.8",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/i2c"
+      ],
+      "why": "I2C 应用页：X5 默认 I2C5（脚 3/5）和 I2C0（脚 27/28），IO 3.3V。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 14.8,
+      "top": [
+        {
+          "title": "I2C 应用",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/i2c",
+          "score": 35.99,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "I2C 调试指南",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/driver_development_x5/driver_i2c_dev#x5-的-i2c-控制器",
+          "score": 10.2,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "电压域配置",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/driver_development_x5/driver_pinctrl_dev#电压域配置",
+          "score": 8.77,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "x5-uart-not-debug",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 40pin 串口应用测哪一个设备节点，/dev/ttyS0 能不能拿来跟 ttl 模块对发，手册里 x5 推荐的是 ttyS 几",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/uart"
+      ],
+      "why": "串口应用页写明 ttyS0 是调试口，X5 测试用 /dev/ttyS1。",
+      "rank": 7,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0.14285714285714285,
+      "abstained": false,
+      "latencyMs": 14.7,
+      "top": [
+        {
+          "title": "推荐做法",
+          "url": "https://developer.d-robotics.cc/rdk_studio_doc/faq/multi-device-issue#推荐做法",
+          "score": 9.17,
+          "manual": "rdk-studio"
+        },
+        {
+          "title": "40PIN 接口",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/hardware_introduction/rdk_x5#40pin-接口",
+          "score": 7.78,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "Q10: 开发板接入 USB 遥控手柄（Gamepad/Joystick）后无法使用，没有生成 /dev/input/js0 设备节点，如何解决？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/interface#q10-开发板接入-usb-遥控手柄gamepadjoystick后无法使用没有生成-devinputjs0-设备节点如何解决",
+          "score": 7.65,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "x5-spi-pins",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 的 spi 从 40pin 哪几个脚出来的，是 spi1 还是 spi2，几个片选，io 是 3.3v 吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/spi"
+      ],
+      "why": "SPI 应用页：X5 脚 19/21/23/24/26 引出 SPI1，两个片选，3.3V。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 10.7,
+      "top": [
+        {
+          "title": "SPI 应用",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/spi",
+          "score": 45.45,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "4.3.8. SPI 调试指南",
+          "url": "https://developer.d-robotics.cc/x5_sdk_doc/linux_development/driver_develop_guide/14-SPI_Debug_Guide_zh_CN.html",
+          "score": 16.67,
+          "manual": "x5-sdk"
+        },
+        {
+          "title": "4.5.7. SPI 压力测试",
+          "url": "https://developer.d-robotics.cc/x5_sdk_doc/linux_development/chip_base_test/5-spi_stress.html",
+          "score": 11.21,
+          "manual": "x5-sdk"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "s100-i2c-dip",
+      "board": "s100",
+      "noGoodMatch": false,
+      "query": "s100 40pin 的 i2c5 和 uart2 好像要拨码开关二选一，pin3 和 pin5 默认是 i2c 几，测试脚本路径是啥",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/03_40pin_user_guide/s100/i2c"
+      ],
+      "why": "S100 I2C 页写了拨码在 I2C5 和 UART2 之间选择，以及 test_i2c.py。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 11.4,
+      "top": [
+        {
+          "title": "3.3.1.5 I2C 应用",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/03_40pin_user_guide/s100/i2c",
+          "score": 38.69,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "3.3.1.4 串口应用",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/03_40pin_user_guide/s100/uart",
+          "score": 16.44,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "I2C 调试指南",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Advanced_development/linux_development/driver_development_super/driver_i2c_dev#i2c-测试",
+          "score": 9.2,
+          "manual": "rdk-s"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "s600-uart-voltage",
+      "board": "s600",
+      "noGoodMatch": false,
+      "query": "s600 自锁 10pin 上的 uart6 uart7 电平是 3.3 还是 1.8，设备节点 /dev/ttyS6 对吗，ttyS0 是不是调试口别动",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/03_40pin_user_guide/s600/uart"
+      ],
+      "why": "S600 串口页：10-PIN 上 UART6/UART7，3.3V，测试 /dev/ttyS6 或 ttyS7，ttyS0 是调试口。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 11.9,
+      "top": [
+        {
+          "title": "3.3.2.3 串口应用",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/03_40pin_user_guide/s600/uart",
+          "score": 13.98,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "设备节点",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/audio/audio_board_super#设备节点",
+          "score": 9.38,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "RDKS600_LNX_SDK_V5.1.0",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Release_Note/s600/v5_1_0#33-mcu",
+          "score": 8.33,
+          "manual": "rdk-s"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "s600-spi-1v8",
+      "board": "s600",
+      "noGoodMatch": false,
+      "query": "s600 14pin 那路 spi 电压好像只有 1.8v，我外接 3.3v 的传感器会不会烧掉，总线号是 spidev1.0 吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/03_40pin_user_guide/s600/spi"
+      ],
+      "why": "S600 SPI 页：14-PIN 引出 SPI1，IO 1.8V，示例选 spidev1.0。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 9.7,
+      "top": [
+        {
+          "title": "3.3.2.4 SPI 应用",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/03_40pin_user_guide/s600/spi",
+          "score": 24.86,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "3.3.2.3 串口应用",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/03_40pin_user_guide/s600/uart",
+          "score": 8.44,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "SPI 调试指南",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Advanced_development/linux_development/driver_development_super/driver_spi_dev#spi-配置-gpio-cs",
+          "score": 6.3,
+          "manual": "rdk-s"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "x5-poe-hat",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 接 poe hat，802.3af 和 at 都能用吗，hat 送进板子的直流必须是 5v 吗，超过 5.2v 会怎样",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/hardware_development/rdk_x5/POE"
+      ],
+      "why": "X5 PoE 页对比 802.3af/at，并要求 Hat 输出 5V（最高 5.2V）。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 9.9,
+      "top": [
+        {
+          "title": "PoE 供电使用",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/hardware_development/rdk_x5/POE#poe-hat",
+          "score": 29.56,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "微雪 WM8960 Audio HAT",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/audio/rdk_x5/wm8960_audio_hat",
+          "score": 8.46,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "微雪 Audio Driver HAT REV2",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/audio/rdk_x5/audio_driver_hat2_rev2",
+          "score": 5.49,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "x5-thermal-trip",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 满载降频，thermal zone 的 trip point 默认多少度开始降 cpu 和 bpu，启动温度和降频温度分别 cat 哪个节点",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/System_configuration/frequency_management"
+      ],
+      "why": "频率管理页给出 trip_point_0_temp 默认 80°C、trip_point_1_temp 默认 95°C。",
+      "rank": 3,
+      "hitAt1": false,
+      "hitAt3": true,
+      "reciprocalRank": 0.3333333333333333,
+      "abstained": false,
+      "latencyMs": 10.5,
+      "top": [
+        {
+          "title": "4.3.14. Thermal 系统",
+          "url": "https://developer.d-robotics.cc/x5_sdk_doc/linux_development/driver_develop_guide/17-thermal_Usage.html",
+          "score": 18.39,
+          "manual": "x5-sdk"
+        },
+        {
+          "title": "BPU sysfs 节点说明",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/driver_development/driver_bpu_sysfs_dev#bpu-sysfs-节点说明",
+          "score": 11.7,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "2.4 Thermal 和 CPU 频率管理",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/System_configuration/frequency_management#thermal",
+          "score": 11.69,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "x5-suspend",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 怎么进休眠，是 systemctl suspend 还是 hobot-suspend，短按哪个键能唤醒",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/driver_development_x5/driver_lowpower"
+      ],
+      "why": "X5 低功耗页：长按或 hobot-suspend 休眠，短按按键唤醒。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 9.3,
+      "top": [
+        {
+          "title": "休眠唤醒",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/driver_development_x5/driver_lowpower#休眠唤醒",
+          "score": 7.27,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "hobot_llamacpp",
+          "url": "https://developer.d-robotics.cc/tros_doc/apps/hobot_llamacpp",
+          "score": 5.32,
+          "manual": "tros"
+        },
+        {
+          "title": "hobot_dosod",
+          "url": "https://developer.d-robotics.cc/tros_doc/boxs/detection/hobot_dosod",
+          "score": 5.22,
+          "manual": "tros"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "x3-typec-amps",
+      "board": "x3",
+      "noGoodMatch": false,
+      "query": "x3 用电脑 usb 口供电老重启，type-c 最低要几安，qc/pd 充电宝行不行",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system"
+      ],
+      "why": "硬件 FAQ 写 X3 Type-C 最低 5V/2A，建议 5V/3A，并反对用 PC USB 口供电。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0,
+      "abstained": false,
+      "latencyMs": 8.3,
+      "top": [
+        {
+          "title": "2.3.1 Type-C 直连",
+          "url": "https://developer.d-robotics.cc/rdk_studio_doc/quick-start/connect-device/typec-flash",
+          "score": 13.61,
+          "manual": "rdk-studio"
+        },
+        {
+          "title": "Type-C 直连后电脑上不了网",
+          "url": "https://developer.d-robotics.cc/rdk_studio_doc/quick-start/configure-network#type-c-直连后电脑上不了网",
+          "score": 10.72,
+          "manual": "rdk-studio"
+        },
+        {
+          "title": "USB 接口",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/hardware_introduction/rdk_x3#usb-接口",
+          "score": 8.26,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "x5-40pin-rail-current",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 40pin 的 3.3v 和 5v 对外供电电流上限到底是 1A 还是 800mA/500mA，两页说法不一样以哪页为准",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/hardware_introduction/rdk_x5",
+        "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/40pin_define"
+      ],
+      "why": "硬件简介写 1A/1A，管脚定义写 800mA/500mA。两页都是该问题的原文，命中任一即对。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 10.3,
+      "top": [
+        {
+          "title": "40PIN 接口",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/hardware_introduction/rdk_x5#40pin-接口",
+          "score": 9.04,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "Q1: 开发板是否支持将 40PIN 中的 VDD_5V 作为电源输入？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/interface#q1-开发板是否支持将-40pin-中的-vdd_5v-作为电源输入",
+          "score": 7.94,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "串口应用",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/uart",
+          "score": 7.67,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "apt-sunrisepi-dns",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "apt updte 失败：Could not resolve 'archive.sunrisepi.tech'，sunrise.list 里域名是不是要改成 archive.d-robotics.cc",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system",
+        "https://developer.d-robotics.cc/rdk_s_doc/FAQ/hardware_and_system"
+      ],
+      "why": "X 与 S 的系统 FAQ 都写了旧域名 sunrisepi 要换成 archive.d-robotics.cc。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 6.3,
+      "top": [
+        {
+          "title": "Q6: apt update 命令执行失败或报错如何处理？",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/hardware_and_system#q6-apt-update-命令执行失败或报错如何处理",
+          "score": 12.25,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "Model List",
+          "url": "https://developer.d-robotics.cc/oe_llm_s600_doc/en/guide/model_list",
+          "score": 8.45,
+          "manual": "oe-llm-s600"
+        },
+        {
+          "title": "3.16. Sunrise camera 用户使用说明",
+          "url": "https://developer.d-robotics.cc/x5_sdk_doc/samples/sunrise_camera_user_guide.html",
+          "score": 6.14,
+          "manual": "x5-sdk"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits.",
+        "No board in the query. Hits are grouped by board. Pass board=x3|x5|s100|s600. Agents on a board, including Moss, should pass the detected board."
+      ]
+    },
+    {
+      "id": "s100-docker-legacy-iptables",
+      "board": "s100",
+      "noGoodMatch": false,
+      "query": "s100 上 docker 装完 systemctl restart docker 还是起不来，是不是要 sudo update-alternatives --set iptables /usr/sbin/iptables-legacy 这种",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/FAQ/hardware_and_system"
+      ],
+      "why": "S100 FAQ Q30：板端 Docker 要切到 iptables legacy 再重启服务。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0,
+      "abstained": false,
+      "latencyMs": 9,
+      "top": [
+        {
+          "title": "Docker Image",
+          "url": "https://developer.d-robotics.cc/oe_s_doc/en/guide/advanced_content/hat/examples/docker",
+          "score": 11.06,
+          "manual": "oe-s"
+        },
+        {
+          "title": "Update",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/System_configuration/srpi-config#update",
+          "score": 9.59,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "CPU Docker 环境",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Release_Note/s100/v4_0_2#cpu-docker-环境",
+          "score": 9.11,
+          "manual": "rdk-s"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "x5-rufus-sd",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "windows 上把 x5 的 ubuntu 镜像烧进 sd 卡，用 rufus 能不能直接选压缩包，xburn 是不是必须先解压成 img",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/burn-sd-card"
+      ],
+      "why": "SD 烧录页：XBurn 要 .img，Rufus 或 RDK Studio 可以直接选压缩包。",
+      "rank": 2,
+      "hitAt1": false,
+      "hitAt3": true,
+      "reciprocalRank": 0.5,
+      "abstained": false,
+      "latencyMs": 11.2,
+      "top": [
+        {
+          "title": "Windows 环境",
+          "url": "https://developer.d-robotics.cc/xburn_doc/environment/windows-setup",
+          "score": 17.11,
+          "manual": "xburn"
+        },
+        {
+          "title": "烧录系统镜像",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/burn-sd-card#使用-rufus-烧录",
+          "score": 16,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "XBurn 概述",
+          "url": "https://developer.d-robotics.cc/xburn_doc/overview",
+          "score": 15.9,
+          "manual": "xburn"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "x3-emmc-full-image",
+      "board": "x3",
+      "noGoodMatch": false,
+      "query": "x3 不是烧 sd，我要把全镜像写进 emmc，官方步骤在哪，别给我 module 的 nand 流程",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/install_os/rdk_x3/system_burn"
+      ],
+      "why": "RDK X3（非 Module）全镜像烧录页，对应 eMMC，不是 Module 的 NAND 流程。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0,
+      "abstained": false,
+      "latencyMs": 8.2,
+      "top": [
+        {
+          "title": "从 SD 卡启动切换回从 eMMC 启动",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/install_os/rdk_x3_module/boot_system#从-sd-卡启动切换回从-emmc-启动",
+          "score": 18.98,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "烧录 eMMC",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/install_os/rdk_x3_module/system_burn#x3md-emmc-system-burn",
+          "score": 18.38,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "eMMC 烧录",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/burn-sd-card#emmc-烧录",
+          "score": 15.55,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "x5-miniboot-no-downgrade",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 能正常进系统，想升 miniboot，是 rdk-miniboot-update 吗，能不能刷回旧版",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/upgrade-miniboot"
+      ],
+      "why": "升级 miniboot 页给出 rdk-miniboot-update，并禁止降级。",
+      "rank": 2,
+      "hitAt1": false,
+      "hitAt3": true,
+      "reciprocalRank": 0.5,
+      "abstained": false,
+      "latencyMs": 19.1,
+      "top": [
+        {
+          "title": "rdk-miniboot-update",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Appendix/rdk-command-manual/cmd_rdk-miniboot-update",
+          "score": 49.13,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "升级 miniboot",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/upgrade-miniboot#使用-rdk-miniboot-update-命令",
+          "score": 42.5,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "Q39: 如何升级 RDK X5 的 MiniBoot？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system#q39-如何升级-rdk-x5-的-miniboot",
+          "score": 25.99,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "s100-xburn-fastboot",
+      "board": "s100",
+      "noGoodMatch": false,
+      "query": "s100 首次刷机和以后更新，xburn 走 fastboot 还是 dfu，全镜像会不会把 nor 里的 miniboot 也覆盖掉",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/install_os/rdk_s100/burn"
+      ],
+      "why": "S100 烧录步骤页区分 Fastboot 与空板/变砖，全镜像覆盖 eMMC 和 NOR 上的 miniboot。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 8.7,
+      "top": [
+        {
+          "title": "烧录步骤",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/install_os/rdk_s100/burn#进入-dfufastboot-模式",
+          "score": 25,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "XBurn 概述",
+          "url": "https://developer.d-robotics.cc/xburn_doc/overview",
+          "score": 20.98,
+          "manual": "xburn"
+        },
+        {
+          "title": "Linux 环境",
+          "url": "https://developer.d-robotics.cc/xburn_doc/environment/linux-setup#验证-fastboot",
+          "score": 15.7,
+          "manual": "xburn"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "xburn-ch340-921600",
+      "board": "any",
+      "noGoodMatch": false,
+      "query": "ubuntu 笔记本用 xburn 看串口全是乱码，ch340 在 921600 上是不是驱动不兼容，要改 ttyUSB 那个名字吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/xburn_doc/troubleshooting/serial-driver"
+      ],
+      "why": "XBurn 串口页写 Ubuntu 自带 CH340 在 921600 乱码，需改驱动名 ttyUSB 后重编。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 3.9,
+      "top": [
+        {
+          "title": "串口与驱动问题",
+          "url": "https://developer.d-robotics.cc/xburn_doc/troubleshooting/serial-driver#ubuntu-串口乱码",
+          "score": 43.86,
+          "manual": "xburn"
+        },
+        {
+          "title": "常见问题",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/install_os/rdk_s100/FAQ",
+          "score": 6.49,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "常见问题",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/install_os/rdk_s600/FAQ",
+          "score": 6.49,
+          "manual": "rdk-s"
+        }
+      ],
+      "warnings": [
+        "Board model is missing; version- or hardware-specific instructions require clarification before execution.",
+        "No board in the query. Hits are grouped by board. Pass board=x3|x5|s100|s600. Agents on a board, including Moss, should pass the detected board."
+      ]
+    },
+    {
+      "id": "tros-humble-apt",
+      "board": "any",
+      "noGoodMatch": false,
+      "query": "how do I apt-install TogetheROS humble on the board? is the package tros-humble or just tros, and do I ssh in as root",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/tros_doc/quick_start/install_tros"
+      ],
+      "why": "apt 安装页：Humble 用 sudo apt install tros-humble，示例 ssh root@板子IP。",
+      "rank": 8,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0.125,
+      "abstained": false,
+      "latencyMs": 5.8,
+      "top": [
+        {
+          "title": "tros-humble",
+          "url": "https://developer.d-robotics.cc/tros_doc/quick_start/changelog#tros-humble",
+          "score": 43.08,
+          "manual": "tros"
+        },
+        {
+          "title": "Install the other files in the deployment package",
+          "url": "https://developer.d-robotics.cc/oe_llm_s100p_doc/en/guide/env_install#install-the-other-files-in-the-deployment-package",
+          "score": 24.68,
+          "manual": "oe-llm-s100"
+        },
+        {
+          "title": "Prepare the Development Package",
+          "url": "https://developer.d-robotics.cc/oe_llm_s600_doc/en/guide/env_install/x86_env#prepare-the-development-package",
+          "score": 10.45,
+          "manual": "oe-llm-s600"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits.",
+        "No board in the query. Hits are grouped by board. Pass board=x3|x5|s100|s600. Agents on a board, including Moss, should pass the detected board."
+      ]
+    },
+    {
+      "id": "tros-nav2-humble",
+      "board": "any",
+      "noGoodMatch": false,
+      "query": "地图已经有了，tros humble 上装 nav2 之前要 source 哪个 setup.bash，pc 上 gazebo 小车是 waffle 吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/tros_doc/apps/navigation2"
+      ],
+      "why": "Navigation2 页要求 source /opt/tros/humble/setup.bash，Gazebo 模型是 waffle。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0,
+      "abstained": false,
+      "latencyMs": 3.2,
+      "top": [
+        {
+          "title": "8.6 TROS/ROS 开发",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/tros_ros#q2-tros-和标准的-ros2有什么区别tros-foxy-版本如何升级到-tros-humble-版本",
+          "score": 13.04,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "PC",
+          "url": "https://developer.d-robotics.cc/oe_llm_s600_doc/en/guide/quickstart/vla_model/smol#pc",
+          "score": 11.2,
+          "manual": "oe-llm-s600"
+        },
+        {
+          "title": "Environment Setup",
+          "url": "https://developer.d-robotics.cc/oe_llm_s100p_doc/en/guide/quickstart/S100P/internlm2/advanced_development_internlm2#environment-setup",
+          "score": 8.95,
+          "manual": "oe-llm-s100"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits.",
+        "No board in the query. Hits are grouped by board. Pass board=x3|x5|s100|s600. Agents on a board, including Moss, should pass the detected board."
+      ]
+    },
+    {
+      "id": "tros-slam-toolbox",
+      "board": "any",
+      "noGoodMatch": false,
+      "query": "用 tros 做 slam 建图，算法是 slam-toolbox 吗，建图跑在板子上还是 pc 的 rviz 上",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/tros_doc/apps/slam"
+      ],
+      "why": "SLAM 页使用 SLAM-Toolbox，算法在 RDK 上，Gazebo 和 Rviz2 在 PC 上。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 3.3,
+      "top": [
+        {
+          "title": "5.4.1 SLAM 建图",
+          "url": "https://developer.d-robotics.cc/tros_doc/apps/slam",
+          "score": 49.29,
+          "manual": "tros"
+        },
+        {
+          "title": "PC",
+          "url": "https://developer.d-robotics.cc/oe_llm_s600_doc/en/guide/quickstart/vla_model/smol#pc",
+          "score": 12.4,
+          "manual": "oe-llm-s600"
+        },
+        {
+          "title": "Boxs 算法仓库",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Release_Note/s100/v4_0_2#boxs-算法仓库",
+          "score": 4.03,
+          "manual": "rdk-s"
+        }
+      ],
+      "warnings": [
+        "No board in the query. Hits are grouped by board. Pass board=x3|x5|s100|s600. Agents on a board, including Moss, should pass the detected board."
+      ]
+    },
+    {
+      "id": "tros-zero-copy-hbmem",
+      "board": "any",
+      "noGoodMatch": false,
+      "query": "tros humble 大块图像零拷贝怎么写，是 hbmem 那套自定义 msg 吗，foxy 也一样吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/tros_doc/tros_dev/zero_copy"
+      ],
+      "why": "zero-copy 页基于 hbmem，覆盖 Foxy/Humble/Jazzy 的自定义消息示例。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0,
+      "abstained": false,
+      "latencyMs": 3.8,
+      "top": [
+        {
+          "title": "8.6 TROS/ROS 开发",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/tros_ros#q2-tros-和标准的-ros2有什么区别tros-foxy-版本如何升级到-tros-humble-版本",
+          "score": 30.76,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "5.4. 内存管理 - hbmem",
+          "url": "https://developer.d-robotics.cc/x5_sdk_doc/multimedia_development/3-Hbmem_index_zh_CN.html",
+          "score": 7.73,
+          "manual": "x5-sdk"
+        },
+        {
+          "title": "hbmem sample 使用说明",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Advanced_development/multimedia_development/S600_multimedia_application/hbmem_sample_guide",
+          "score": 4.71,
+          "manual": "rdk-s"
+        }
+      ],
+      "warnings": [
+        "No board in the query. Hits are grouped by board. Pass board=x3|x5|s100|s600. Agents on a board, including Moss, should pass the detected board."
+      ]
+    },
+    {
+      "id": "tros-cross-docker-wget",
+      "board": "any",
+      "noGoodMatch": false,
+      "query": "在开发机上交叉编译 tros，官方 docker 镜像是 wget archive.d-robotics.cc 那个 tar.gz 吗，foxy humble jazzy 是不是同一个文件",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/tros_doc/quick_start/cross_compile"
+      ],
+      "why": "交叉编译页在开发机 wget pc_tros docker tar.gz，Foxy/Humble/Jazzy 共用这段步骤。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0,
+      "abstained": false,
+      "latencyMs": 6.1,
+      "top": [
+        {
+          "title": "Q2: TROS 和标准的 ROS2有什么区别？TROS Foxy 版本如何升级到 TROS Humble 版本？",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/tros_ros#q2-tros-和标准的-ros2有什么区别tros-foxy-版本如何升级到-tros-humble-版本",
+          "score": 23.84,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "Docker 镜像",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/toolchain_development/rdk_x3/oe_toolchain_v2_6_6#docker-镜像",
+          "score": 18.52,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "Docker 镜像",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/toolchain_development/rdk_x5/oe_toolchain_v1_2_8#docker-镜像",
+          "score": 18.39,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": [
+        "Board model is missing; version- or hardware-specific instructions require clarification before execution.",
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits.",
+        "No board in the query. Hits are grouped by board. Pass board=x3|x5|s100|s600. Agents on a board, including Moss, should pass the detected board."
+      ]
+    },
+    {
+      "id": "tros-yolo-v12",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "tros 的 yolo 示例支持到 yolov12 吗，x5 humble 能不能 web 看检测框，x3 是不是只到 yolov5",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/tros_doc/boxs/detection/yolo"
+      ],
+      "why": "TROS YOLO 页列出到 YOLOv12，并按 X3/X5 给出支持的版本和 web 展示。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 14.9,
+      "top": [
+        {
+          "title": "YOLO",
+          "url": "https://developer.d-robotics.cc/tros_doc/boxs/detection/yolo",
+          "score": 22.51,
+          "manual": "tros"
+        },
+        {
+          "title": "yolov5 模型",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/pydev_demo_sample/RDK_X3/yolov5_sample",
+          "score": 14.08,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "8.6 TROS/ROS 开发",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/tros_ros#q2-tros-和标准的-ros2-有什么区别tros-foxy-版本如何升级到-tros-humble-版本",
+          "score": 11.99,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "x3-realsense-old-kernel",
+      "board": "x3",
+      "noGoodMatch": false,
+      "query": "x3 内核比较老，realsense d435i 还能装吗，官方还有安装说明不",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/FAQ/tros_ros"
+      ],
+      "why": "X 系列 TROS FAQ 有一问专门讲老内核上的 RealSense D435i 安装。S 系列 FAQ 没有这条。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 8.8,
+      "top": [
+        {
+          "title": "Q12: RDK X3 的内核版本较老，是否还能支持使用 RealSense D435i 深度相机？如何安装？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/tros_ros#q12-rdk-x3-的内核版本较老是否还能支持使用-realsense-d435i-深度相机如何安装",
+          "score": 36.26,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "RealSense 图像采集",
+          "url": "https://developer.d-robotics.cc/tros_doc/quick_demo/demo_sensor#realsense-图像采集",
+          "score": 10.84,
+          "manual": "tros"
+        },
+        {
+          "title": "X3 系列板卡",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/realtime_kernel#x3-系列板卡",
+          "score": 4.19,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "colcon-pyparsing",
+      "board": "any",
+      "noGoodMatch": false,
+      "query": "colcon build 编译 ros2 包报 AttributeError: module 'pyparsing' has no attribute 'operatorPrecedence'，要改 apt 源吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/FAQ/applications_and_examples",
+        "https://developer.d-robotics.cc/rdk_s_doc/FAQ/applications_and_examples"
+      ],
+      "why": "X 与 S 的应用 FAQ 都收录了这条 pyparsing 报错和 ROS apt 源处理。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 3.8,
+      "top": [
+        {
+          "title": "Q10: 使用colcon build命令编译 ROS2 package 时报错 AttributeError: module 'pyparsing' has no attribute 'operatorPrecedence'，如何解决？",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/applications_and_examples#q10-使用colcon-build命令编译-ros2-package-时报错-attributeerror-module-pyparsing-has-no-attribute-operatorprecedence如何解决",
+          "score": 122.07,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "编译",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Advanced_development/multimedia_development/S600_multimedia_application/hbmem_sample_guide#编译",
+          "score": 5.24,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "Q10: 使用colcon build命令编译 ROS2 package 时报错 AttributeError: module 'pyparsing' has no attribute 'operatorPrecedence'，如何解决？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/applications_and_examples#q10-使用colcon-build命令编译-ros2-package-时报错-attributeerror-module-pyparsing-has-no-attribute-operatorprecedence如何解决",
+          "score": 122.07,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "yolov5-reshape-84",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "yolov5 部署到 x5 报 can't reshape xxx in (84,84,3,85)，输出头是不是没对上",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/FAQ/toolchain",
+        "https://developer.d-robotics.cc/rdk_s_doc/FAQ/toolchain"
+      ],
+      "why": "X 与 S 的工具链 FAQ 都写了这条 YOLOv5 reshape 报错。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 9.4,
+      "top": [
+        {
+          "title": "Q7: YOLOv5 部署时遇到 can't reshape xxx in (84,84,3,85) 类似的错误，如何解决？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/toolchain#q7-yolov5-部署时遇到-cant-reshape-xxx-in-8484385-类似的错误如何解决",
+          "score": 96.13,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "CAN 使用",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/hardware_development/rdk_x5/can",
+          "score": 12.52,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "Q32: 运行 RDK X5 的 /app/pydev_demo/02_camera_hdmi_output 或 03_yolov5_camera_hdmi_output 示例时，HDMI 输出的图像是倒向的，或者不显示 YOLOv5 的检测框，是什么情况？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system#q32-运行-rdk-x5-的-apppydev_demo02_camera_hdmi_output-或-03_yolov5_camera_hdmi_output-示例时hdmi-输出的图像是倒向的或者不显示-yolov5-的检测框是什么情况",
+          "score": 7.82,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "oe-x5-checker-params",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 工具链 hb_mapper checker 的命令行参数表在哪一页，我想看 --input-shape 怎么写，不要故障案例",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_tool/hb_mapper/hb_mapper_checker.html"
+      ],
+      "why": "参数表在 hb_mapper checker 命令页，不在故障处理页。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 17.6,
+      "top": [
+        {
+          "title": "6.2.2.1. 模型检查命令（hb_mapper checker）",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_tool/hb_mapper/hb_mapper_checker.html",
+          "score": 46.27,
+          "manual": "oe-x5"
+        },
+        {
+          "title": "6.2.2.2. 模型编译命令（hb_mapper makertbin）",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_tool/hb_mapper/hb_mapper_makertbin.html",
+          "score": 27.78,
+          "manual": "oe-x5"
+        },
+        {
+          "title": "6.2.2.3. 模型推理命令（hb_mapper infer）",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_tool/hb_mapper/hb_mapper_infer.html",
+          "score": 27.47,
+          "manual": "oe-x5"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "oe-x5-calib-count",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 ptq 校准集要多少张，20 到 100 是不是官方建议，纯色图能不能拿来当标定样本，preprocess_on 关掉时前处理谁做",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_usage/prepare_calibration_data.html"
+      ],
+      "why": "校准数据准备页要求 20～100 份样本，禁止纯色图，并说明 preprocess_on。",
+      "rank": 7,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0.14285714285714285,
+      "abstained": false,
+      "latencyMs": 10.4,
+      "top": [
+        {
+          "title": "6.2. PTQ 转换工具",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_tool/ptq_tool.html",
+          "score": 14.03,
+          "manual": "oe-x5"
+        },
+        {
+          "title": "6.1. PTQ 转换原理及流程",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_workflow.html",
+          "score": 12.53,
+          "manual": "oe-x5"
+        },
+        {
+          "title": "6. 训练后量化（PTQ）",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq.html",
+          "score": 12.4,
+          "manual": "oe-x5"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "oe-x5-dynamic-shape-error",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "hb_mapper checker 报 ERROR The shape of model input:input is [xxx] which has dimensions of 0. Please specify input-shape parameter. 动态 shape 要怎么处理",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_faq_troubleshooting/troubleshooting.html"
+      ],
+      "why": "常见故障处理页把这条 dimensions of 0 记成动态 shape，并给出 --input-shape。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0,
+      "abstained": false,
+      "latencyMs": 6.7,
+      "top": [
+        {
+          "title": "ERROR The input model is invalid",
+          "url": "https://developer.d-robotics.cc/oe_s_doc/guide/ptq/ptq_faq_troubleshooting/troubleshooting#error-the-input-model-is-invalid",
+          "score": 40.44,
+          "manual": "oe-s"
+        },
+        {
+          "title": "S600 Benchmark of Model Performance",
+          "url": "https://developer.d-robotics.cc/oe_s_doc/en/guide/benchmark/j6ph_benchmark",
+          "score": 11.25,
+          "manual": "oe-s"
+        },
+        {
+          "title": "S100 Benchmark of Model Performance",
+          "url": "https://developer.d-robotics.cc/oe_s_doc/en/guide/benchmark/j6em_benchmark",
+          "score": 11.08,
+          "manual": "oe-s"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits.",
+        "No board in the query. Hits are grouped by board. Pass board=x3|x5|s100|s600. Agents on a board, including Moss, should pass the detected board."
+      ]
+    },
+    {
+      "id": "oe-x5-accuracy-drop",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 ptq 量化完精度掉了 4% 以上，官方让先查 pipeline 还是先改校准方式，1.5% 到 3% 的小损失呢",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/tune_content/accuracy_tune.html"
+      ],
+      "why": "PTQ 精度调优页按 4% 以上和 1.5%–3% 分开写排查顺序。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0,
+      "abstained": false,
+      "latencyMs": 8.6,
+      "top": [
+        {
+          "title": "5.1. PTQ、QAT 简介",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/faststart/ptq_qat_overview.html",
+          "score": 14.28,
+          "manual": "oe-x5"
+        },
+        {
+          "title": "6.6.1. 训练后量化（PTQ）常见问题",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_faq_troubleshooting/ptq_faq.html",
+          "score": 12.25,
+          "manual": "oe-x5"
+        },
+        {
+          "title": "6. 训练后量化（PTQ）",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq.html",
+          "score": 11.73,
+          "manual": "oe-x5"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "oe-x5-hrt-perf",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "bin 模型上了 x5，用 hrt_model_exec 看 perf 和 latency 的参数在 runtime 手册哪一节，不是 hb_perf",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/oe_x5_doc/cn/runtime/source/tool_introduction/hrt_model_exec.html"
+      ],
+      "why": "runtime 手册的 hrt_model_exec 页有 perf 和 latency 统计说明。",
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
+      "abstained": false,
+      "latencyMs": 16.4,
+      "top": [
+        {
+          "title": "9.5.2. hrt_model_exec 工具介绍",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/runtime/source/tool_introduction/hrt_model_exec.html",
+          "score": 55.27,
+          "manual": "oe-x5"
+        },
+        {
+          "title": "6.2.3. hb_perf 工具",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_tool/hb_perf.html",
+          "score": 37.72,
+          "manual": "oe-x5"
+        },
+        {
+          "title": "9. 嵌入式应用开发（runtime）手册",
+          "url": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/runtime.html",
+          "score": 30.66,
+          "manual": "oe-x5"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "oe-x3-docker-host",
+      "board": "x3",
+      "noGoodMatch": false,
+      "query": "x3 算法工具链的 docker 是装在开发机上还是板子上，oe 发布包的容器部署步骤在哪",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/oe_x3_doc/cn/oe_mapper/source/env_install/env_deploy.html"
+      ],
+      "why": "X3 OE 环境部署页的 Docker 容器部署是开发机环境，不是板端。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0,
+      "abstained": false,
+      "latencyMs": 8.7,
+      "top": [
+        {
+          "title": "7.4.1.1 算法工具链 V2.6.6",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/toolchain_development/rdk_x3/oe_toolchain_v2_6_6#docker-镜像",
+          "score": 31.65,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "X3 算法工具链",
+          "url": "https://developer.d-robotics.cc/oe_x3_doc/cn/",
+          "score": 18.8,
+          "manual": "oe-x3"
+        },
+        {
+          "title": "i. 下载 docker 文件",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Application_case/amr#i-下载-docker-文件",
+          "score": 13.25,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "bmi088-ros2-topic",
+      "board": "any",
+      "noGoodMatch": false,
+      "query": "bmi088 imu 模组的 ros2 包 colcon 之前要先编 c-api 吗，launch 是 rdk_imu.launch.py 吗，topic 是不是 /rdkimu/data",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/accessories_bmi088_doc/software/ros2"
+      ],
+      "why": "BMI088 ROS2 页要求先编好 C-API so，launch 为 rdk_imu.launch.py，话题 /rdkimu/data。",
+      "rank": 7,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0.14285714285714285,
+      "abstained": false,
+      "latencyMs": 5.4,
+      "top": [
+        {
+          "title": "RDK IMU Module（BMI088）",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/accessory_instructions/rdk_x5/imu/rdk_imu_module",
+          "score": 21.43,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "C-API 使用说明",
+          "url": "https://developer.d-robotics.cc/accessories_bmi088_doc/software/c_api#读取-imu-数据",
+          "score": 18.24,
+          "manual": "bmi088"
+        },
+        {
+          "title": "适配模组",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/hardware_introduction/rdk_s100/rdk_s100_camera_expansion_board/rdk_s100_camera_expansion_board#适配模组",
+          "score": 9.53,
+          "manual": "rdk-s"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits.",
+        "No board in the query. Hits are grouped by board. Pass board=x3|x5|s100|s600. Agents on a board, including Moss, should pass the detected board."
+      ]
+    },
+    {
+      "id": "s600-qwen-ion",
+      "board": "s600",
+      "noGoodMatch": false,
+      "query": "s600 上跑 qwen3-8b，是不是要先 hb_switch_ion.sh balanced 再 reboot，sdk 包名 D-Robotics_LLM_S600 从哪下",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/case_doc/basic/llm"
+      ],
+      "why": "S600 案例的 LLM 页给出 hb_switch_ion.sh balanced 和 LLM_S600 SDK 下载。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0,
+      "abstained": false,
+      "latencyMs": 10.4,
+      "top": [
+        {
+          "title": "大模型工具链_v1.0.5",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Advanced_development/toolchain_development/LLM_Toolchain/rdk_s600/s100_LLM_Toolchain_v1_0_5",
+          "score": 13.81,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "On-device Environment Configuration",
+          "url": "https://developer.d-robotics.cc/oe_llm_s600_doc/en/guide/env_install/arm_env",
+          "score": 11.88,
+          "manual": "oe-llm-s600"
+        },
+        {
+          "title": "LLM 端侧运行",
+          "url": "https://developer.d-robotics.cc/oe_llm_s600_doc/guide/quickstart/llm_model/llm",
+          "score": 11.84,
+          "manual": "oe-llm-s600"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "x5-preempt-rt",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "does x5 have a preempt-rt kernel? which apt packages, hobot-kernel-headers with the ~rt suffix?",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/realtime_kernel"
+      ],
+      "why": "实时内核页覆盖 X3/X5，用带 ~rt 后缀的 hobot-kernel-headers、hobot-boot、hobot-bpu-drivers。",
+      "rank": 2,
+      "hitAt1": false,
+      "hitAt3": true,
+      "reciprocalRank": 0.5,
+      "abstained": false,
+      "latencyMs": 8.7,
+      "top": [
+        {
+          "title": "2 安装 packages",
+          "url": "https://developer.d-robotics.cc/tros_doc/quick_start/ros_pkg#2-安装-packages",
+          "score": 11.77,
+          "manual": "tros"
+        },
+        {
+          "title": "7.2.6 应用实时内核",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/realtime_kernel#安装-rt-tests-工具",
+          "score": 10.92,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "配置 uboot 和 kernel 选项参数",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/driver_development_x5/uboot_kernel_config#kernel-设备树",
+          "score": 10.91,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "s100-static-nmcli",
+      "board": "s100",
+      "noGoodMatch": false,
+      "query": "s100 桌面版想把有线网改成静态 ip，是 nmcli 写进 NetworkManager 吗，netplan 的连接文件在 /etc/NetworkManager/system-connections 下吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/System_configuration/network_bluetooth"
+      ],
+      "why": "S 系列网络页写 S100 桌面用 NetworkManager + Netplan，nmcli 配置落在 system-connections。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0,
+      "abstained": false,
+      "latencyMs": 8.8,
+      "top": [
+        {
+          "title": "方案二：使用 netplan 将 eth0 配置为静态 IP 地址",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Advanced_development/linux_development/driver_development_super/driver_ethernet/ethercat#方案二使用-netplan-将-eth0-配置为静态-ip-地址",
+          "score": 13.83,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "SYSTEM（橙色）",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/01_Quick_start/01_hardware_introduction/01_rdk_s100/01_rdk_s100_kit#system橙色",
+          "score": 12.42,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "ip",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/Appendix/linux-command-manual/cmd_ip",
+          "score": 9.26,
+          "manual": "rdk-s"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "s600-k3s-bpu",
+      "board": "s600",
+      "noGoodMatch": true,
+      "query": "s600 上装 k3s，把 bpu 做成 kubernetes device plugin，yaml 官方有没有",
+      "expectedUrls": [],
+      "why": "资料中心没有 k3s、Kubernetes 或 BPU device plugin。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": null,
+      "abstained": false,
+      "latencyMs": 8,
+      "top": [
+        {
+          "title": "Pi Simulation and On-Device Execution",
+          "url": "https://developer.d-robotics.cc/oe_llm_s600_doc/en/guide/quickstart/vla_model/pi#s600-on-device-deployment",
+          "score": 11.39,
+          "manual": "oe-llm-s600"
+        },
+        {
+          "title": "Smolvla Simulation and On-Device Execution",
+          "url": "https://developer.d-robotics.cc/oe_llm_s600_doc/en/guide/quickstart/vla_model/smol#s600-on-device-deployment",
+          "score": 11.39,
+          "manual": "oe-llm-s600"
+        },
+        {
+          "title": "Correspondence between BPU Architecture and Processor",
+          "url": "https://developer.d-robotics.cc/oe_s_doc/en/guide/plugin/terminology#correspondence-between-bpu-architecture-and-processor",
+          "score": 9.94,
+          "manual": "oe-s"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "x5-livox-mid360",
+      "board": "x5",
+      "noGoodMatch": true,
+      "query": "how do I build the Livox Mid-360 ROS 2 humble driver on an RDK X5, and what is the pointcloud topic name",
+      "expectedUrls": [],
+      "why": "手册没有 Livox 或 Mid-360。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": null,
+      "abstained": false,
+      "latencyMs": 9.3,
+      "top": [
+        {
+          "title": "输入 topic",
+          "url": "https://developer.d-robotics.cc/tros_doc/boxs/spatial/hobot_vio#输入-topic",
+          "score": 8.92,
+          "manual": "tros"
+        },
+        {
+          "title": "D-Robotics RDK 套件",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/RDK#rdk-x5",
+          "score": 8.05,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "开发 RDK X5",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/environment_build#开发-rdk-x5",
+          "score": 7.95,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "x5-tensorrt-engine",
+      "board": "x5",
+      "noGoodMatch": true,
+      "query": "把 yolov8 转成 TensorRT engine 在 x5 的 gpu 上跑，trtexec 的命令官方写在哪",
+      "expectedUrls": [],
+      "why": "X5 部署走 BPU 工具链。手册没有 TensorRT、trtexec 或 NVIDIA GPU。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": null,
+      "abstained": false,
+      "latencyMs": 8,
+      "top": [
+        {
+          "title": "目标检测",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/pydev_demo_sample/RDK_X5/detection_sample#yolov8-执行效果",
+          "score": 13.91,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "openssl engine",
+          "url": "https://developer.d-robotics.cc/x5_sdk_doc/linux_development/system_component_development/security_development/crypto_algo/3-openssl_engine.html",
+          "score": 12.79,
+          "manual": "x5-sdk"
+        },
+        {
+          "title": "7.4.2.1 算法工具链 V1.2.8",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/toolchain_development/rdk_x5/oe_toolchain_v1_2_8#gpu-docker",
+          "score": 12.48,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "s100-ros-kilted",
+      "board": "s100",
+      "noGoodMatch": true,
+      "query": "s100 要装 ROS 2 Kilted Kaiju，apt 源和 tros 冲突怎么处理，有没有官方步骤",
+      "expectedUrls": [],
+      "why": "TROS 文档只到 Foxy、Humble、Jazzy，没有 Kilted。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": null,
+      "abstained": false,
+      "latencyMs": 9,
+      "top": [
+        {
+          "title": "1 添加 ROS apt 源",
+          "url": "https://developer.d-robotics.cc/tros_doc/quick_start/ros_pkg#1-添加-ros-apt-源",
+          "score": 23.18,
+          "manual": "tros"
+        },
+        {
+          "title": "8.6 TROS/ROS 开发",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/tros_ros#q13-除了-d-robotics-官方的-apt-源是否有其他-ros2的公开软件源可以使用",
+          "score": 17.93,
+          "manual": "rdk-s"
+        },
+        {
+          "title": "Q6: apt update 命令执行失败或报错如何处理？",
+          "url": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/hardware_and_system#q6-apt-update-命令执行失败或报错如何处理",
+          "score": 10.36,
+          "manual": "rdk-s"
+        }
+      ],
+      "warnings": [
+        "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits."
+      ]
+    },
+    {
+      "id": "x3-libgpiod-gpioset",
+      "board": "x3",
+      "noGoodMatch": true,
+      "query": "x3 用 libgpiod 的 gpioset 拉高 40pin，官方例子在哪，别给我 python 的 Hobot.GPIO",
+      "expectedUrls": [],
+      "why": "40PIN 只文档化了 Hobot.GPIO。没有 libgpiod 或 gpioset 页面，用户明确不要 Hobot.GPIO。",
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": null,
+      "abstained": false,
+      "latencyMs": 6.4,
+      "top": [
+        {
+          "title": "GPIO 应用",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/gpio#导入-gpio-python-库",
+          "score": 34.66,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "Q37: 如何在 Conda 虚拟环境中获取和使用地瓜机器人 RDK 特定的 Python 包（如 hobot.GPIO, hobot_dnn 等）？",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system#q37-如何在-conda-虚拟环境中获取和使用地瓜机器人-rdk-特定的-python-包如-hobotgpio-hobot_dnn-等",
+          "score": 21.91,
+          "manual": "rdk-x"
+        },
+        {
+          "title": "GPIO 调试指南",
+          "url": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/driver_development/driver_gpio_dev#gpio-使用",
+          "score": 11.64,
+          "manual": "rdk-x"
+        }
+      ],
+      "warnings": []
+    }
+  ],
+  "abstentionFromWarning": {
+    "rule": "A query abstains when searchDocs recorded a warning beginning with 'noGoodMatch:'. The unchanged runner does not count this: it looks for an empty hit list, no_good_match, or the phrase 'no good match'. This build keeps the weak hits and sets that warning.",
+    "truePositives": [
+      "s600-k3s-bpu",
+      "x5-livox-mid360",
+      "x5-tensorrt-engine",
+      "s100-ros-kilted"
+    ],
+    "falsePositives": [
+      "x5-wifi-rescan",
+      "s100-mipi-sensors",
+      "gs130w-ffc",
+      "s600-gmsl-board",
+      "x5-uart-not-debug",
+      "s600-uart-voltage",
+      "x5-poe-hat",
+      "x3-typec-amps",
+      "x5-40pin-rail-current",
+      "apt-sunrisepi-dns",
+      "s100-docker-legacy-iptables",
+      "x5-rufus-sd",
+      "x5-miniboot-no-downgrade",
+      "tros-humble-apt",
+      "tros-nav2-humble",
+      "tros-cross-docker-wget",
+      "oe-x5-calib-count",
+      "oe-x5-dynamic-shape-error",
+      "oe-x5-accuracy-drop",
+      "bmi088-ros2-topic",
+      "s600-qwen-ion",
+      "x5-preempt-rt",
+      "s100-static-nmcli"
+    ],
+    "falseNegatives": [
+      "x3-libgpiod-gpioset"
+    ],
+    "precision": 0.14814814814814814,
+    "recall": 0.8
+  }
+}
