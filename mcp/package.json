@@ -8,6 +8,7 @@
   },
   "files": [
     "dist",
+    "prebuilt",
     "README.md",
     "LICENSE",
     "install.md",
@@ -20,6 +21,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "eval": "npm run build && node dist/eval-retrieval.js",
+    "build:index": "npm run build && node dist/build-prebuilt.js",
     "eval:live": "npm run build && node dist/eval-live.js",
     "eval:skills": "npm run build && node dist/eval-skills-live.js",
     "verify": "npm test && npm run eval:live",

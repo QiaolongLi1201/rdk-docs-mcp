@@ -15,3 +15,5 @@ npx -y rdk-docs-mcp@latest --install
 ```
 
 需要 Node.js 20+。无需登录、无需 API Key。
+
+`search_docs` 可多传 `board`（`x3` | `x5` | `s100` | `s600`）。`noGoodMatch=true` 表示没有强匹配页。`get_page` 可传 `query` 或 `section`，或在 URL 上带 `#anchor`，用来打开长页里的某一节；`imageOnly=true` 表示该节只有图片。冷启动检索使用包内 `prebuilt/` 索引快照，设 `RDK_DOCS_PREBUILT=0` 则改为在线拉索引。

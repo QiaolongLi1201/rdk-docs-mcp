@@ -474,4 +474,140 @@ describe("rankHits", () => {
     expect(x3).toBeTruthy();
     expect(x5?.score).toBeGreaterThan(0);
   });
+
+  it("prefers the BPU API page on the newer board when the query names neither", () => {
+    const docs: IndexedDoc[] = [
+      {
+        manualId: "rdk-x",
+        title: "BPU（算法推理模块）API",
+        url: "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/multi_media_sp_dev_api/RDK_X3/cdev_multimedia_api_x3/bpu_api",
+        kind: "page",
+      },
+      {
+        manualId: "rdk-x",
+        title: "BPU（算法推理模块）API",
+        url: "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/multi_media_sp_dev_api/RDK_X5/cdev_multimedia_api_x5/bpu_api",
+        kind: "page",
+      },
+    ];
+    const hits = rankHits(docs, "BPU inference", 5);
+    expect(hits[0]?.url).toContain("RDK_X5");
+  });
+
+  it("uses the board argument when the query does not name one", () => {
+    const docs: IndexedDoc[] = [
+      {
+        manualId: "rdk-x",
+        title: "BPU（算法推理模块）API",
+        url: "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/multi_media_sp_dev_api/RDK_X5/cdev_multimedia_api_x5/bpu_api",
+        kind: "page",
+      },
+      {
+        manualId: "rdk-x",
+        title: "BPU（算法推理模块）API",
+        url: "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/multi_media_sp_dev_api/RDK_X3/cdev_multimedia_api_x3/bpu_api",
+        kind: "page",
+      },
+    ];
+    const hits = rankHits(docs, "BPU inference", 5, { board: "x3" });
+    expect(hits[0]?.url).toContain("RDK_X3");
+  });
+
+  it("ranks a package page above the Conda FAQ for a bare hobot_dnn query", () => {
+    const hits = rankHits(
+      [
+        {
+          manualId: "rdk-x",
+          title: "Q37: 如何在 Conda 虚拟环境中获取和使用 hobot_dnn？",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system",
+          kind: "heading",
+        },
+        {
+          manualId: "rdk-x",
+          title: "基础示例使用 hobot_dnn 做分类",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/pydev_demo_sample/RDK_X3/basic_sample",
+          kind: "page",
+          text: "from hobot_dnn import pyeasy_dnn",
+        },
+      ],
+      "hobot_dnn",
+      5,
+    );
+    expect(hits[0]?.url).toContain("basic_sample");
+  });
+
+  it("maps hbm_shell onto the documented hrt_model_exec page", () => {
+    const hits = rankHits(
+      [
+        {
+          manualId: "oe-x5",
+          title: "9.5.2. hrt_model_exec 工具介绍",
+          url: "https://developer.d-robotics.cc/oe_x5_doc/cn/runtime/source/tool_introduction/hrt_model_exec.html",
+          kind: "page",
+        },
+      ],
+      "hbm_shell",
+      3,
+    );
+    expect(hits[0]?.url).toContain("hrt_model_exec");
+    expect(hits[0]?.matchedVia).toBe("alias");
+    expect(hits[0]?.snippet).toContain("hbm_shell");
+  });
+
+  it("prefers hardware intros over the network page for an X3 vs X5 question", () => {
+    const hits = rankHits(
+      [
+        {
+          manualId: "rdk-x",
+          title: "2.1 网络与蓝牙配置",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/System_configuration/network_blueteeth",
+          kind: "page",
+          text: "X3 和 X5 的网络配置不同",
+        },
+        {
+          manualId: "rdk-x",
+          title: "1.1.2 硬件简介",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/hardware_introduction/rdk_x5",
+          kind: "page",
+          text: "RDK X5",
+        },
+        {
+          manualId: "rdk-x",
+          title: "1.1.1 硬件简介",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/hardware_introduction/rdk_x3",
+          kind: "page",
+          text: "RDK X3",
+        },
+      ],
+      "X3 vs X5",
+      5,
+    );
+    expect(hits[0]?.url).toContain("hardware_introduction");
+    expect(hits.some((hit) => hit.url.includes("rdk_x3"))).toBe(true);
+    expect(hits.some((hit) => hit.url.includes("rdk_x5"))).toBe(true);
+  });
+
+  it("down-ranks a forum promo under a troubleshooting post", () => {
+    const hits = rankHits(
+      [
+        {
+          manualId: "forum",
+          title: "GMSL 摄像头新品发布",
+          url: "https://forum.d-robotics.cc/t/topic/1",
+          kind: "page",
+          text: "camera GMSL 正式发布",
+        },
+        {
+          manualId: "forum",
+          title: "camera no image 黑屏求助",
+          url: "https://forum.d-robotics.cc/t/topic/2",
+          kind: "page",
+          text: "MIPI camera no image",
+        },
+      ],
+      "camera no image",
+      5,
+    );
+    expect(hits[0]?.url).toContain("/t/topic/2");
+  });
 });

@@ -7,8 +7,11 @@ import { FORUM_ID, getForumTopic, isForumRef, listForumTopics, searchForum } fro
 import type { HttpGet } from "./http.js";
 import { findRspressPage, isRspressShell, loadRspressDocs, normalizeDocPath } from "./rspress.js";
 import { applyOfficialPath, matchOfficialPath, searchGuidance } from "./routes.js";
-import { rankHits } from "./search.js";
+import { rankHits, matchQuality } from "./search.js";
+import { selectSection } from "./sections.js";
 import { compactSphinxIndex } from "./sphinx.js";
+import { prebuiltEnabled, readPrebuilt, recallIndex, rememberIndex } from "./index-store.js";
+import type { BoardId } from "./products.js";
 import type { IndexedDoc, SearchHit } from "./types.js";
 
 export type SearchSource = "docs" | "forum" | "all";
@@ -18,6 +21,8 @@ export type SearchInput = {
   manual?: string;
   source?: SearchSource;
   limit?: number;
+  /** Board the agent is on. Used when the query itself does not name one. */
+  board?: BoardId;
 };
 
 export type TocInput = {
@@ -28,6 +33,10 @@ export type TocInput = {
 export type PageInput = {
   url: string;
   maxChars?: number;
+  /** Heading text to return instead of the start of the page. */
+  section?: string;
+  /** Find the section that answers this query, even when it sits past maxChars. */
+  query?: string;
 };
 
 function requireManual(idOrAlias: string): Manual {
@@ -105,6 +114,21 @@ function manualsForSearch(manual?: string, query = ""): { targets: Manual[]; war
 }
 
 async function loadIndex(manual: Manual, http: HttpGet): Promise<IndexedDoc[]> {
+  const cached = recallIndex(http, manual.id);
+  if (cached) return cached;
+  if (prebuiltEnabled(http)) {
+    const prebuilt = readPrebuilt(manual.id);
+    if (prebuilt) {
+      rememberIndex(http, manual.id, prebuilt);
+      return prebuilt;
+    }
+  }
+  const docs = await loadIndexFromOrigin(manual, http);
+  rememberIndex(http, manual.id, docs);
+  return docs;
+}
+
+export async function loadIndexFromOrigin(manual: Manual, http: HttpGet): Promise<IndexedDoc[]> {
   if (manual.indexKind === "rspress") {
     return loadRspressDocs(manual, http);
   }
@@ -123,7 +147,13 @@ async function loadIndex(manual: Manual, http: HttpGet): Promise<IndexedDoc[]> {
 export async function searchDocs(
   input: SearchInput,
   http: HttpGet,
-): Promise<{ hits: SearchHit[]; warnings: string[]; guidance: string }> {
+): Promise<{
+  hits: SearchHit[];
+  warnings: string[];
+  guidance: string;
+  noGoodMatch: boolean;
+  matchQuality: "good" | "weak" | "none";
+}> {
   const query = input.query.trim();
   if (!query) {
     throw new Error("query is required");
@@ -135,7 +165,7 @@ export async function searchDocs(
   const warnings: string[] = [];
   const mentioned = mentionedBoards(query);
   const needsBoard = /升级|烧录|镜像|驱动|安装|系统|GPIO|PoE|WiFi|摄像头/i.test(query);
-  if (needsBoard && mentioned.length === 0 && !input.manual)
+  if (needsBoard && mentioned.length === 0 && !input.manual && !input.board)
     warnings.push("Board model is missing; version- or hardware-specific instructions require clarification before execution.");
   if (mentioned.length > 1 && input.manual === "rdk-x")
     warnings.push("Comparison evidence must be checked per board; do not infer a missing model's facts from another model.");
@@ -157,11 +187,10 @@ export async function searchDocs(
       }),
     );
     warnings.push(...loaded.map((item) => item.warning).filter((item): item is string => Boolean(item)));
-    docHits = rankHits(
-      loaded.flatMap((item) => item.docs),
-      query,
-      limit,
-    ).map((hit) => ({ ...hit, source: "docs" as const }));
+    docHits = rankHits(loaded.flatMap((item) => item.docs), query, limit, { board: input.board }).map((hit) => ({
+      ...hit,
+      source: "docs" as const,
+    }));
   }
 
   let forumHits: SearchHit[] = [];
@@ -179,10 +208,21 @@ export async function searchDocs(
     if (missing.length > 0)
       warnings.push(`No retrieved hit is explicitly scoped to: ${missing.join(", ")}. Treat the comparison as incomplete.`);
   }
+  const hits = applyOfficialPath(mergeHits(docHits, forumHits, limit), official, limit);
+  const quality = matchQuality(hits);
+  if (quality.noGoodMatch) {
+    warnings.push(
+      "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits.",
+    );
+  }
   return {
-    hits: applyOfficialPath(mergeHits(docHits, forumHits, limit), official, limit),
+    hits,
     warnings,
-    guidance: searchGuidance(official),
+    guidance: quality.noGoodMatch
+      ? "noGoodMatch. Do not answer from these hits. Say the manuals did not contain a strong page, and ask for the board or the exact tool name."
+      : searchGuidance(official),
+    noGoodMatch: quality.noGoodMatch,
+    matchQuality: quality.matchQuality,
   };
 }
 
@@ -223,19 +263,20 @@ export async function listToc(
 export async function getPage(
   input: PageInput,
   http: HttpGet,
-): Promise<{ title: string; url: string; markdown: string; truncated: boolean }> {
+): Promise<{
+  title: string;
+  url: string;
+  markdown: string;
+  truncated: boolean;
+  section?: string;
+  anchor?: string;
+  sectionMatched?: boolean;
+  imageOnly?: boolean;
+  contentNotes?: string[];
+}> {
   const url = canonicalizeDocUrl(resolveDocUrl(input.url));
   if (new URL(url).hostname === "forum.d-robotics.cc") {
-    const page = await getForumTopic(url, http);
-    const maxChars = input.maxChars ?? 16_000;
-    if (page.markdown.length <= maxChars) {
-      return { ...page, truncated: false };
-    }
-    return {
-      ...page,
-      markdown: `${page.markdown.slice(0, maxChars)}\n\n…[truncated]`,
-      truncated: true,
-    };
+    return finishPage(await getForumTopic(url, http), input);
   }
   const html = await http(url);
   let page = htmlToMarkdown(html, url);
@@ -258,14 +299,47 @@ export async function getPage(
       markdown: emptyShellNotice(url),
     };
   }
-  const maxChars = input.maxChars ?? 16_000;
-  if (page.markdown.length <= maxChars) {
-    return { ...page, truncated: false };
+  return finishPage(page, input);
+}
+
+function finishPage(
+  page: { title: string; url: string; markdown: string },
+  input: PageInput,
+): {
+  title: string;
+  url: string;
+  markdown: string;
+  truncated: boolean;
+  section?: string;
+  anchor?: string;
+  sectionMatched?: boolean;
+  imageOnly?: boolean;
+  contentNotes?: string[];
+} {
+  let hash = "";
+  try {
+    hash = new URL(input.url, "https://developer.d-robotics.cc").hash.replace(/^#/, "");
+  } catch {
+    hash = "";
   }
+  const picked = selectSection(page.markdown, {
+    section: input.section,
+    query: input.query,
+    anchor: hash || undefined,
+  });
+  const maxChars = input.maxChars ?? 16_000;
+  const truncated = picked.markdown.length > maxChars;
+  const markdown = truncated ? `${picked.markdown.slice(0, maxChars)}\n\n…[truncated]` : picked.markdown;
   return {
-    ...page,
-    markdown: `${page.markdown.slice(0, maxChars)}\n\n…[truncated]`,
-    truncated: true,
+    title: page.title,
+    url: page.url,
+    markdown,
+    truncated,
+    section: picked.section,
+    anchor: picked.anchor,
+    sectionMatched: picked.matched,
+    imageOnly: picked.imageOnly,
+    contentNotes: picked.contentNotes.length > 0 ? picked.contentNotes : undefined,
   };
 }
 
