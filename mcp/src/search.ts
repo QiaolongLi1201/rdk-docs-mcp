@@ -209,18 +209,27 @@ function scoreDoc(doc: IndexedDoc, matchers: Matcher[], query: string, options: 
   if (wantsPin && /40pin|user_sample/.test(url)) score += 8;
   if (wantsCases && (/\/case\/?$/.test(url) || title.includes("应用案例"))) score += 10;
   if (wantsMipi && /mipi_camera|mipi-camera/.test(url)) score += 12;
-  if (wantsV4l2 && /v4l2/.test(url)) score += 14;
+  if (wantsV4l2 && /v4l2/.test(url)) score += 24;
+  if (wantsV4l2 && /mipi_camera|usb_camera|web_display_camera/.test(url) && !/mipi|usb/i.test(query)) score -= 60;
   if (wantsInfer && /bpu_api|pyeasy_dnn|ai-python-api|python-api/.test(url)) score += 12;
   if (wantsInfer && /bpu_mem|stress|sysfs/.test(url) && !/内存|占用|sysfs/.test(query)) score -= 10;
   if (wantsApt && /hardware_and_system/.test(url)) score += 8;
+  if (wantsApt && /sources\.list/.test(query) && /hardware_and_system/.test(url)) score += 12;
+  if (wantsApt && /isp_|light_source|awb/.test(url)) score -= 24;
   if (wantsApt && /tros_ros/.test(url) && !/ros|tros/i.test(query)) score -= 12;
   if (titleMatched > 0 && (/\/overview(?:\.html)?$/.test(url) || title.includes("概述"))) score += 4;
   if (/\/faq\/|accessory|release_note|changelog|config_txt/.test(url)) score -= 6;
   if (bareIdent && /\/faq\//.test(url)) score -= 14;
 
   if (comparison) {
-    if (/hardware_introduction|01_rdk_s100_kit|01_rdk_s600_kit/.test(url)) score += 18;
-    if (/network|blueteeth|bluetooth|remote_login/.test(url) && !/网络|wifi|蓝牙|ip/i.test(query)) score -= 16;
+    const overview =
+      /\/hardware_introduction\/rdk_x[35](?:[#/?]|$)/.test(url) ||
+      /\/01_rdk_s100_kit(?:[#/?]|$)/.test(url) ||
+      /\/01_rdk_s600_kit(?:[#/?]|$)/.test(url);
+    if (overview) score += 28;
+    const sideTopic = /network|blueteeth|bluetooth|remote_login|cdev_demo|camera_expansion|driver_/.test(url);
+    const asksSide = /网络|wifi|蓝牙|ip|摄像头|相机|驱动|demo|示例/i.test(query);
+    if (sideTopic && !asksSide) score -= 14;
   }
 
   const troubleQuery = /no image|无图|黑屏|不出|打不开|失败|报错|error|troubleshoot/i.test(query);

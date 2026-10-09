@@ -587,6 +587,113 @@ describe("rankHits", () => {
     expect(hits.some((hit) => hit.url.includes("rdk_x5"))).toBe(true);
   });
 
+  it("prefers hardware intros over a demo heading that names both boards", () => {
+    const hits = rankHits(
+      [
+        {
+          manualId: "rdk-x",
+          title: "参考示例（ C++）",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/multi_media_sp_dev_api/RDK_X3/cdev_multimedia_api_x3/cdev_demo#摄像头图像本地保存-rdk-x5",
+          kind: "heading",
+          text: "RDK X3 RDK X5",
+        },
+        {
+          manualId: "rdk-x",
+          title: "1.1.2 硬件简介",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/hardware_introduction/rdk_x5",
+          kind: "page",
+          text: "RDK X5",
+        },
+        {
+          manualId: "rdk-s",
+          title: "RDK S100 相机扩展板",
+          url: "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/hardware_introduction/rdk_s100/rdk_s100_camera_expansion_board/rdk_s100_camera_expansion_board",
+          kind: "page",
+          text: "S100 与 S600 相机扩展",
+        },
+        {
+          manualId: "rdk-s",
+          title: "RDK S100 开发者套件",
+          url: "https://developer.d-robotics.cc/rdk_s_doc/01_Quick_start/01_hardware_introduction/01_rdk_s100/01_rdk_s100_kit",
+          kind: "page",
+          text: "S100",
+        },
+      ],
+      "X3 vs X5",
+      5,
+    );
+    expect(hits[0]?.url).toContain("hardware_introduction/rdk_x5");
+
+    const sHits = rankHits(
+      [
+        {
+          manualId: "rdk-s",
+          title: "RDK S100 相机扩展板",
+          url: "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/hardware_introduction/rdk_s100/rdk_s100_camera_expansion_board/rdk_s100_camera_expansion_board",
+          kind: "page",
+          text: "S100 S600",
+        },
+        {
+          manualId: "rdk-s",
+          title: "RDK S100 开发者套件",
+          url: "https://developer.d-robotics.cc/rdk_s_doc/01_Quick_start/01_hardware_introduction/01_rdk_s100/01_rdk_s100_kit",
+          kind: "page",
+          text: "S100 开发者套件",
+        },
+      ],
+      "S100 vs S600",
+      5,
+    );
+    expect(sHits[0]?.url).toContain("01_rdk_s100_kit");
+  });
+
+  it("does not treat an ISP light-source symbol as an apt source", () => {
+    const hits = rankHits(
+      [
+        {
+          manualId: "rdk-x",
+          title: "HB_ISP_AWB_LIGHT_SOURCE_S",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/multimedia_development/isp_system#hb_isp_awb_light_source_s",
+          kind: "heading",
+        },
+        {
+          manualId: "rdk-x",
+          title: "8.1 硬件、系统与环境配置",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system#q10-apt-update",
+          kind: "heading",
+          text: "sources.list 软件源",
+        },
+      ],
+      "apt source sources.list",
+      5,
+    );
+    expect(hits[0]?.url).toContain("hardware_and_system");
+  });
+
+  it("prefers the V4L2 page over a MIPI demo when the query names v4l2", () => {
+    const hits = rankHits(
+      [
+        {
+          manualId: "rdk-x",
+          title: "MIPI 摄像头实时检测",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/pydev_demo_sample/RDK_X5/mipi_camera_sample",
+          kind: "page",
+          text: "X5 摄像头",
+        },
+        {
+          manualId: "rdk-x",
+          title: "V4L2 使用",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/hardware_development/rdk_x5/V4l2",
+          kind: "page",
+          text: "v4l2 camera",
+        },
+      ],
+      "X5 v4l2 摄像头",
+      5,
+    );
+    expect(hits[0]?.url).toContain("/V4l2");
+  });
+
   it("down-ranks a forum promo under a troubleshooting post", () => {
     const hits = rankHits(
       [
