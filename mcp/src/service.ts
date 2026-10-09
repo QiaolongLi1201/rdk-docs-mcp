@@ -180,6 +180,7 @@ export async function searchDocs(
   guidance: string;
   noGoodMatch: boolean;
   matchQuality: "good" | "weak" | "none";
+  confidence: number;
 }> {
   const query = input.query.trim();
   if (!query) {
@@ -269,6 +270,7 @@ export async function searchDocs(
       : searchGuidance(),
     noGoodMatch: quality.noGoodMatch,
     matchQuality: quality.matchQuality,
+    confidence: quality.confidence,
   };
 }
 

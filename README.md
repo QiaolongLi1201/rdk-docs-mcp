@@ -34,7 +34,7 @@ jsDelivr 不可用时，同一文件在：
 | Tool | 做什么 |
 |------|--------|
 | `list_manuals` | 列出资料中心已上架手册（X/S 系列、TROS、Model Zoo、Studio、XBurn、OE、X5 SDK 等） |
-| `search_docs` | BM25 检索（标题/路径权重大于正文，中文按二字切分）。指定手册只搜那一本；不指定时只搜手册。问句或 `board` 点名 X3/X5 时不会返回 S 系列 OE。未传板卡时 `ambiguousBoard=true`，`groups` 按板卡分组。`noGoodMatch=true` 表示顶部分数覆盖的问句概念太少。 |
+| `search_docs` | BM25 检索（标题/路径权重大于正文，中文按二字切分）。指定手册只搜那一本；不指定时只搜手册。问句或 `board` 点名 X3/X5 时不会返回 S 系列 OE。未传板卡时 `ambiguousBoard=true`，`groups` 按板卡分组。每条命中带 `confidence`（0–1）。`noGoodMatch=true` 只在专有词不在手册里、或顶部得分远低于正常命中时出现；口语对不上不会单凭这一点弃答。 |
 | `get_page` | 把一页官方文档或一篇论坛主题收成 Markdown。可选 `query` / `section`，或 URL 带 `#anchor`，用来跳过页首、直接打开相关小节。 |
 | `list_toc` | 列出某一本手册的页面目录；`forum` 列出「开发与问题」和「通用」最近帖 |
 | `search_skills` | 在 [D-Robotics/rdk-skills](https://github.com/D-Robotics/rdk-skills) 目录快照里按任务找 Skill（只读，带 `catalog_revision` 溯源） |

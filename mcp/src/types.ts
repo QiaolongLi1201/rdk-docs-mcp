@@ -21,8 +21,14 @@ export type SearchHit = {
   /** Board the URL or title is scoped to, when that is unambiguous. */
   board?: "x3" | "x5" | "s100" | "s600" | "multiple";
   quality?: "good" | "weak";
-  /** Fraction of query concepts found on this page. Below the abstain line, quality is weak. */
+  /** Fraction of query concepts found on this page. */
   coverage?: number;
+  /**
+   * 0–1 overlap of the query's distinctive terms with this page, mixed with
+   * how strong the score is for this corpus. Callers can threshold this.
+   * `noGoodMatch` stays conservative and does not follow a low value by itself.
+   */
+  confidence?: number;
   /** Set when the hit came from an alias because the literal identifier is not indexed. */
   matchedVia?: "alias";
 };

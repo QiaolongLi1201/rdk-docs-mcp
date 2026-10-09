@@ -76,9 +76,14 @@ export function searchManuals(
   return orderHits(groups, query, limit, options);
 }
 
-export function matchQuality(hits: SearchHit[]): { noGoodMatch: boolean; matchQuality: "good" | "weak" | "none" } {
+export function matchQuality(hits: SearchHit[]): {
+  noGoodMatch: boolean;
+  matchQuality: "good" | "weak" | "none";
+  confidence: number;
+} {
   const top = hits[0];
-  if (!top || top.score <= 0) return { noGoodMatch: true, matchQuality: "none" };
-  if (top.quality === "weak") return { noGoodMatch: true, matchQuality: "weak" };
-  return { noGoodMatch: false, matchQuality: "good" };
+  if (!top || top.score <= 0) return { noGoodMatch: true, matchQuality: "none", confidence: 0 };
+  const confidence = top.confidence ?? 0;
+  if (top.quality === "weak") return { noGoodMatch: true, matchQuality: "weak", confidence };
+  return { noGoodMatch: false, matchQuality: "good", confidence };
 }

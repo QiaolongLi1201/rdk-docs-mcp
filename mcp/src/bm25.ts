@@ -20,10 +20,17 @@ const TITLE_W = 3;
 const URL_W = 1.6;
 const BODY_W = 1;
 const BODY_CAP = 1500;
-/** A top hit below this fraction of matched query concepts is a weak match. */
-export const ABSTAIN_COVERAGE = 0.34;
 /** Terms in more than this fraction of the searched docs do not carry a concept. */
 const COMMON_DF = 0.08;
+/** Rarer than this, a content term is distinctive enough to abstain on. */
+const RARE_DF = 0.02;
+/**
+ * IDF below this is a generic token (error, docker, ip). It still matches,
+ * but it cannot carry a page by itself.
+ */
+const IDF_FLOOR = 3.2;
+/** Top score / undamped IDF mass below this is far under a real match. */
+const FAR_BELOW = 0.45;
 
 const ASCII = /[a-z0-9][a-z0-9_.-]*/g;
 const BOARDS: BoardId[] = ["s600", "s100", "x5", "x3"];
@@ -81,6 +88,117 @@ const EN_STOP = new Set([
   "into",
   "onto",
   "not",
+]);
+
+/** Collision tokens. Rare identifiers are never in this set. */
+const GENERIC_ASCII = new Set([
+  "error",
+  "errors",
+  "err",
+  "type",
+  "docker",
+  "static",
+  "dynamic",
+  "install",
+  "update",
+  "device",
+  "network",
+  "system",
+  "model",
+  "board",
+  "linux",
+  "python",
+  "ubuntu",
+  "version",
+  "default",
+  "config",
+  "file",
+  "image",
+  "driver",
+  "command",
+  "script",
+  "test",
+  "data",
+  "info",
+  "failed",
+  "failure",
+  "warning",
+  "unknown",
+  "invalid",
+  "name",
+  "path",
+  "port",
+  "host",
+  "user",
+  "root",
+  "ip",
+  "usb",
+  "sdk",
+  "api",
+  "app",
+  "src",
+  "bin",
+  "doc",
+  "bad",
+  "gateway",
+  "pending",
+  "chain",
+  "target",
+  "match",
+]);
+
+/** Colloquial filler. These never make a query look out of corpus. */
+const CJK_FILLER = new Set([
+  "一直",
+  "好像",
+  "提示",
+  "报错",
+  "失败",
+  "不行",
+  "没有",
+  "板子",
+  "这个",
+  "那个",
+  "怎么",
+  "如何",
+  "怎样",
+  "是不是",
+  "能不能",
+  "可不可以",
+  "一下",
+  "已经",
+  "现在",
+  "直接",
+  "根本",
+  "老是",
+  "完全",
+  "还是",
+  "出来",
+  "进去",
+  "出现",
+  "起来",
+  "上去",
+  "下来",
+  "什么",
+  "哪里",
+  "哪个",
+  "因为",
+  "所以",
+  "如果",
+  "但是",
+  "就是",
+  "不是",
+  "可以",
+  "应该",
+  "需要",
+  "问题",
+  "错误",
+  "之后",
+  "然后",
+  "或者",
+  "我们",
+  "你们",
+  "自己",
 ]);
 
 /** Path and identifier fragments that are not retrieval terms. */
@@ -203,7 +321,7 @@ type Corpus = {
   touched: number[];
 };
 
-type Concept = { terms: string[]; keys: string[]; minHits: number };
+type Concept = { terms: string[]; keys: string[]; minHits: number; original: string[] };
 type QTerm = { term: string; qtf: number };
 
 const cache = new WeakMap<IndexedDoc[], Corpus>();
@@ -476,7 +594,11 @@ function analyzeQuery(query: string): { terms: QTerm[]; concepts: Concept[] } {
   const seenAscii = new Set<string>();
   const ascii: string[] = [];
   for (const match of lowered.matchAll(ASCII)) ascii.push(match[0]);
-  for (const match of lowered.matchAll(/(\d+)\s*[-_]?\s*([a-z]{2,})/g)) ascii.push(`${match[1]}${match[2]}`);
+  for (const match of lowered.matchAll(/(\d+)\s*[-_]?\s*([a-z]{2,})/g)) {
+    const start = match.index ?? 0;
+    if (start > 0 && /[a-z0-9]/i.test(lowered[start - 1])) continue;
+    ascii.push(`${match[1]}${match[2]}`);
+  }
   for (const tok of ascii) {
     if (seenAscii.has(tok) || tok.length < 2 || EN_STOP.has(tok)) continue;
     seenAscii.add(tok);
@@ -486,7 +608,8 @@ function analyzeQuery(query: string): { terms: QTerm[]; concepts: Concept[] } {
       if (flat.length >= 6 && flat !== tok) terms.push(flat);
       for (const part of tok.split(/[-_.]+/)) if (part.length >= 2) terms.push(part);
     }
-    concepts.push({ terms: [...new Set(terms)], keys: [tok], minHits: 1 });
+    const unique = [...new Set(terms)];
+    concepts.push({ terms: unique, keys: [tok], minHits: 1, original: [...unique] });
     for (const term of terms) push(term, 1);
   }
 
@@ -505,10 +628,12 @@ function analyzeQuery(query: string): { terms: QTerm[]; concepts: Concept[] } {
 
   for (const segment of cjkSegments(lowered)) {
     const grams = bigrams(segment);
+    const cjkTerms = grams.length > 0 ? grams : [segment];
     concepts.push({
-      terms: grams.length > 0 ? grams : [segment],
+      terms: [...cjkTerms],
       keys: [segment],
       minHits: grams.length > 4 ? 2 : 1,
+      original: [...cjkTerms],
     });
     pushCjk(segment, 1);
   }
@@ -618,8 +743,92 @@ function conceptMatches(corpus: Corpus, docId: number, concept: Concept, df: (te
   return present >= concept.minHits;
 }
 
-function hitIsGood(coverage: number, absentFraction: number): boolean {
-  return coverage >= ABSTAIN_COVERAGE && !(absentFraction >= 0.5 && coverage < 0.67);
+function dampGenericIdf(idf: number): number {
+  if (idf >= IDF_FLOOR) return idf;
+  // Continuous fade: a token at half the floor keeps about 70% of its idf.
+  return idf * (0.45 + 0.55 * (idf / IDF_FLOOR));
+}
+
+function isCjkTerm(term: string): boolean {
+  const code = term.charCodeAt(0);
+  return code >= 0x4e00 && code <= 0x9fff;
+}
+
+function looksLikeContent(term: string): boolean {
+  if (isCjkTerm(term)) return term.length >= 2 && !CJK_FILLER.has(term);
+  if (term.length < 3 || GENERIC_ASCII.has(term) || EN_STOP.has(term) || FRAGMENT_SKIP.has(term)) return false;
+  return true;
+}
+
+/** Digit, underscore, or a longer token. Generic collision words are already excluded. */
+function isIdentifier(term: string): boolean {
+  if (!looksLikeContent(term) || isCjkTerm(term)) return false;
+  return /[0-9_\-]/.test(term) || term.length >= 5;
+}
+
+function termFound(term: string, df: (term: string) => number): boolean {
+  return df(term) > 0 && looksLikeContent(term);
+}
+
+/** In-corpus and rare. A term that never occurs is handled on the concept, not here. */
+function isDistinctiveTerm(term: string, docs: number, n: number): boolean {
+  if (docs <= 0 || n <= 0 || docs / n >= RARE_DF) return false;
+  return looksLikeContent(term);
+}
+
+function conceptInCorpus(concept: Concept, df: (term: string) => number): boolean {
+  return concept.terms.some((term) => df(term) > 0);
+}
+
+/**
+ * Concepts that can justify abstaining: fully absent content words, or rare
+ * identifiers that do occur. Filler and generic collision words are left out.
+ */
+function distinctiveOf(concepts: Concept[], df: (term: string) => number, n: number): Concept[] {
+  return concepts.filter((concept) => {
+    if (!conceptInCorpus(concept, df)) return concept.terms.some((term) => looksLikeContent(term));
+    return concept.terms.some((term) => isDistinctiveTerm(term, df(term), n));
+  });
+}
+
+function isHowTo(query: string): boolean {
+  return /怎么|如何|怎样|教程|步骤|howto|how to|how do|在哪/i.test(query);
+}
+
+function roleScale(query: string, url: string, concepts: Concept[]): number {
+  const path = url.toLowerCase();
+  const command = /\/cmd[_-]|command-manual|command_manual|linux-command/.test(path);
+  const driver = /driver_development|\/drivers?\//.test(path);
+  const guide = /user[_-]guide|user[_-]sample|basic_application|tutorial/.test(path);
+  const named = concepts.some((concept) =>
+    concept.terms.some((term) => term.length >= 4 && /[a-z]/.test(term) && path.includes(term)),
+  );
+  const aboutDriver = /驱动|driver|内核|kernel/i.test(query);
+  let scale = 1;
+  // Usage guides outrank a neighboring driver or command page when the
+  // question is not itself about writing a driver.
+  if (guide) scale *= 1.14;
+  if (!named && command && isHowTo(query)) scale *= 0.8;
+  if (!named && driver && !aboutDriver) scale *= 0.86;
+  return scale;
+}
+
+function breadthScale(doc: IndexedDoc, bodyDl: number, avgBody: number): number {
+  const text = doc.text ?? "";
+  let topics = 1;
+  for (let i = 0; i < text.length; i += 1) {
+    const ch = text[i];
+    if (ch === "?" || ch === "？") topics += 1;
+  }
+  const ratio = avgBody > 0 ? bodyDl / avgBody : 1;
+  if (ratio <= 2.2 && topics < 6 && text.length < 900) return 1;
+  const extraLen = Math.max(0, ratio - 2.2);
+  const extraTopics = Math.max(0, topics - 5);
+  return Math.max(0.72, 1 / (1 + 0.1 * extraLen + 0.05 * extraTopics));
+}
+
+function round3(value: number): number {
+  return Math.round(Math.max(0, Math.min(1, value)) * 1000) / 1000;
 }
 
 function coverageOf(
@@ -689,10 +898,13 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
   addTypoVariants(plan.concepts, plan.terms, (term) => df(term) > 0);
 
   for (const corpus of corpora) beginEpoch(corpus);
+  let idfMass = 0;
   for (const qterm of plan.terms) {
     const docsWith = df(qterm.term);
     if (docsWith === 0) continue;
     const idf = Math.log(1 + (n - docsWith + 0.5) / (docsWith + 0.5));
+    idfMass += idf * qterm.qtf;
+    const weighted = dampGenericIdf(idf);
     for (const corpus of corpora) {
       const list = corpus.postings.get(qterm.term);
       if (!list) continue;
@@ -702,34 +914,69 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
           TITLE_W * fieldScore(list[i + 1], corpus.titleDl[doc], avgTitle) +
           URL_W * fieldScore(list[i + 2], corpus.urlDl[doc], avgUrl) +
           BODY_W * fieldScore(list[i + 3], corpus.bodyDl[doc], avgBody);
-        addScore(corpus, doc, idf * sat * qterm.qtf);
+        addScore(corpus, doc, weighted * sat * qterm.qtf);
       }
     }
   }
 
   const boards = contextBoards(query, options);
-  type Cand = { corpus: Corpus; doc: number; score: number; coverage: number };
+  type Cand = { corpus: Corpus; doc: number; score: number; raw: number; coverage: number; confidence: number };
   const cands: Cand[] = [];
   for (const corpus of corpora) {
     for (const doc of corpus.touched) {
       const score = corpus.scores[doc];
       if (score <= 0) continue;
       if (!docAllowed(corpus.docs[doc], boards)) continue;
-      cands.push({ corpus, doc, score, coverage: 0 });
+      cands.push({ corpus, doc, score, raw: score, coverage: 0, confidence: 0 });
     }
   }
   cands.sort((a, b) => b.score - a.score);
   const pool = cands.slice(0, 300);
-  let absent = 0;
-  for (const concept of plan.concepts) {
-    if (!concept.terms.some((term) => df(term) > 0)) absent += 1;
-  }
-  const absentFraction = plan.concepts.length === 0 ? 1 : absent / plan.concepts.length;
+  const distinctive = distinctiveOf(plan.concepts, df, n);
+  const identifierConcepts = plan.concepts.filter((concept) => concept.original.some((term) => isIdentifier(term)));
+  const cjkConcepts = plan.concepts.filter((concept) =>
+    concept.original.some((term) => isCjkTerm(term) && looksLikeContent(term)),
+  );
+  const cjkOriginalInCorpus = cjkConcepts.some((concept) =>
+    concept.original.some((term) => isCjkTerm(term) && looksLikeContent(term) && df(term) > 0),
+  );
+  // An identifier that never occurs abstains only when the query also has no
+  // in-corpus CJK content word. Colloquial wording can miss the identifier
+  // and still name a real topic (烧录, 无线).
+  const identifiersAbsent =
+    identifierConcepts.length > 0 &&
+    identifierConcepts.every((concept) => !concept.terms.some((term) => termFound(term, df))) &&
+    !cjkOriginalInCorpus;
+  const cjkAbsent =
+    identifierConcepts.length === 0 &&
+    cjkConcepts.length > 0 &&
+    cjkConcepts.every((concept) => !concept.terms.some((term) => df(term) > 0 && isCjkTerm(term) && looksLikeContent(term)));
+  const allDistinctiveAbsent = identifiersAbsent || cjkAbsent;
   for (const cand of pool) {
+    const doc = cand.corpus.docs[cand.doc];
+    cand.raw =
+      cand.score *
+      breadthScale(doc, cand.corpus.bodyDl[cand.doc], avgBody) *
+      roleScale(query, doc.url, plan.concepts);
     cand.coverage = coverageOf(cand.corpus, cand.doc, plan.concepts, df, n);
-    cand.score *= 0.15 + 0.85 * cand.coverage;
+    cand.score = cand.raw * (0.15 + 0.85 * cand.coverage);
+    const norm = idfMass > 0 ? cand.raw / idfMass : 0;
+    let available = 0;
+    let onHit = 0;
+    for (const concept of distinctive) {
+      if (!conceptInCorpus(concept, df)) continue;
+      available += 1;
+      if (conceptMatches(cand.corpus, cand.doc, concept, df, n)) onHit += 1;
+    }
+    const scorePart = Math.max(0, Math.min(1, norm / 2.2));
+    if (allDistinctiveAbsent) cand.confidence = round3(Math.min(0.15, scorePart));
+    else if (available === 0) cand.confidence = round3(scorePart);
+    else cand.confidence = round3(0.75 * (onHit / available) + 0.25 * scorePart);
   }
   pool.sort((a, b) => b.score - a.score || a.doc - b.doc);
+  const topNorm = pool.length > 0 && idfMass > 0 ? pool[0].raw / idfMass : 0;
+  const farBelow = pool.length === 0 || topNorm < FAR_BELOW;
+  const weakQuery = allDistinctiveAbsent || farBelow;
 
   const best = new Map<string, { hit: SearchHit; page: boolean }>();
   for (const cand of pool) {
@@ -737,7 +984,6 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
     const base = doc.url.split("#")[0] ?? doc.url;
     const on = boardsOn(doc);
     const coverage = cand.coverage;
-    const good = hitIsGood(coverage, absentFraction);
     const hit: SearchHit = {
       title: doc.title,
       url: doc.url,
@@ -746,8 +992,9 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
       score: cand.score,
       source: doc.manualId === "forum" ? "forum" : "docs",
       board: on.length === 1 ? on[0] : on.length > 1 ? "multiple" : undefined,
-      quality: good ? "good" : "weak",
+      quality: weakQuery ? "weak" : "good",
       coverage: Math.round(coverage * 1000) / 1000,
+      confidence: cand.confidence,
     };
     const prev = best.get(base);
     if (!prev) {
@@ -762,6 +1009,7 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
     const snippet = hit.score > prev.hit.score ? hit.snippet : prev.hit.snippet;
     const url = hit.score > prev.hit.score ? hit.url : prev.hit.url;
     const coverageOut = hit.score > prev.hit.score ? hit.coverage : prev.hit.coverage;
+    const confidenceOut = hit.score > prev.hit.score ? hit.confidence : prev.hit.confidence;
     best.set(base, {
       hit: {
         ...winner,
@@ -770,6 +1018,7 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
         url,
         score: Math.max(hit.score, prev.hit.score),
         coverage: coverageOut,
+        confidence: confidenceOut,
         quality: winner.quality,
       },
       page: prev.page || nextIsPage,

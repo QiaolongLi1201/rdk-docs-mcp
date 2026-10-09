@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ABSTAIN_COVERAGE, manualMatchesBoards } from "./bm25.js";
+import { manualMatchesBoards } from "./bm25.js";
 import { matchQuality, rankHits } from "./search.js";
 import type { IndexedDoc } from "./types.js";
 
@@ -62,9 +62,89 @@ describe("bm25", () => {
       "excel 数据透视表怎么做",
       5,
     );
-    expect(matchQuality(hits).noGoodMatch).toBe(true);
-    expect(ABSTAIN_COVERAGE).toBeGreaterThan(0);
-    expect(ABSTAIN_COVERAGE).toBeLessThan(1);
+    const quality = matchQuality(hits);
+    expect(quality.noGoodMatch).toBe(true);
+    expect(quality.confidence).toBeLessThan(0.2);
+  });
+
+  it("does not abstain when filler words miss but a distinctive term is in the corpus", () => {
+    const hits = rankHits(
+      [doc({ title: "系统烧录", url: "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn" })],
+      "怎么把系统烧录一下，老是失败",
+      5,
+    );
+    const quality = matchQuality(hits);
+    expect(quality.noGoodMatch).toBe(false);
+    expect(hits[0]?.confidence).toBeGreaterThan(0.4);
+  });
+
+  it("prefers a guide over a command page for a how-to", () => {
+    const hits = rankHits(
+      [
+        doc({
+          title: "烧录命令",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/Appendix/linux-command-manual/cmd_dd",
+          text: "烧录 镜像到 sd 卡",
+        }),
+        doc({
+          title: "烧录指南",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn",
+          text: "烧录 镜像到 sd 卡",
+        }),
+      ],
+      "镜像怎么烧录到卡上",
+      5,
+    );
+    expect(hits[0]?.url).toContain("system-burn");
+  });
+
+  it("downranks a long multi-topic section against a short guide", () => {
+    const broad = `humble 安装说明。${"这是另一个问题？".repeat(12)}${"填充内容用于拉长这一节。".repeat(40)}`;
+    const hits = rankHits(
+      [
+        doc({
+          title: "Humble 说明",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/FAQ/tros",
+          text: broad,
+        }),
+        doc({
+          title: "Humble 说明",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/install",
+          text: "安装步骤",
+        }),
+      ],
+      "humble 怎么安装",
+      5,
+    );
+    expect(hits[0]?.url).toContain("Quick_start/install");
+  });
+
+  it("lets a rare token beat a title full of generic collision words", () => {
+    const filler = Array.from({ length: 24 }, (_, i) =>
+      doc({
+        title: `note ${i}`,
+        url: `https://developer.d-robotics.cc/rdk_x_doc/note-${i}`,
+        text: "docker error static ip",
+      }),
+    );
+    const hits = rankHits(
+      [
+        ...filler,
+        doc({
+          title: "docker error",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/FAQ/docker-error",
+          text: "error docker static",
+        }),
+        doc({
+          title: "网络配置",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/System_configuration/iptables",
+          text: "iptables",
+        }),
+      ],
+      "docker error iptables",
+      5,
+    );
+    expect(hits[0]?.url).toContain("iptables");
   });
 
   it("keeps one hit from each board when the query names neither", () => {
