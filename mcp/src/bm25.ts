@@ -3,8 +3,19 @@ import { performance } from "node:perf_hooks";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gunzipSync } from "node:zlib";
-import { RETRIEVAL_ALIASES } from "./aliases.js";
+import { CONCEPT_SYNONYMS, RETRIEVAL_ALIASES } from "./aliases.js";
+import { MANUALS } from "./catalog.js";
 import { GLOSSARY_ALIASES } from "./glossary-aliases.js";
+import {
+  credentialFaqBoost,
+  isThinLanding,
+  primaryScale,
+  lexicalScore,
+  linuxCommandPenalty,
+  prepareLexical,
+  topicClash,
+  urlIntentScale,
+} from "./lexical.js";
 import { mentionedBoards, urlLooksLikeBoard, type BoardId } from "./products.js";
 import type { IndexedDoc, SearchHit } from "./types.js";
 
@@ -86,6 +97,8 @@ const EN_STOP = new Set([
   "into",
   "onto",
   "not",
+  "vs",
+  "via",
 ]);
 
 /** Collision tokens. Rare identifiers are never in this set. */
@@ -281,7 +294,19 @@ function mergeSynonyms(...maps: Array<Record<string, string[]>>): Record<string,
   return out;
 }
 
-const ALL_SYNONYMS = mergeSynonyms(SYNONYMS, GLOSSARY_ALIASES, RETRIEVAL_ALIASES);
+const ALL_SYNONYMS = mergeSynonyms(SYNONYMS, GLOSSARY_ALIASES, RETRIEVAL_ALIASES, CONCEPT_SYNONYMS);
+
+const BOARD_TOKEN = new Set(["x3", "x5", "s100", "s600", "s100p", "rdk"]);
+
+/** Long manual aliases. A typo of one of these still names that manual. */
+const MANUAL_ALIAS_TARGETS: Array<{ alias: string; term: string }> = [];
+for (const manual of MANUALS) {
+  for (const alias of manual.aliases) {
+    const key = alias.toLowerCase();
+    if (key.length < 6 || BOARD_TOKEN.has(key)) continue;
+    MANUAL_ALIAS_TARGETS.push({ alias: key, term: manual.id });
+  }
+}
 
 const S_SERIES_MANUALS = new Set(["rdk-s", "oe-s", "oe-llm-s100", "oe-llm-s600", "case-s600"]);
 const X_SERIES_MANUALS = new Set(["rdk-x", "oe-x3", "oe-x5", "x5-sdk", "magicbox"]);
@@ -666,6 +691,28 @@ function analyzeQuery(query: string): { terms: QTerm[]; concepts: Concept[] } {
     }
   }
 
+  const phrasePush = (term: string, qtf: number) => {
+    push(term, qtf);
+  };
+  if (/网线供电|以太网供电|网线.{0,4}供电/.test(lowered)) {
+    phrasePush("poe", 0.9);
+    phrasePush("供电", 0.6);
+  }
+  if (/风扇|烫|过热/.test(query)) {
+    phrasePush("温度", 0.75);
+    phrasePush("散热", 0.6);
+  }
+  if (/静态\s*ip|静态ip|static\s*ip/.test(lowered)) phrasePush("静态", 0.8);
+  if (/烧系统|烧镜像|刷系统|刷机/.test(query)) {
+    phrasePush("烧录", 0.85);
+    for (const concept of concepts) {
+      if (concept.terms.some((term) => /烧|刷|镜像/.test(term)) && !concept.terms.includes("烧录")) concept.terms.push("烧录");
+    }
+  }
+  for (const { alias, term } of MANUAL_ALIAS_TARGETS) {
+    if (lowered.includes(alias)) phrasePush(term, 1);
+  }
+
   return { terms: [...qmap].map(([term, qtf]) => ({ term, qtf })), concepts };
 }
 
@@ -682,21 +729,149 @@ function aliasTerms(extra: string): string[] {
   return out;
 }
 
-function addTypoVariants(concepts: Concept[], terms: QTerm[], vocab: (term: string) => boolean): void {
+const ALPHA = "abcdefghijklmnopqrstuvwxyz";
+
+function editNeighbors(term: string): string[] {
+  const out: string[] = [];
+  const n = term.length;
+  for (let i = 0; i < n; i += 1) out.push(term.slice(0, i) + term.slice(i + 1));
+  for (let i = 0; i < n - 1; i += 1) {
+    if (term[i] === term[i + 1]) continue;
+    out.push(term.slice(0, i) + term[i + 1] + term[i] + term.slice(i + 2));
+  }
+  for (let i = 0; i < n; i += 1) {
+    const cur = term[i];
+    for (let c = 0; c < ALPHA.length; c += 1) {
+      const ch = ALPHA[c];
+      if (ch === cur) continue;
+      out.push(term.slice(0, i) + ch + term.slice(i + 1));
+    }
+  }
+  for (let i = 0; i <= n; i += 1) {
+    for (let c = 0; c < ALPHA.length; c += 1) out.push(term.slice(0, i) + ALPHA[c] + term.slice(i));
+  }
+  return out;
+}
+
+function rememberTerm(concept: Concept, terms: QTerm[], have: Set<string>, term: string, qtf: number): void {
+  if (!concept.terms.includes(term)) concept.terms.push(term);
+  if (!have.has(term)) {
+    have.add(term);
+    terms.push({ term, qtf });
+  }
+  const extras = ALL_SYNONYMS[term];
+  if (!extras) return;
+  for (const extra of extras) {
+    for (const piece of aliasTerms(extra)) {
+      if (have.has(piece)) continue;
+      rememberTerm(concept, terms, have, piece, qtf * 0.7);
+    }
+  }
+}
+
+function addTypoVariants(concepts: Concept[], terms: QTerm[], df: (term: string) => number): void {
   const have = new Set(terms.map((item) => item.term));
+  const vocab = (term: string) => df(term) > 0;
   for (const concept of concepts) {
     for (const term of [...concept.terms]) {
-      if (!/^[a-z0-9]+$/.test(term) || term.length < 5 || vocab(term)) continue;
-      for (let drop = 1; drop <= 3 && term.length - drop >= 4; drop += 1) {
-        const prefix = term.slice(0, term.length - drop);
-        if (!vocab(prefix) || FRAGMENT_SKIP.has(prefix)) continue;
-        concept.terms.push(prefix);
-        if (!have.has(prefix)) {
-          have.add(prefix);
-          terms.push({ term: prefix, qtf: 0.4 });
+      if (!/^[a-z0-9]+$/.test(term) || term.length < 4 || vocab(term)) continue;
+      if (term.length >= 5) {
+        for (let drop = 1; drop <= 3 && term.length - drop >= 4; drop += 1) {
+          const prefix = term.slice(0, term.length - drop);
+          if (!vocab(prefix) || FRAGMENT_SKIP.has(prefix)) continue;
+          rememberTerm(concept, terms, have, prefix, 0.45);
+          break;
         }
-        break;
       }
+      // One edit: wfii → wifi, statc → static. Ambiguous corrections are skipped.
+      if (term.length <= 12) {
+      let best = "";
+      let bestDf = 0;
+      let second = 0;
+      const seen = new Set<string>();
+      for (const neighbor of editNeighbors(term)) {
+        if (neighbor.length < 4 || seen.has(neighbor) || FRAGMENT_SKIP.has(neighbor) || EN_STOP.has(neighbor)) continue;
+        if (ORDINARY_EN.has(neighbor) || GENERIC_ASCII.has(neighbor)) continue;
+        // A different first letter is a different word (pending → sending), not a typo.
+        if (neighbor[0] !== term[0] && !ALL_SYNONYMS[neighbor]) continue;
+        // "iphone" is one deletion away from "phone". A neighbor that is just
+        // a piece of the typed token is not a typo correction.
+        if (term.includes(neighbor) || neighbor.includes(term)) continue;
+        const inserted = Math.abs(neighbor.length - term.length) === 1;
+        if (inserted && !ALL_SYNONYMS[neighbor] && !ALL_SYNONYMS[term]) continue;
+        seen.add(neighbor);
+        const docs = df(neighbor);
+        if (docs <= 0) continue;
+        if (docs > bestDf) {
+          second = bestDf;
+          bestDf = docs;
+          best = neighbor;
+        } else if (docs > second) second = docs;
+      }
+        for (const { alias, term: manualTerm } of MANUAL_ALIAS_TARGETS) {
+          if (alias === term || Math.abs(alias.length - term.length) > 1) continue;
+          if (!editNeighbors(term).includes(alias) && alias !== term) continue;
+          rememberTerm(concept, terms, have, manualTerm, 0.8);
+        }
+        if (best && (second === 0 || bestDf >= second * 3)) rememberTerm(concept, terms, have, best, 0.7);
+      }
+      // video0 → video8: same letter stem, a different small index that is documented.
+      const device = /^([a-z]{4,})(\d+)$/.exec(term);
+      if (device && !vocab(term)) {
+        const stem = device[1] ?? "";
+        for (let n = 0; n <= 16; n += 1) {
+          const alt = `${stem}${n}`;
+          if (alt !== term && vocab(alt)) rememberTerm(concept, terms, have, alt, 0.55);
+        }
+      }
+    }
+  }
+}
+
+const prefixCache = new WeakMap<Map<string, number>, Map<string, string[]>>();
+
+function prefixIndex(dfMap: Map<string, number>): Map<string, string[]> {
+  const cached = prefixCache.get(dfMap);
+  if (cached) return cached;
+  const index = new Map<string, string[]>();
+  for (const term of dfMap.keys()) {
+    if (term.length < 5 || term.length > 24 || !/^[a-z][a-z0-9]*$/.test(term)) continue;
+    const key = term.slice(0, 4);
+    const list = index.get(key);
+    if (list) {
+      if (list.length < 16) list.push(term);
+    } else index.set(key, [term]);
+  }
+  prefixCache.set(dfMap, index);
+  return index;
+}
+
+function expandPrefixes(concepts: Concept[], terms: QTerm[], corpora: Corpus[]): void {
+  const maps = corpora.map((corpus) => prefixIndex(corpus.df));
+  const have = new Set(terms.map((item) => item.term));
+  const df = (term: string) => {
+    let n = 0;
+    for (const corpus of corpora) n += corpus.df.get(term) ?? 0;
+    return n;
+  };
+  for (const concept of concepts) {
+    for (const term of [...concept.original]) {
+      if (!/^[a-z][a-z0-9]*$/.test(term) || term.length < 4 || term.length > 8 || df(term) > 0) continue;
+      if (GENERIC_ASCII.has(term) || FRAGMENT_SKIP.has(term) || BOARD_TOKEN.has(term)) continue;
+      const found = new Set<string>();
+      for (const map of maps) {
+        const list = map.get(term.slice(0, 4));
+        if (!list) continue;
+        for (const candidate of list) {
+          if (!candidate.startsWith(term) || candidate.length <= term.length) continue;
+          // yolo → yolov5. An open-ended prefix (helm → helmfile) is not a version.
+          const rest = candidate.slice(term.length);
+          if (!/^v?\d/.test(rest)) continue;
+          found.add(candidate);
+        }
+      }
+      if (found.size === 0 || found.size > 12) continue;
+      for (const candidate of found) rememberTerm(concept, terms, have, candidate, 0.65);
     }
   }
 }
@@ -765,6 +940,8 @@ function looksLikeContent(term: string): boolean {
 const ORDINARY_EN = new Set([
   "repository",
   "signed",
+  "help",
+  "install",
   "found",
   "join",
   "import",
@@ -824,23 +1001,68 @@ export function absentCommandToken(groups: IndexedDoc[][], query: string): boole
   const plan = analyzeQuery(query);
   if (plan.concepts.length === 0) return false;
   const df = (term: string) => dfOf(corpora, term);
-  addTypoVariants(plan.concepts, plan.terms, (term) => df(term) > 0);
+  addTypoVariants(plan.concepts, plan.terms, df);
   return missingCodeToken(plan.concepts, df, undefined);
 }
 
+function isBoardToken(term: string): boolean {
+  return BOARD_TOKEN.has(term);
+}
+
+/** A full query concept that is actually in the manuals, not a board name or a stray bigram. */
+function conceptCarries(concept: Concept, df: (term: string) => number): boolean {
+  // A concept carries when the typed word is in the manuals. Overlapping
+  // bigrams of a longer phrase do not: otherwise "恢复模式" looks on-topic
+  // because 模式 is everywhere. A generic original (install) does not carry
+  // through its synonym (安装) either.
+  const contentOriginals = concept.original.filter((term) => looksLikeContent(term) && !isBoardToken(term));
+  if (contentOriginals.length === 0) return false;
+  const head = concept.keys[0];
+  if (head && looksLikeContent(head) && !isBoardToken(head) && df(head) > 0) return true;
+  const skipBigrams = Boolean(head && isCjkTerm(head) && head.length > 2);
+  const accept = (term: string) => {
+    if (!looksLikeContent(term) || isBoardToken(term)) return false;
+    if (skipBigrams && isCjkTerm(term) && head && term.length < head.length) return false;
+    return df(term) > 0;
+  };
+  if (contentOriginals.some(accept)) return true;
+  // Synonyms and phrase aliases are intentional (烧系统 → 烧录). A raw
+  // bigram of a longer phrase is not.
+  return concept.terms.some((term) => {
+    if (concept.original.includes(term) || !looksLikeContent(term) || isBoardToken(term)) return false;
+    return df(term) > 0;
+  });
+}
+
+function identifierAbsent(
+  concept: Concept,
+  df: (term: string) => number,
+  top: { hit: SearchHit; doc: IndexedDoc } | undefined,
+): boolean {
+  const codes = concept.original.filter((term) => isCodeLike(term));
+  if (codes.length === 0) return false;
+  if (concept.terms.some((term) => df(term) > 0)) return false;
+  if (top && codes.some((term) => hitContainsToken(top.hit, top.doc, term))) return false;
+  return true;
+}
+
+/**
+ * Abstain only when an identifier is missing AND the rest of the query did
+ * not land on an RDK concept. One unknown tool name next to 烧录 or a board
+ * task is not a reason to discard the match.
+ */
 function missingCodeToken(
   concepts: Concept[],
   df: (term: string) => number,
   top: { hit: SearchHit; doc: IndexedDoc } | undefined,
 ): boolean {
+  let absent = false;
+  let carried = false;
   for (const concept of concepts) {
-    const codes = concept.original.filter((term) => isCodeLike(term));
-    if (codes.length === 0) continue;
-    if (concept.terms.some((term) => df(term) > 0)) continue;
-    if (top && codes.some((term) => hitContainsToken(top.hit, top.doc, term))) continue;
-    return true;
+    if (identifierAbsent(concept, df, top)) absent = true;
+    else if (conceptCarries(concept, df)) carried = true;
   }
-  return false;
+  return absent && !carried;
 }
 
 /** In-corpus and rare. A term that never occurs is handled on the concept, not here. */
@@ -865,12 +1087,11 @@ function distinctiveOf(concepts: Concept[], df: (term: string) => number, n: num
 }
 
 function isHowTo(query: string): boolean {
-  return /怎么|如何|怎样|教程|步骤|howto|how to|how do|在哪/i.test(query);
+  return /怎么|如何|怎样|教程|步骤|多少|是什么|howto|how to|how do|在哪/i.test(query);
 }
 
 function roleScale(query: string, url: string, concepts: Concept[]): number {
   const path = url.toLowerCase();
-  const command = /\/cmd[_-]|command-manual|command_manual|linux-command/.test(path);
   const driver = /driver_development|\/drivers?\//.test(path);
   const guide = /user[_-]guide|user[_-]sample|basic_application|tutorial/.test(path);
   const named = concepts.some((concept) =>
@@ -878,11 +1099,13 @@ function roleScale(query: string, url: string, concepts: Concept[]): number {
   );
   const aboutDriver = /驱动|driver|内核|kernel/i.test(query);
   let scale = 1;
-  // Usage guides outrank a neighboring driver or command page when the
-  // question is not itself about writing a driver.
+  // Usage guides outrank a neighboring driver page when the question is
+  // not itself about writing a driver. Generic Linux command manuals are
+  // down-weighted for board setup questions; RDK commands stay.
   if (guide) scale *= 1.14;
-  if (!named && command && isHowTo(query)) scale *= 0.8;
-  if (!named && driver && !aboutDriver) scale *= 0.86;
+  if (!named && driver && !aboutDriver && isHowTo(query)) scale *= 0.74;
+  else if (!named && driver && !aboutDriver) scale *= 0.9;
+  scale *= linuxCommandPenalty(query, path);
   return scale;
 }
 
@@ -968,7 +1191,21 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
   const avgUrl = n > 0 ? sumUrl / n : 1;
   const avgBody = n > 0 ? sumBody / n : 1;
   const df = (term: string) => dfOf(corpora, term);
-  addTypoVariants(plan.concepts, plan.terms, (term) => df(term) > 0);
+  addTypoVariants(plan.concepts, plan.terms, df);
+  expandPrefixes(plan.concepts, plan.terms, corpora);
+  // When the full identifier is absent (hbm_shell) its documented alias
+  // should carry the query, not the leftover fragment (hbm) at qtf 0.2.
+  for (const concept of plan.concepts) {
+    const head = concept.keys[0];
+    if (!head || df(head) > 0) continue;
+    if (!concept.original.some((term) => isCodeLike(term) || term.includes("_"))) continue;
+    for (const item of plan.terms) {
+      if (concept.original.includes(item.term)) continue;
+      if (!concept.terms.includes(item.term)) continue;
+      if (item.qtf < 0.85) item.qtf = 0.85;
+    }
+  }
+  const lexical = prepareLexical(query);
 
   for (const corpus of corpora) beginEpoch(corpus);
   let idfMass = 0;
@@ -1004,14 +1241,23 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
     }
   }
   cands.sort((a, b) => b.score - a.score);
-  const pool = cands.slice(0, 300);
+  // A high-df bigram such as 连接 fills the head of the list. Keep enough of
+  // the tail that a page which actually contains the rare token (WiFi on the
+  // remote-login page) is still scored.
+  const pool = cands.slice(0, 450);
   const distinctive = distinctiveOf(plan.concepts, df, n);
   for (const cand of pool) {
     const doc = cand.corpus.docs[cand.doc];
+    const landing = isThinLanding(doc) && plan.concepts.some((concept) => conceptCarries(concept, df)) ? 0.34 : 1;
     cand.raw =
       cand.score *
       breadthScale(doc, cand.corpus.bodyDl[cand.doc], avgBody) *
-      roleScale(query, doc.url, plan.concepts);
+      roleScale(query, doc.url, plan.concepts) *
+      urlIntentScale(lexical, doc.url, query) *
+      credentialFaqBoost(query, doc) *
+      (topicClash(query, doc) ? 0.36 : 1) *
+      landing *
+      primaryScale(query, doc);
     cand.coverage = coverageOf(cand.corpus, cand.doc, plan.concepts, df, n);
     cand.score = cand.raw * (0.15 + 0.85 * cand.coverage);
     const norm = idfMass > 0 ? cand.raw / idfMass : 0;
@@ -1024,6 +1270,52 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
     }
     const scorePart = Math.max(0, Math.min(1, norm / 2.2));
     cand.confidence = available === 0 ? round3(scorePart) : round3(0.75 * (onHit / available) + 0.25 * scorePart);
+  }
+  pool.sort((a, b) => b.score - a.score || a.doc - b.doc);
+
+  // Reciprocal-rank fusion with the title/URL lexical score. BM25 rank stays
+  // the rare-token signal; lexical rank promotes the page whose title or
+  // manual section actually answers a how-to.
+  const lexOf = new Map<(typeof pool)[number], number>();
+  for (const cand of pool) lexOf.set(cand, lexicalScore(cand.corpus.docs[cand.doc], lexical, query));
+  const byLex = [...pool].sort((a, b) => (lexOf.get(b) ?? 0) - (lexOf.get(a) ?? 0) || a.doc - b.doc);
+  const lexRank = new Map<(typeof pool)[number], number>();
+  byLex.forEach((cand, index) => lexRank.set(cand, index));
+  const fuseK = 10;
+  const specific = plan.terms
+    .map((item) => item.term)
+    .filter((term) => {
+      if (!plan.concepts.some((concept) => concept.original.includes(term))) return false;
+      if (!/^[a-z][a-z0-9_]{3,}$/.test(term)) return false;
+      if (GENERIC_ASCII.has(term) || BOARD_TOKEN.has(term) || EN_STOP.has(term) || FRAGMENT_SKIP.has(term)) return false;
+      const docs = df(term);
+      return docs > 0 && (docs <= 4 || docs / n < 0.03);
+    });
+  for (let index = 0; index < pool.length; index += 1) {
+    const cand = pool[index];
+    if (!cand) continue;
+    const lexicalRank = lexRank.get(cand) ?? index;
+    const doc = cand.corpus.docs[cand.doc];
+    const blob = `${doc?.title ?? ""} ${doc?.url ?? ""}`.toLowerCase();
+    const hasSpecific = specific.length === 0 || specific.some((term) => blob.includes(term));
+    const lexWeight = hasSpecific ? 0.28 : 0.12;
+    cand.score = 1 / (fuseK + index) + lexWeight / (fuseK + lexicalRank);
+  }
+  // A dedicated page that titles the identifier outranks an FAQ that only mentions it.
+  const rareAscii = plan.terms
+    .map((item) => item.term)
+    .filter((term) => /^[a-z][a-z0-9_]{3,}$/.test(term) && !GENERIC_ASCII.has(term) && !BOARD_TOKEN.has(term) && !EN_STOP.has(term));
+  const dedicated = pool.some((cand) => {
+    const doc = cand.corpus.docs[cand.doc];
+    if (!doc || /\/faq\//i.test(doc.url) || /linux-command-manual/.test(doc.url)) return false;
+    const title = doc.title.toLowerCase();
+    return rareAscii.some((term) => title.includes(term));
+  });
+  if (dedicated) {
+    for (const cand of pool) {
+      const doc = cand.corpus.docs[cand.doc];
+      if (doc && /\/faq\//i.test(doc.url)) cand.score *= 0.72;
+    }
   }
   pool.sort((a, b) => b.score - a.score || a.doc - b.doc);
 

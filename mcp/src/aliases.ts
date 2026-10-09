@@ -26,4 +26,34 @@ export const RETRIEVAL_ALIASES: Record<string, string[]> = {
   无线: ["wifi"],
   推理: ["inference"],
   inference: ["推理"],
+  nmcli: ["wifi", "无线", "networkmanager"],
+};
+
+/**
+ * Generic bilingual concepts. These are not tool names: a query about a
+ * board setup should meet the words the manuals actually use.
+ */
+export const CONCEPT_SYNONYMS: Record<string, string[]> = {
+  登录: ["login"],
+  login: ["登录"],
+  ssh: ["登录"],
+  账号: ["账户", "account"],
+  账户: ["账号", "account"],
+  account: ["账号", "账户"],
+  密码: ["password", "口令"],
+  password: ["密码", "口令"],
+  口令: ["密码", "password"],
+  波特率: ["baud", "baudrate", "串口"],
+  baud: ["波特率", "串口"],
+  baudrate: ["波特率", "baud", "串口"],
+  静态: ["static"],
+  static: ["静态"],
+  大模型: ["llm", "大语言模型"],
+  大语言模型: ["llm", "大模型"],
+  llm: ["大模型", "大语言模型"],
+  部署: ["端侧"],
+  poe: ["供电"],
+  风扇: ["温度", "散热"],
+  散热: ["温度", "风扇"],
+  温度: ["散热"],
 };

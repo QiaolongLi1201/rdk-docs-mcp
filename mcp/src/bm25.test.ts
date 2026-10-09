@@ -196,6 +196,78 @@ describe("bm25", () => {
     expect(hits.map((hit) => hit.board).sort()).toEqual(["x3", "x5"]);
   });
 
+  it("keeps a burn page when the only unknown token is a host tool name", () => {
+    const docs = [
+      doc({
+        title: "烧录系统镜像",
+        url: "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn",
+        text: "烧录 镜像",
+      }),
+    ];
+    const query = "用 balenaEtcher 给 x3 烧系统镜像行不行";
+    const hits = rankHits(docs, query, 3);
+    expect(matchQuality(hits, [docs], query).noGoodMatch).toBe(false);
+    expect(hits[0]?.url).toContain("system-burn");
+  });
+
+  it("abstains on kubernetes and on an iPhone question", () => {
+    const docs = [doc({ title: "安装依赖", url: "https://developer.d-robotics.cc/rdk_x_doc/install", text: "安装 conda" })];
+    for (const query of ["kubernetes helm install 一直 pending", "iPhone 卡在恢复模式退不出来"]) {
+      expect(matchQuality(rankHits(docs, query, 3), [docs], query).noGoodMatch).toBe(true);
+    }
+  });
+
+  it("corrects a transposed wifi typo onto the wireless page", () => {
+    const hits = rankHits(
+      [
+        doc({ title: "其他", url: "https://developer.d-robotics.cc/rdk_x_doc/other", text: "gpio" }),
+        doc({
+          title: "无线网络",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/System_configuration/network",
+          text: "wifi 无线",
+        }),
+      ],
+      "wfii",
+      3,
+    );
+    expect(hits[0]?.url).toContain("network");
+  });
+
+  it("prefers the login procedure over the password FAQ and the ssh manual", () => {
+    const hits = rankHits(
+      [
+        doc({
+          title: "ssh",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/Appendix/linux-command-manual/cmd_ssh",
+          text: "ssh 远程登录",
+        }),
+        doc({
+          title: "Q13: 开发板的默认登录账户和密码是什么？",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system",
+          text: "默认账户 sunrise 密码",
+        }),
+        doc({
+          title: "1.4 远程登录",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/remote_login",
+          text: "SSH 默认口令",
+        }),
+      ],
+      "怎么从电脑登到板子上，默认口令是什么",
+      3,
+    );
+    expect(hits[0]?.url).toContain("remote_login");
+    expect(hits[0]?.url).not.toContain("cmd_ssh");
+  });
+
+  it("expands a yolo prefix onto the documented yolov5 page", () => {
+    const hits = rankHits(
+      [doc({ title: "yolov5 检测", url: "https://developer.d-robotics.cc/model_zoo_doc/object_detection", text: "yolov5 模型示例" })],
+      "YOLO 模型示例",
+      3,
+    );
+    expect(hits[0]?.url).toContain("model_zoo");
+  });
+
   it("blocks S-series manuals for an X-only board and the reverse", () => {
     expect(manualMatchesBoards("oe-s", ["x5"])).toBe(false);
     expect(manualMatchesBoards("oe-x5", ["x5"])).toBe(true);
