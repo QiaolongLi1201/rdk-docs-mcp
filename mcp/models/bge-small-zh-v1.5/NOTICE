@@ -1,0 +1,7 @@
+Quantized ONNX export of BAAI/bge-small-zh-v1.5
+(https://huggingface.co/BAAI/bge-small-zh-v1.5).
+
+Weights: Xenova/bge-small-zh-v1.5 onnx/model_quantized.onnx
+(https://huggingface.co/Xenova/bge-small-zh-v1.5).
+
+The upstream model is released under the MIT License.

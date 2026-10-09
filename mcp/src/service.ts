@@ -8,7 +8,8 @@ import { fetchText, type HttpGet } from "./http.js";
 import { findRspressPage, isRspressShell, loadRspressDocs, normalizeDocPath } from "./rspress.js";
 import { contextBoards, manualMatchesBoards, markPackagedIndex, primeIndex } from "./bm25.js";
 import { searchGuidance } from "./routes.js";
-import { groupHits, matchQuality, searchManuals } from "./search.js";
+import { hybridEnabled } from "./hybrid.js";
+import { groupHits, matchQuality, searchManuals, searchManualsHybrid } from "./search.js";
 import { selectSection } from "./sections.js";
 import { compactSphinxIndex } from "./sphinx.js";
 import {
@@ -244,7 +245,10 @@ export async function searchDocs(
     warnings.push(...loaded.map((item) => item.warning).filter((item): item is string => Boolean(item)));
     warnings.push(...drainIndexNotes());
     searched = loaded.map((item) => item.docs);
-    docHits = searchManuals(searched, query, limit, { board: input.board }).map((hit) => ({
+    const ranked = hybridEnabled()
+      ? await searchManualsHybrid(searched, query, limit, { board: input.board })
+      : searchManuals(searched, query, limit, { board: input.board });
+    docHits = ranked.map((hit) => ({
       ...hit,
       source: "docs" as const,
     }));

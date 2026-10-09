@@ -1,5 +1,7 @@
 import { RETRIEVAL_ALIASES } from "./aliases.js";
 import { absentCommandToken, contextBoards, rankCorpora, type RankOptions } from "./bm25.js";
+import { fuseByRrf } from "./dense-store.js";
+import { denseHits, hybridEnabled, warmHybrid } from "./hybrid.js";
 import type { IndexedDoc, ResultBoard, SearchHit } from "./types.js";
 
 export type { RankOptions };
@@ -74,6 +76,34 @@ export function searchManuals(
   options: RankOptions = {},
 ): SearchHit[] {
   return orderHits(groups, query, limit, options);
+}
+
+/**
+ * BM25 fused with local dense ranks when `RDK_DOCS_HYBRID=1`.
+ * The flag-off path is `searchManuals` unchanged.
+ */
+export async function searchManualsHybrid(
+  groups: IndexedDoc[][],
+  query: string,
+  limit: number,
+  options: RankOptions = {},
+): Promise<SearchHit[]> {
+  if (!hybridEnabled()) return searchManuals(groups, query, limit, options);
+  const ready = await warmHybrid();
+  if (!ready) return searchManuals(groups, query, limit, options);
+  const ranked = rankCorpora(groups, query, options);
+  const dense = await denseHits(groups, query);
+  if (dense.hits.length === 0) {
+    const unscoped = contextBoards(query, options).length === 0;
+    const ordered = unscoped ? diversifyByBoard(ranked) : ranked;
+    return ordered.slice(0, limit).map((hit) => aliasNote(query, hit));
+  }
+  let fused = fuseByRrf(ranked, dense.hits);
+  const weak = ranked[0]?.quality === "weak" || (ranked.length === 0 && absentCommandToken(groups, query));
+  if (weak) fused = fused.map((hit) => ({ ...hit, quality: "weak" as const }));
+  const unscoped = contextBoards(query, options).length === 0;
+  const ordered = unscoped ? diversifyByBoard(fused) : fused;
+  return ordered.slice(0, limit).map((hit) => aliasNote(query, hit));
 }
 
 export function matchQuality(

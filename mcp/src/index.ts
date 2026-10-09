@@ -25,6 +25,13 @@ async function main() {
       console.error(`rdk-docs index warm failed: ${message}`);
     },
   );
+  if (process.env.RDK_DOCS_HYBRID === "1") {
+    void import("./hybrid.js").then(({ warmHybrid }) =>
+      warmHybrid().then((ok) => {
+        console.error(ok ? `rdk-docs hybrid warm ${Date.now() - started}ms` : "rdk-docs hybrid warm skipped");
+      }),
+    );
+  }
   await server.connect(transport);
   // Skill refresh walks client config dirs. Do not block the MCP initialize handshake on it.
   setImmediate(() => refreshInstalledSkillsOnStart());

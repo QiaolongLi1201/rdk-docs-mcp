@@ -1,0 +1,108 @@
+{
+  "model": "BAAI/bge-small-zh-v1.5",
+  "onnx": "Xenova/bge-small-zh-v1.5 onnx/model_quantized.onnx",
+  "pooling": "cls",
+  "normalized": true,
+  "dtype": "int8",
+  "queryPrefix": "为这个句子生成表示以用于检索相关文章：",
+  "passageMaxLen": 192,
+  "builtAt": "2026-10-09T17:27:07.313Z",
+  "manuals": [
+    {
+      "manualId": "rdk-x",
+      "count": 3526,
+      "bytes": 1366579,
+      "fingerprint": 2308271087
+    },
+    {
+      "manualId": "rdk-s",
+      "count": 4317,
+      "bytes": 1669442,
+      "fingerprint": 1326393551
+    },
+    {
+      "manualId": "tros",
+      "count": 608,
+      "bytes": 233610,
+      "fingerprint": 103112823
+    },
+    {
+      "manualId": "model-zoo",
+      "count": 69,
+      "bytes": 25780,
+      "fingerprint": 2190029391
+    },
+    {
+      "manualId": "case-s600",
+      "count": 153,
+      "bytes": 60089,
+      "fingerprint": 222829611
+    },
+    {
+      "manualId": "magicbox",
+      "count": 91,
+      "bytes": 35724,
+      "fingerprint": 3813700589
+    },
+    {
+      "manualId": "stereo-camera",
+      "count": 77,
+      "bytes": 26684,
+      "fingerprint": 43654927
+    },
+    {
+      "manualId": "bmi088",
+      "count": 74,
+      "bytes": 28838,
+      "fingerprint": 565356596
+    },
+    {
+      "manualId": "rdk-studio",
+      "count": 747,
+      "bytes": 292181,
+      "fingerprint": 3597331278
+    },
+    {
+      "manualId": "xburn",
+      "count": 89,
+      "bytes": 35216,
+      "fingerprint": 4053768707
+    },
+    {
+      "manualId": "oe-s",
+      "count": 3594,
+      "bytes": 1075204,
+      "fingerprint": 3692501438
+    },
+    {
+      "manualId": "oe-llm-s100",
+      "count": 326,
+      "bytes": 91588,
+      "fingerprint": 599746698
+    },
+    {
+      "manualId": "oe-llm-s600",
+      "count": 264,
+      "bytes": 74066,
+      "fingerprint": 3346639593
+    },
+    {
+      "manualId": "oe-x5",
+      "count": 106,
+      "bytes": 42552,
+      "fingerprint": 2019550428
+    },
+    {
+      "manualId": "oe-x3",
+      "count": 109,
+      "bytes": 43843,
+      "fingerprint": 3511089996
+    },
+    {
+      "manualId": "x5-sdk",
+      "count": 214,
+      "bytes": 86275,
+      "fingerprint": 1244525177
+    }
+  ]
+}

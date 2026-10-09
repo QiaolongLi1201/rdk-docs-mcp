@@ -9,6 +9,7 @@
   "files": [
     "dist",
     "prebuilt",
+    "models",
     "README.md",
     "LICENSE",
     "install.md",
@@ -24,6 +25,7 @@
     "eval:offline": "npm run build && node dist/eval-retrieval.js --offline",
     "eval:paraphrase": "npm run build && node dist/eval-retrieval.js --offline --cases eval/paraphrase-cases.json --out eval/paraphrase-after.json",
     "build:index": "npm run build && node dist/build-prebuilt.js",
+    "build:embeddings": "vite-node src/build-embeddings.ts",
     "eval:live": "npm run build && node dist/eval-live.js",
     "eval:skills": "npm run build && node dist/eval-skills-live.js",
     "verify": "npm test && npm run eval:live",
@@ -36,6 +38,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.0",
     "node-html-parser": "^7.0.1",
+    "onnxruntime-node": "1.22.0",
     "smol-toml": "^1.8.0",
     "zod": "^3.25.0"
   },
