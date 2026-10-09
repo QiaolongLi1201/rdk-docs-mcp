@@ -1,0 +1,510 @@
+{
+  "name": "rdk-docs-mcp holdout retrieval set",
+  "blind": "Written from the public docs site only. The author did not read mcp/eval/retrieval-cases.json, origin/feat/retrieval-quality, or alias tables.",
+  "rubric": {
+    "search": "search_docs with the raw query, no manual filter, limit 8, docs source (the service default).",
+    "hit": "Exact path match after stripping scheme/host, hash, .html, and a trailing slash. Any listed expectedUrls counts.",
+    "hitAt1": "Fraction of relevant cases whose first hit matches.",
+    "hitAt3": "Fraction of relevant cases with a match at rank <= 3.",
+    "mrr": "Mean reciprocal rank of the first match over relevant cases. Unranked cases contribute 0. Rank is within the 8 returned hits.",
+    "noGoodMatch": "Cases with no acceptable page. Abstain means an empty hit list, an explicit abstain/noMatch/no_good_match flag, or warnings/guidance that say there is no matching document. Precision is true abstains divided by all abstains, and is null when the system never abstains. Recall is true abstains divided by the five negative cases.",
+    "latency": "Milliseconds inside searchDocs after one discarded warmup query, so index download is not the whole number. p50 and p95 are nearest-rank."
+  },
+  "cases": [
+    {
+      "id": "x5-wifi-rescan",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 的wifi老是搜不到，我敲 sudo nmcli devise wifi rescan 它回 Error: Scanning not allowed immediatly following previous scan，要等多久才能再扫啊",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/System_configuration/network_blueteeth"
+      ],
+      "why": "X 系列网络配置写了这条 nmcli 扫描过于频繁的报错，以及稍后重试。"
+    },
+    {
+      "id": "x3-module-mipi-ribbon",
+      "board": "x3",
+      "noGoodMatch": false,
+      "query": "x3 module 载板上那两路 15pin mipi，ov5647 和 imx219 排线蓝面朝上还是朝下，插反会怎样",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/hardware_development/rdk_x3_module/camera"
+      ],
+      "why": "X3 Module 摄像头页写明 CAM0/CAM2 支持 OV5647、IMX219、IMX477，排线蓝面朝上。"
+    },
+    {
+      "id": "x5-mipi-yolo-demo",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "rdk x5 想用板载 mipi 摄像头跑实时 yolov5，官方 python demo 是不是在 /app/pydev_demo 里，目录名我忘了",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/vision/RDK_X5/mipi_camera"
+      ],
+      "why": "X5 MIPI 摄像头页给出 /app/pydev_demo/08_mipi_camera_sample，模型是 YOLOv5x。"
+    },
+    {
+      "id": "s100-mipi-sensors",
+      "board": "s100",
+      "noGoodMatch": false,
+      "query": "s100 那个 mipi sample 只认哪几个 sensor，imx219 和 sc230ai 都能出图吗，别的型号呢",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/Image/mipi_camera"
+      ],
+      "why": "S 系列 MIPI 页写明该 sample 仅支持 IMX219 和 SC230AI。"
+    },
+    {
+      "id": "gs130w-ffc",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "官方双目 GS130W 接到 x5 上，ffc 排线触点朝哪边，和 gs130wi 是不是反的，插的时候板子要断电吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/accessories_stereo_camera_doc/stereo_camera_gs130w/installation"
+      ],
+      "why": "GS130W 安装页要求断电再插 FFC，并写明和 GS130WI 触点方向相反。"
+    },
+    {
+      "id": "s600-gmsl-board",
+      "board": "s600",
+      "noGoodMatch": false,
+      "query": "s600 相机扩展板到底是几路 gmsl，能不能当 mipi csi 用，这个板子能插到 s100 上吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/hardware_introduction/rdk_s600/rdk_s600_camera_expansion_board"
+      ],
+      "why": "S600 相机扩展板页写的是 8 路 GMSL，并声明只适配 S600。"
+    },
+    {
+      "id": "mipi-lt8618-error",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "跑 mipi 摄像头示例直接炸了：ValueError: invalid literal for int() with base 10: b'open device /dev/lt8618_ioctl failed\\ndevice not open\\n1080' 这是 x5 上的，啥意思",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/FAQ/interface",
+        "https://developer.d-robotics.cc/rdk_s_doc/FAQ/interface"
+      ],
+      "why": "X 与 S 的接口 FAQ 都收录了这条 lt8618_ioctl 报错。两页正文相同，都算答对。"
+    },
+    {
+      "id": "x5-gpio-python",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 40pin 想用 python 点灯，库是 import Hobot.GPIO 还是 RPi.GPIO，引脚编码用 BOARD 还是 BCM",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/gpio"
+      ],
+      "why": "GPIO 应用页预置 Hobot.GPIO，并推荐 BOARD 编码。"
+    },
+    {
+      "id": "x5-i2c-buses",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 40pin 默认开了哪几路 i2c，pin3/5 是 i2c5 吗，27/28 那组是不是另一条，电压 3.3 还是 1.8",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/i2c"
+      ],
+      "why": "I2C 应用页：X5 默认 I2C5（脚 3/5）和 I2C0（脚 27/28），IO 3.3V。"
+    },
+    {
+      "id": "x5-uart-not-debug",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 40pin 串口应用测哪一个设备节点，/dev/ttyS0 能不能拿来跟 ttl 模块对发，手册里 x5 推荐的是 ttyS 几",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/uart"
+      ],
+      "why": "串口应用页写明 ttyS0 是调试口，X5 测试用 /dev/ttyS1。"
+    },
+    {
+      "id": "x5-spi-pins",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 的 spi 从 40pin 哪几个脚出来的，是 spi1 还是 spi2，几个片选，io 是 3.3v 吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/spi"
+      ],
+      "why": "SPI 应用页：X5 脚 19/21/23/24/26 引出 SPI1，两个片选，3.3V。"
+    },
+    {
+      "id": "s100-i2c-dip",
+      "board": "s100",
+      "noGoodMatch": false,
+      "query": "s100 40pin 的 i2c5 和 uart2 好像要拨码开关二选一，pin3 和 pin5 默认是 i2c 几，测试脚本路径是啥",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/03_40pin_user_guide/s100/i2c"
+      ],
+      "why": "S100 I2C 页写了拨码在 I2C5 和 UART2 之间选择，以及 test_i2c.py。"
+    },
+    {
+      "id": "s600-uart-voltage",
+      "board": "s600",
+      "noGoodMatch": false,
+      "query": "s600 自锁 10pin 上的 uart6 uart7 电平是 3.3 还是 1.8，设备节点 /dev/ttyS6 对吗，ttyS0 是不是调试口别动",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/03_40pin_user_guide/s600/uart"
+      ],
+      "why": "S600 串口页：10-PIN 上 UART6/UART7，3.3V，测试 /dev/ttyS6 或 ttyS7，ttyS0 是调试口。"
+    },
+    {
+      "id": "s600-spi-1v8",
+      "board": "s600",
+      "noGoodMatch": false,
+      "query": "s600 14pin 那路 spi 电压好像只有 1.8v，我外接 3.3v 的传感器会不会烧掉，总线号是 spidev1.0 吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/03_40pin_user_guide/s600/spi"
+      ],
+      "why": "S600 SPI 页：14-PIN 引出 SPI1，IO 1.8V，示例选 spidev1.0。"
+    },
+    {
+      "id": "x5-poe-hat",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 接 poe hat，802.3af 和 at 都能用吗，hat 送进板子的直流必须是 5v 吗，超过 5.2v 会怎样",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/hardware_development/rdk_x5/POE"
+      ],
+      "why": "X5 PoE 页对比 802.3af/at，并要求 Hat 输出 5V（最高 5.2V）。"
+    },
+    {
+      "id": "x5-thermal-trip",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 满载降频，thermal zone 的 trip point 默认多少度开始降 cpu 和 bpu，启动温度和降频温度分别 cat 哪个节点",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/System_configuration/frequency_management"
+      ],
+      "why": "频率管理页给出 trip_point_0_temp 默认 80°C、trip_point_1_temp 默认 95°C。"
+    },
+    {
+      "id": "x5-suspend",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 怎么进休眠，是 systemctl suspend 还是 hobot-suspend，短按哪个键能唤醒",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/driver_development_x5/driver_lowpower"
+      ],
+      "why": "X5 低功耗页：长按或 hobot-suspend 休眠，短按按键唤醒。"
+    },
+    {
+      "id": "x3-typec-amps",
+      "board": "x3",
+      "noGoodMatch": false,
+      "query": "x3 用电脑 usb 口供电老重启，type-c 最低要几安，qc/pd 充电宝行不行",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system"
+      ],
+      "why": "硬件 FAQ 写 X3 Type-C 最低 5V/2A，建议 5V/3A，并反对用 PC USB 口供电。"
+    },
+    {
+      "id": "x5-40pin-rail-current",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 40pin 的 3.3v 和 5v 对外供电电流上限到底是 1A 还是 800mA/500mA，两页说法不一样以哪页为准",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/hardware_introduction/rdk_x5",
+        "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/40pin_define"
+      ],
+      "why": "硬件简介写 1A/1A，管脚定义写 800mA/500mA。两页都是该问题的原文，命中任一即对。"
+    },
+    {
+      "id": "apt-sunrisepi-dns",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "apt updte 失败：Could not resolve 'archive.sunrisepi.tech'，sunrise.list 里域名是不是要改成 archive.d-robotics.cc",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system",
+        "https://developer.d-robotics.cc/rdk_s_doc/FAQ/hardware_and_system"
+      ],
+      "why": "X 与 S 的系统 FAQ 都写了旧域名 sunrisepi 要换成 archive.d-robotics.cc。"
+    },
+    {
+      "id": "s100-docker-legacy-iptables",
+      "board": "s100",
+      "noGoodMatch": false,
+      "query": "s100 上 docker 装完 systemctl restart docker 还是起不来，是不是要 sudo update-alternatives --set iptables /usr/sbin/iptables-legacy 这种",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/FAQ/hardware_and_system"
+      ],
+      "why": "S100 FAQ Q30：板端 Docker 要切到 iptables legacy 再重启服务。"
+    },
+    {
+      "id": "x5-rufus-sd",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "windows 上把 x5 的 ubuntu 镜像烧进 sd 卡，用 rufus 能不能直接选压缩包，xburn 是不是必须先解压成 img",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/burn-sd-card"
+      ],
+      "why": "SD 烧录页：XBurn 要 .img，Rufus 或 RDK Studio 可以直接选压缩包。"
+    },
+    {
+      "id": "x3-emmc-full-image",
+      "board": "x3",
+      "noGoodMatch": false,
+      "query": "x3 不是烧 sd，我要把全镜像写进 emmc，官方步骤在哪，别给我 module 的 nand 流程",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/install_os/rdk_x3/system_burn"
+      ],
+      "why": "RDK X3（非 Module）全镜像烧录页，对应 eMMC，不是 Module 的 NAND 流程。"
+    },
+    {
+      "id": "x5-miniboot-no-downgrade",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 能正常进系统，想升 miniboot，是 rdk-miniboot-update 吗，能不能刷回旧版",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/upgrade-miniboot"
+      ],
+      "why": "升级 miniboot 页给出 rdk-miniboot-update，并禁止降级。"
+    },
+    {
+      "id": "s100-xburn-fastboot",
+      "board": "s100",
+      "noGoodMatch": false,
+      "query": "s100 首次刷机和以后更新，xburn 走 fastboot 还是 dfu，全镜像会不会把 nor 里的 miniboot 也覆盖掉",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/install_os/rdk_s100/burn"
+      ],
+      "why": "S100 烧录步骤页区分 Fastboot 与空板/变砖，全镜像覆盖 eMMC 和 NOR 上的 miniboot。"
+    },
+    {
+      "id": "xburn-ch340-921600",
+      "board": "any",
+      "noGoodMatch": false,
+      "query": "ubuntu 笔记本用 xburn 看串口全是乱码，ch340 在 921600 上是不是驱动不兼容，要改 ttyUSB 那个名字吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/xburn_doc/troubleshooting/serial-driver"
+      ],
+      "why": "XBurn 串口页写 Ubuntu 自带 CH340 在 921600 乱码，需改驱动名 ttyUSB 后重编。"
+    },
+    {
+      "id": "tros-humble-apt",
+      "board": "any",
+      "noGoodMatch": false,
+      "query": "how do I apt-install TogetheROS humble on the board? is the package tros-humble or just tros, and do I ssh in as root",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/tros_doc/quick_start/install_tros"
+      ],
+      "why": "apt 安装页：Humble 用 sudo apt install tros-humble，示例 ssh root@板子IP。"
+    },
+    {
+      "id": "tros-nav2-humble",
+      "board": "any",
+      "noGoodMatch": false,
+      "query": "地图已经有了，tros humble 上装 nav2 之前要 source 哪个 setup.bash，pc 上 gazebo 小车是 waffle 吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/tros_doc/apps/navigation2"
+      ],
+      "why": "Navigation2 页要求 source /opt/tros/humble/setup.bash，Gazebo 模型是 waffle。"
+    },
+    {
+      "id": "tros-slam-toolbox",
+      "board": "any",
+      "noGoodMatch": false,
+      "query": "用 tros 做 slam 建图，算法是 slam-toolbox 吗，建图跑在板子上还是 pc 的 rviz 上",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/tros_doc/apps/slam"
+      ],
+      "why": "SLAM 页使用 SLAM-Toolbox，算法在 RDK 上，Gazebo 和 Rviz2 在 PC 上。"
+    },
+    {
+      "id": "tros-zero-copy-hbmem",
+      "board": "any",
+      "noGoodMatch": false,
+      "query": "tros humble 大块图像零拷贝怎么写，是 hbmem 那套自定义 msg 吗，foxy 也一样吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/tros_doc/tros_dev/zero_copy"
+      ],
+      "why": "zero-copy 页基于 hbmem，覆盖 Foxy/Humble/Jazzy 的自定义消息示例。"
+    },
+    {
+      "id": "tros-cross-docker-wget",
+      "board": "any",
+      "noGoodMatch": false,
+      "query": "在开发机上交叉编译 tros，官方 docker 镜像是 wget archive.d-robotics.cc 那个 tar.gz 吗，foxy humble jazzy 是不是同一个文件",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/tros_doc/quick_start/cross_compile"
+      ],
+      "why": "交叉编译页在开发机 wget pc_tros docker tar.gz，Foxy/Humble/Jazzy 共用这段步骤。"
+    },
+    {
+      "id": "tros-yolo-v12",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "tros 的 yolo 示例支持到 yolov12 吗，x5 humble 能不能 web 看检测框，x3 是不是只到 yolov5",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/tros_doc/boxs/detection/yolo"
+      ],
+      "why": "TROS YOLO 页列出到 YOLOv12，并按 X3/X5 给出支持的版本和 web 展示。"
+    },
+    {
+      "id": "x3-realsense-old-kernel",
+      "board": "x3",
+      "noGoodMatch": false,
+      "query": "x3 内核比较老，realsense d435i 还能装吗，官方还有安装说明不",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/FAQ/tros_ros"
+      ],
+      "why": "X 系列 TROS FAQ 有一问专门讲老内核上的 RealSense D435i 安装。S 系列 FAQ 没有这条。"
+    },
+    {
+      "id": "colcon-pyparsing",
+      "board": "any",
+      "noGoodMatch": false,
+      "query": "colcon build 编译 ros2 包报 AttributeError: module 'pyparsing' has no attribute 'operatorPrecedence'，要改 apt 源吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/FAQ/applications_and_examples",
+        "https://developer.d-robotics.cc/rdk_s_doc/FAQ/applications_and_examples"
+      ],
+      "why": "X 与 S 的应用 FAQ 都收录了这条 pyparsing 报错和 ROS apt 源处理。"
+    },
+    {
+      "id": "yolov5-reshape-84",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "yolov5 部署到 x5 报 can't reshape xxx in (84,84,3,85)，输出头是不是没对上",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/FAQ/toolchain",
+        "https://developer.d-robotics.cc/rdk_s_doc/FAQ/toolchain"
+      ],
+      "why": "X 与 S 的工具链 FAQ 都写了这条 YOLOv5 reshape 报错。"
+    },
+    {
+      "id": "oe-x5-checker-params",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 工具链 hb_mapper checker 的命令行参数表在哪一页，我想看 --input-shape 怎么写，不要故障案例",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_tool/hb_mapper/hb_mapper_checker.html"
+      ],
+      "why": "参数表在 hb_mapper checker 命令页，不在故障处理页。"
+    },
+    {
+      "id": "oe-x5-calib-count",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 ptq 校准集要多少张，20 到 100 是不是官方建议，纯色图能不能拿来当标定样本，preprocess_on 关掉时前处理谁做",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_usage/prepare_calibration_data.html"
+      ],
+      "why": "校准数据准备页要求 20～100 份样本，禁止纯色图，并说明 preprocess_on。"
+    },
+    {
+      "id": "oe-x5-dynamic-shape-error",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "hb_mapper checker 报 ERROR The shape of model input:input is [xxx] which has dimensions of 0. Please specify input-shape parameter. 动态 shape 要怎么处理",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_faq_troubleshooting/troubleshooting.html"
+      ],
+      "why": "常见故障处理页把这条 dimensions of 0 记成动态 shape，并给出 --input-shape。"
+    },
+    {
+      "id": "oe-x5-accuracy-drop",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "x5 ptq 量化完精度掉了 4% 以上，官方让先查 pipeline 还是先改校准方式，1.5% 到 3% 的小损失呢",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/tune_content/accuracy_tune.html"
+      ],
+      "why": "PTQ 精度调优页按 4% 以上和 1.5%–3% 分开写排查顺序。"
+    },
+    {
+      "id": "oe-x5-hrt-perf",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "bin 模型上了 x5，用 hrt_model_exec 看 perf 和 latency 的参数在 runtime 手册哪一节，不是 hb_perf",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/oe_x5_doc/cn/runtime/source/tool_introduction/hrt_model_exec.html"
+      ],
+      "why": "runtime 手册的 hrt_model_exec 页有 perf 和 latency 统计说明。"
+    },
+    {
+      "id": "oe-x3-docker-host",
+      "board": "x3",
+      "noGoodMatch": false,
+      "query": "x3 算法工具链的 docker 是装在开发机上还是板子上，oe 发布包的容器部署步骤在哪",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/oe_x3_doc/cn/oe_mapper/source/env_install/env_deploy.html"
+      ],
+      "why": "X3 OE 环境部署页的 Docker 容器部署是开发机环境，不是板端。"
+    },
+    {
+      "id": "bmi088-ros2-topic",
+      "board": "any",
+      "noGoodMatch": false,
+      "query": "bmi088 imu 模组的 ros2 包 colcon 之前要先编 c-api 吗，launch 是 rdk_imu.launch.py 吗，topic 是不是 /rdkimu/data",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/accessories_bmi088_doc/software/ros2"
+      ],
+      "why": "BMI088 ROS2 页要求先编好 C-API so，launch 为 rdk_imu.launch.py，话题 /rdkimu/data。"
+    },
+    {
+      "id": "s600-qwen-ion",
+      "board": "s600",
+      "noGoodMatch": false,
+      "query": "s600 上跑 qwen3-8b，是不是要先 hb_switch_ion.sh balanced 再 reboot，sdk 包名 D-Robotics_LLM_S600 从哪下",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/case_doc/basic/llm"
+      ],
+      "why": "S600 案例的 LLM 页给出 hb_switch_ion.sh balanced 和 LLM_S600 SDK 下载。"
+    },
+    {
+      "id": "x5-preempt-rt",
+      "board": "x5",
+      "noGoodMatch": false,
+      "query": "does x5 have a preempt-rt kernel? which apt packages, hobot-kernel-headers with the ~rt suffix?",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/realtime_kernel"
+      ],
+      "why": "实时内核页覆盖 X3/X5，用带 ~rt 后缀的 hobot-kernel-headers、hobot-boot、hobot-bpu-drivers。"
+    },
+    {
+      "id": "s100-static-nmcli",
+      "board": "s100",
+      "noGoodMatch": false,
+      "query": "s100 桌面版想把有线网改成静态 ip，是 nmcli 写进 NetworkManager 吗，netplan 的连接文件在 /etc/NetworkManager/system-connections 下吗",
+      "expectedUrls": [
+        "https://developer.d-robotics.cc/rdk_s_doc/System_configuration/network_bluetooth"
+      ],
+      "why": "S 系列网络页写 S100 桌面用 NetworkManager + Netplan，nmcli 配置落在 system-connections。"
+    },
+    {
+      "id": "s600-k3s-bpu",
+      "board": "s600",
+      "noGoodMatch": true,
+      "expectedUrls": [],
+      "query": "s600 上装 k3s，把 bpu 做成 kubernetes device plugin，yaml 官方有没有",
+      "why": "资料中心没有 k3s、Kubernetes 或 BPU device plugin。"
+    },
+    {
+      "id": "x5-livox-mid360",
+      "board": "x5",
+      "noGoodMatch": true,
+      "expectedUrls": [],
+      "query": "how do I build the Livox Mid-360 ROS 2 humble driver on an RDK X5, and what is the pointcloud topic name",
+      "why": "手册没有 Livox 或 Mid-360。"
+    },
+    {
+      "id": "x5-tensorrt-engine",
+      "board": "x5",
+      "noGoodMatch": true,
+      "expectedUrls": [],
+      "query": "把 yolov8 转成 TensorRT engine 在 x5 的 gpu 上跑，trtexec 的命令官方写在哪",
+      "why": "X5 部署走 BPU 工具链。手册没有 TensorRT、trtexec 或 NVIDIA GPU。"
+    },
+    {
+      "id": "s100-ros-kilted",
+      "board": "s100",
+      "noGoodMatch": true,
+      "expectedUrls": [],
+      "query": "s100 要装 ROS 2 Kilted Kaiju，apt 源和 tros 冲突怎么处理，有没有官方步骤",
+      "why": "TROS 文档只到 Foxy、Humble、Jazzy，没有 Kilted。"
+    },
+    {
+      "id": "x3-libgpiod-gpioset",
+      "board": "x3",
+      "noGoodMatch": true,
+      "expectedUrls": [],
+      "query": "x3 用 libgpiod 的 gpioset 拉高 40pin，官方例子在哪，别给我 python 的 Hobot.GPIO",
+      "why": "40PIN 只文档化了 Hobot.GPIO。没有 libgpiod 或 gpioset 页面，用户明确不要 Hobot.GPIO。"
+    }
+  ]
+}
