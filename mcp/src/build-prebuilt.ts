@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { gzipSync, gunzipSync } from "node:zlib";
+import { encodeBm25 } from "./bm25.js";
 import { listManuals } from "./catalog.js";
 import { fetchText } from "./http.js";
 import { prebuiltDir } from "./index-store.js";
@@ -25,6 +26,12 @@ function compact(doc: IndexedDoc): IndexedDoc {
   if (doc.text) out.text = doc.text;
   if (doc.breadcrumbs?.length) out.breadcrumbs = doc.breadcrumbs;
   return out;
+}
+
+function writePostings(dir: string, manualId: string, docs: IndexedDoc[]): number {
+  const gzip = gzipSync(encodeBm25(docs));
+  writeFileSync(join(dir, `${manualId}.bm25.gz`), gzip);
+  return gzip.length;
 }
 
 function writeSnapshot(dir: string, manualId: string, docs: IndexedDoc[], builtAt: string): number {
@@ -73,9 +80,10 @@ function stampExisting(): void {
     }
     const stamped = statSync(path).mtime.toISOString();
     const bytes = writeSnapshot(dir, manualId, docs, stamped);
+    const postings = writePostings(dir, manualId, docs);
     builtAt = builtAt > stamped ? builtAt : stamped;
     manuals.push(manualId);
-    process.stderr.write(`stamped\t${manualId}\t${docs.length}\t${bytes}\t${stamped}\n`);
+    process.stderr.write(`stamped\t${manualId}\t${docs.length}\t${bytes}\tpostings ${postings}\t${stamped}\n`);
   }
   if (!manuals.length) process.exit(1);
   writeManifest(dir, builtAt, manuals.sort());
@@ -98,8 +106,9 @@ async function rebuild(): Promise<void> {
         continue;
       }
       const bytes = writeSnapshot(dir, manual.id, docs, builtAt);
+      const postings = writePostings(dir, manual.id, docs);
       written.push(manual.id);
-      process.stderr.write(`ok\t${manual.id}\t${docs.length}\t${bytes}\t${Date.now() - started}ms\n`);
+      process.stderr.write(`ok\t${manual.id}\t${docs.length}\t${bytes}\tpostings ${postings}\t${Date.now() - started}ms\n`);
     } catch (error) {
       failed += 1;
       process.stderr.write(`fail\t${manual.id}\t${error instanceof Error ? error.message : String(error)}\n`);

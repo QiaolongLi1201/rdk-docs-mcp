@@ -20,8 +20,8 @@ description: Retrieves official D-Robotics RDK documentation from developer.d-ro
 
 1. 识别产品：X3/X5 → `rdk-x` / `x5`；S100/S600 → `rdk-s`；TROS → `tros`；烧录 → `xburn`；Studio → `studio`。
 2. `search_docs`，查询词用用户中文原词，必要时再补英文。已知板卡而问句没写型号时传 `board`（`x3` | `x5` | `s100` | `s600`）；问句已经点名型号就不要再传。标识符保持整词（`hobot_dnn`、`hrt_model_exec`）。
-3. 看返回里的 `score`、`board`、`url`。`noGoodMatch=true` 时不要根据弱命中编命令、针脚或板级事实；说明手册没有强匹配页，并向用户要板卡或工具全名。`matchedVia=alias` 表示字面量不在索引里，摘要写的是最近的已写页面（例如 `hbm_shell` → `hrt_model_exec`）。`sun55iw3` 不在手册里，不要把它当成 X5。
-4. 有 `role=official-start` 就先 `get_page` 打开它。若正文以「空壳页」开头，立刻改开下一条 `related`，不要对用户说「手册没写」。
+3. 看返回里的 `score`、`coverage`、`board`、`url`。`noGoodMatch=true` 时不要根据弱命中编命令、针脚或板级事实；说明手册没有强匹配页，并向用户要板卡或工具全名。问句里写了 X3/X5 就不会返回 S 系列 OE，写了 S100/S600 就不会返回 X 系列 OE。`matchedVia=alias` 表示字面量不在索引里，摘要写的是最近的已写页面（例如 `hbm_shell` → `hrt_model_exec`）。`sun55iw3` 不在手册里，不要把它当成 X5。
+4. 打开第一条 `quality=good` 的命中。若正文以「空壳页」开头，立刻改开下一条，不要对用户说「手册没写」。
 5. 问句点名 X3 / X5 / S100 / S600 时，跨型号分开检索，不要用另一型号的专题页当答案。问句没写型号时看返回的 `groups` 和 `ambiguousBoard`：每种板卡各有一条，不要把 `hits[0]` 当成用户的板。Moss 等已知当前板卡的 Agent 必须传 `board`。
 6. 保留检索结果中的版本标签；缺少型号、系统版本或其他决定性参数时，先向用户澄清。
 7. 证据不足时明确说明无法确认，不得推断支持或不支持。

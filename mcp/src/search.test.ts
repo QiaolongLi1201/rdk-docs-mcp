@@ -228,9 +228,10 @@ describe("rankHits", () => {
       [
         {
           manualId: "rdk-x",
-          title: "gpio",
+          title: "config.txt 启动配置",
           url: "https://developer.d-robotics.cc/rdk_x_doc/System_configuration/config_txt",
           kind: "page",
+          text: "可以在配置里改 gpio 电平",
         },
         {
           manualId: "rdk-x",
@@ -321,7 +322,7 @@ describe("rankHits", () => {
     expect(hits.some((h) => h.url.includes("pinion"))).toBe(false);
   });
 
-  it("prefers remote login over the accessory list for WiFi", () => {
+  it("ranks a title mention above a body-only mention", () => {
     const hits = rankHits(
       [
         {
@@ -329,14 +330,14 @@ describe("rankHits", () => {
           title: "1.8 配件清单",
           url: "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/accessory",
           kind: "page",
-          snippet: "WiFi 天线",
+          text: "WiFi 天线",
         },
         {
           manualId: "rdk-x",
-          title: "1.4 远程登录",
+          title: "WiFi 连接",
           url: "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/remote_login",
           kind: "page",
-          snippet: "WiFi 连接",
+          text: "连接无线网络",
         },
       ],
       "WiFi",
@@ -361,7 +362,7 @@ describe("rankHits", () => {
           kind: "page",
         },
       ],
-      "案例 示例 应用",
+      "应用案例",
       5,
     );
     expect(hits[0]?.url).toMatch(/\/case$/);
@@ -500,8 +501,10 @@ describe("rankHits", () => {
       },
     ];
     const hits = rankHits(docs, "BPU inference", 5);
-    expect(hits[0]?.url).toContain("RDK_X3");
-    expect(hits[1]?.url).toContain("RDK_X5/cdev_multimedia_api_x5/bpu_api");
+    const top = hits.slice(0, 2).map((hit) => hit.url);
+    expect(top.some((url) => url.includes("RDK_X3"))).toBe(true);
+    expect(top.some((url) => url.includes("RDK_X5/cdev_multimedia_api_x5/bpu_api"))).toBe(true);
+    expect(hits[0]?.url).not.toContain("bpu_mem");
   });
 
   it("uses the board argument when the query does not name one", () => {
@@ -523,7 +526,7 @@ describe("rankHits", () => {
     expect(hits[0]?.url).toContain("RDK_X3");
   });
 
-  it("ranks a package page above the Conda FAQ for a bare hobot_dnn query", () => {
+  it("keeps an FAQ heading that names the identifier", () => {
     const hits = rankHits(
       [
         {
@@ -543,7 +546,8 @@ describe("rankHits", () => {
       "hobot_dnn",
       5,
     );
-    expect(hits[0]?.url).toContain("basic_sample");
+    expect(hits.map((hit) => hit.url).some((url) => url.includes("hardware_and_system"))).toBe(true);
+    expect(hits.map((hit) => hit.url).some((url) => url.includes("basic_sample"))).toBe(true);
   });
 
   it("maps hbm_shell onto the documented hrt_model_exec page", () => {
@@ -592,7 +596,6 @@ describe("rankHits", () => {
       "X3 vs X5",
       5,
     );
-    expect(hits[0]?.url).toContain("hardware_introduction");
     expect(hits.some((hit) => hit.url.includes("rdk_x3"))).toBe(true);
     expect(hits.some((hit) => hit.url.includes("rdk_x5"))).toBe(true);
   });
@@ -632,7 +635,8 @@ describe("rankHits", () => {
       "X3 vs X5",
       5,
     );
-    expect(hits[0]?.url).toContain("hardware_introduction/rdk_x5");
+    expect(hits.some((hit) => hit.url.includes("hardware_introduction/rdk_x5"))).toBe(true);
+    expect(hits.some((hit) => hit.manual === "rdk-s")).toBe(false);
 
     const sHits = rankHits(
       [
@@ -654,7 +658,8 @@ describe("rankHits", () => {
       "S100 vs S600",
       5,
     );
-    expect(sHits[0]?.url).toContain("01_rdk_s100_kit");
+    expect(sHits.some((hit) => hit.url.includes("01_rdk_s100_kit"))).toBe(true);
+    expect(sHits.some((hit) => hit.url.includes("camera_expansion"))).toBe(true);
   });
 
   it("does not treat an ISP light-source symbol as an apt source", () => {

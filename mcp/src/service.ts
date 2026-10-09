@@ -1,13 +1,14 @@
 import { listManuals, origin, resolveManual, type Manual } from "./catalog.js";
-import { mentionedBoards, urlLooksLikeBoard } from "./products.js";
+import { mentionedBoards, urlLooksLikeBoard, type BoardId } from "./products.js";
 import { compactDocusaurusIndex } from "./docusaurus.js";
 import { canonicalizeDocUrl } from "./doc-urls.js";
 import { htmlToMarkdown, isDocusaurusShell, resolveDocUrl } from "./fetch-page.js";
 import { FORUM_ID, getForumTopic, isForumRef, listForumTopics, searchForum } from "./forum.js";
 import type { HttpGet } from "./http.js";
 import { findRspressPage, isRspressShell, loadRspressDocs, normalizeDocPath } from "./rspress.js";
-import { applyOfficialPath, matchOfficialPath, searchGuidance } from "./routes.js";
-import { groupHits, matchQuality, rankHits } from "./search.js";
+import { contextBoards, manualMatchesBoards, markPackagedIndex } from "./bm25.js";
+import { searchGuidance } from "./routes.js";
+import { groupHits, matchQuality, searchManuals } from "./search.js";
 import { selectSection } from "./sections.js";
 import { compactSphinxIndex } from "./sphinx.js";
 import {
@@ -20,7 +21,6 @@ import {
   rememberIndex,
   staleIndexWarning,
 } from "./index-store.js";
-import type { BoardId } from "./products.js";
 import type { BoardGroup, IndexedDoc, SearchHit } from "./types.js";
 
 export type SearchSource = "docs" | "forum" | "all";
@@ -128,6 +128,7 @@ async function loadIndex(manual: Manual, http: HttpGet): Promise<IndexedDoc[]> {
   if (prebuiltEnabled(http)) {
     const snapshot = readPrebuiltSnapshot(manual.id);
     if (snapshot && !prebuiltIsStale(snapshot.builtAt)) {
+      markPackagedIndex(snapshot.docs);
       rememberIndex(http, manual.id, snapshot.docs);
       return snapshot.docs;
     }
@@ -138,6 +139,7 @@ async function loadIndex(manual: Manual, http: HttpGet): Promise<IndexedDoc[]> {
         noteIndex(staleIndexWarning(manual.id, snapshot.builtAt, "live"));
         return live;
       } catch (error) {
+        markPackagedIndex(snapshot.docs);
         rememberIndex(http, manual.id, snapshot.docs);
         noteIndex(staleIndexWarning(manual.id, snapshot.builtAt, "snapshot"));
         const message = error instanceof Error ? error.message : String(error);
@@ -199,8 +201,10 @@ export async function searchDocs(
   if (includeDocs) {
     const { targets, warnings: catalogWarnings } = manualsForSearch(input.manual, query);
     warnings.push(...catalogWarnings);
+    const boards = contextBoards(query, { board: input.board });
+    const filtered = targets.filter((manual) => manualMatchesBoards(manual.id, boards));
     const loaded = await Promise.all(
-      targets.map(async (manual) => {
+      filtered.map(async (manual) => {
         try {
           return { docs: await loadIndex(manual, http), warning: undefined };
         } catch (error) {
@@ -213,7 +217,12 @@ export async function searchDocs(
     );
     warnings.push(...loaded.map((item) => item.warning).filter((item): item is string => Boolean(item)));
     warnings.push(...drainIndexNotes());
-    docHits = rankHits(loaded.flatMap((item) => item.docs), query, limit, { board: input.board }).map((hit) => ({
+    docHits = searchManuals(
+      loaded.map((item) => item.docs),
+      query,
+      limit,
+      { board: input.board },
+    ).map((hit) => ({
       ...hit,
       source: "docs" as const,
     }));
@@ -228,13 +237,14 @@ export async function searchDocs(
     }
   }
 
-  const official = includeDocs ? matchOfficialPath(query, input.manual) : undefined;
   if (mentioned.length > 1 && docHits.length > 0) {
     const missing = mentioned.filter((board) => !docHits.some((hit) => urlLooksLikeBoard(hit.url, board) || urlLooksLikeBoard(hit.title, board)));
     if (missing.length > 0)
       warnings.push(`No retrieved hit is explicitly scoped to: ${missing.join(", ")}. Treat the comparison as incomplete.`);
   }
-  const hits = applyOfficialPath(mergeHits(docHits, forumHits, limit), official, limit);
+  const hits = mergeHits(docHits, forumHits, limit).map((hit) =>
+    hit.source === "forum" ? { ...hit, role: "forum-supplement" as const } : hit,
+  );
   const groups = groupHits(hits);
   const boardGroups = groups.filter((group) => group.board !== "agnostic" && group.board !== "multiple");
   const ambiguousBoard = mentioned.length === 0 && !input.board && boardGroups.length > 1;
@@ -256,7 +266,7 @@ export async function searchDocs(
     warnings,
     guidance: quality.noGoodMatch
       ? "noGoodMatch. Do not answer from these hits. Say the manuals did not contain a strong page, and ask for the board or the exact tool name."
-      : searchGuidance(official),
+      : searchGuidance(),
     noGoodMatch: quality.noGoodMatch,
     matchQuality: quality.matchQuality,
   };

@@ -467,6 +467,6 @@ export function formatInstallReport(result: InstallResult): string {
   if (result.mcp.length === 0)
     lines.push("No MCP client configuration was written; Skills alone do not provide MCP tools.");
   lines.push("Reload the Agent / MCP servers, then ask: `RDK X5 怎么烧录？`");
-  lines.push("Open the `official-start` hit first. Do not clone the source repository.");
+  lines.push("If noGoodMatch is true, do not answer from the hits. Do not clone the source repository.");
   return lines.join("\n");
 }

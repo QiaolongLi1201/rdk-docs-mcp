@@ -97,17 +97,26 @@ export function scoreRetrievalCase(
   };
 }
 
+export function percentile(values: number[], p: number): number {
+  if (values.length === 0) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const rank = Math.ceil((p / 100) * sorted.length) - 1;
+  return sorted[Math.min(sorted.length - 1, Math.max(0, rank))];
+}
+
 export function summarize(cases: CaseMetric[]): {
   n: number;
   hitAt1: number;
   hitAt3: number;
   mrr: number;
   meanMs: number;
+  p95Ms: number;
 } {
   const n = cases.length || 1;
   const hitAt1 = cases.filter((item) => item.hitAt1).length / n;
   const hitAt3 = cases.filter((item) => item.hitAt3).length / n;
   const mrr = cases.reduce((sum, item) => sum + item.reciprocalRank, 0) / n;
   const meanMs = cases.reduce((sum, item) => sum + item.ms, 0) / n;
-  return { n: cases.length, hitAt1, hitAt3, mrr, meanMs };
+  const p95Ms = percentile(cases.map((item) => item.ms), 95);
+  return { n: cases.length, hitAt1, hitAt3, mrr, meanMs, p95Ms };
 }

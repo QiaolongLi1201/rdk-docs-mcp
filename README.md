@@ -34,7 +34,7 @@ jsDelivr 不可用时，同一文件在：
 | Tool | 做什么 |
 |------|--------|
 | `list_manuals` | 列出资料中心已上架手册（X/S 系列、TROS、Model Zoo、Studio、XBurn、OE、X5 SDK 等） |
-| `search_docs` | 中英文关键词检索。指定手册只搜那一本；不指定时只搜手册。`source=forum` 只搜社区，`source=all` 才把论坛附在手册后面。可选 `board`（x3/x5/s100/s600）表示当前板卡。未传且问句也没写型号时，`ambiguousBoard=true`，`groups` 按板卡分组，不默认偏新板。`noGoodMatch=true` 表示没有强匹配页。 |
+| `search_docs` | BM25 检索（标题/路径权重大于正文，中文按二字切分）。指定手册只搜那一本；不指定时只搜手册。问句或 `board` 点名 X3/X5 时不会返回 S 系列 OE。未传板卡时 `ambiguousBoard=true`，`groups` 按板卡分组。`noGoodMatch=true` 表示顶部分数覆盖的问句概念太少。 |
 | `get_page` | 把一页官方文档或一篇论坛主题收成 Markdown。可选 `query` / `section`，或 URL 带 `#anchor`，用来跳过页首、直接打开相关小节。 |
 | `list_toc` | 列出某一本手册的页面目录；`forum` 列出「开发与问题」和「通用」最近帖 |
 | `search_skills` | 在 [D-Robotics/rdk-skills](https://github.com/D-Robotics/rdk-skills) 目录快照里按任务找 Skill（只读，带 `catalog_revision` 溯源） |
@@ -95,7 +95,7 @@ ln -sfn "$(pwd)" ~/.cursor/plugins/local/rdk-docs
 用户问 RDK / TROS / 烧录 / 量化等问题时：
 
 1. `search_docs`（能确定产品就带 `manual`，如 `x5`、`tros`、`xburn`；已知板卡而问句没写型号就带 `board`；只要社区就 `source=forum`，兼容写法 `manual=forum`）
-2. 若 `noGoodMatch=true`，不要用弱命中编答案。`matchedVia=alias` 的摘要会说明字面量（如 `hbm_shell`）不在索引里。
+2. 若 `noGoodMatch=true`，不要用弱命中编答案。问句里的型号会硬过滤另一产品族（问 X3/X5 不会拿到 S 系列 OE）。`matchedVia=alias` 的摘要会说明字面量（如 `hbm_shell`）不在索引里。
 3. 对 1–2 个命中 URL 调用 `get_page`（手册或 `forum.d-robotics.cc` 主题）。长页传 `query` 或 `section`。
 4. 用原文回答，并附上官方文档或论坛链接。`imageOnly=true` 时展示 `contentNotes` 里的官方图片，不要编针脚号。
 
@@ -123,7 +123,7 @@ npm run eval
 
 `npm run eval` 跑 `mcp/eval/retrieval-cases.json`（约 60 条中英检索 + 3 条小节读取），报告 hit@1、hit@3、MRR 和冷/热/论坛延迟。基线在 `mcp/eval/baseline.json`。`eval:live` 用另一组真实开发问题打资料中心（搜 + 拉页）。对标 ESP / Jetson MCP 的结论见 `docs/eval-vs-esp-jetson.md`。`eval:skills` 起真实 stdio MCP 连接打 rdk-skills 在线目录，验证六个工具与 flat/workspace 安装引导（需要网络；用隔离 HOME/缓存目录，不碰用户配置）。
 
-冷启动检索读包内 `mcp/prebuilt/*.json.gz`（搜索索引快照，不是整站镜像，gzip 后约 1.3 MB）。含快照的 npm 包约 1.4 MB（解压约 1.7 MB）；去掉快照约 100 kB（解压约 370 kB）。本机 `npm install` 该包大约 2 秒，不含快照大约 1 秒。每个文件带 `builtAt`，目录里的 `manifest.json` 记同一次构建时间。`get_page` 仍向资料中心拉正文。快照超过 14 天（`RDK_DOCS_PREBUILT_MAX_AGE_DAYS`）会改拉线上索引并在 `warnings` 里说明；线上失败才退回旧快照并警告结果可能过期。设 `RDK_DOCS_PREBUILT=0` 可强制每次拉线上索引。刷新：`npm run build:index`。`prepublishOnly` 会在发布前跑同一命令，所以发布需要能访问资料中心。`npm run eval:offline` 只用包内快照，不访问网络（跳过论坛用例和 `get_page`）。
+冷启动检索读包内 `mcp/prebuilt/*.json.gz`（文档快照）和同名 `.bm25.gz`（倒排表，避免每次现场切词）。这不是整站镜像。`get_page` 仍向资料中心拉正文。快照超过 14 天（`RDK_DOCS_PREBUILT_MAX_AGE_DAYS`）会改拉线上索引并在 `warnings` 里说明；线上失败才退回旧快照并警告结果可能过期。设 `RDK_DOCS_PREBUILT=0` 可强制每次拉线上索引。刷新：`npm run build:index`（同时重写倒排表）。`prepublishOnly` 会在发布前跑同一命令，所以发布需要能访问资料中心。`npm run eval:offline` 只用包内快照，不访问网络（跳过论坛用例和 `get_page`）。`npm run eval:paraphrase` 跑另一组口语/错字/报错开发集。排序是 BM25，没有额外的向量模型：常见多语小模型有几十到几百 MB，放不进这个包，也做不到冷启动 300ms 以内。
 
 磁盘缓存：`~/.cache/rdk-docs-mcp`（可用 `RDK_DOCS_CACHE_DIR` 覆盖），默认 TTL 24 小时。官方改文档后，缓存过期会重新拉最新索引；要立刻跟上就删掉缓存目录，或设 `RDK_DOCS_CACHE_TTL_MS=0`。
 

@@ -65,8 +65,9 @@ async function main() {
     process.env.RDK_DOCS_CACHE_DIR = mkdtempSync(join(tmpdir(), "rdk-retrieval-eval-"));
   }
 
-  const cold = await time(() => searchDocs({ query: "X5 GPIO 怎么用", manual: "x5", limit: 5 }, fetchText));
-  const warm = await time(() => searchDocs({ query: "X5 GPIO 怎么用", manual: "x5", limit: 5 }, fetchText));
+  const cold = await time(() => searchDocs({ query: "摄像头黑屏怎么办", limit: 5 }, fetchText));
+  const warm = await time(() => searchDocs({ query: "摄像头黑屏怎么办", limit: 5 }, fetchText));
+  const scoped = await time(() => searchDocs({ query: "X5 GPIO 怎么用", manual: "x5", limit: 5 }, fetchText));
   const forum = offline
     ? { value: { hits: [] as Array<{ title?: string }> }, ms: 0 }
     : await time(() => searchDocs({ query: "camera no image", source: "forum", limit: 5 }, fetchText));
@@ -88,7 +89,11 @@ async function main() {
     const noGoodMatch = Boolean((value as { noGoodMatch?: boolean }).noGoodMatch);
     searchMetrics.push(scoreRetrievalCase(evalCase, value.hits, noGoodMatch, ms));
     const mark = searchMetrics.at(-1)?.hitAt1 ? "ok" : "miss";
-    process.stderr.write(`${mark}\t${evalCase.id}\t${ms}ms\t${value.hits[0]?.url ?? "(none)"}\n`);
+    const coverage = value.hits[0]?.coverage;
+    const flag = noGoodMatch ? " abstain" : "";
+    process.stderr.write(
+      `${mark}\t${evalCase.id}\t${ms}ms\tcov=${coverage ?? "-"}${flag}\t${value.hits[0]?.url ?? "(none)"}\n`,
+    );
   }
 
   const pageMetrics: PageMetric[] = [];
@@ -121,6 +126,7 @@ async function main() {
     latency: {
       coldSearchMs: cold.ms,
       warmSearchMs: warm.ms,
+      scopedSearchMs: scoped.ms,
       forumSearchMs: offline ? null : forum.ms,
       coldTop: cold.value.hits[0]?.url ?? null,
       forumTop: forum.value.hits[0]?.title ?? null,
@@ -131,6 +137,7 @@ async function main() {
       hitAt3: round(search.hitAt3),
       mrr: round(search.mrr),
       meanMs: Math.round(search.meanMs),
+      p95Ms: Math.round(search.p95Ms),
     },
     pages: {
       n: pageMetrics.length,
@@ -145,7 +152,7 @@ async function main() {
   writeFileSync(outPath, `${JSON.stringify(report, null, 2)}\n`);
   process.stdout.write(
     `hit@1 ${report.search.hitAt1}  hit@3 ${report.search.hitAt3}  MRR ${report.search.mrr}  ` +
-      `pages ${pagePasses}/${pageMetrics.length}  cold ${cold.ms}ms warm ${warm.ms}ms forum ${forum.ms}ms\n` +
+      `pages ${pagePasses}/${pageMetrics.length}  cold ${cold.ms}ms warm ${warm.ms}ms scoped ${scoped.ms}ms p95 ${Math.round(search.p95Ms)}ms forum ${forum.ms}ms\n` +
       `wrote ${outPath}\n`,
   );
 }
