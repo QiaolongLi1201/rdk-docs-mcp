@@ -202,10 +202,14 @@ export function structureScale(doc: IndexedDoc): number {
   const title = doc.title.trim();
   const steps = text.match(/(?:^|\n)\s*\d+[.、)]|第[0-9一二三四五六七八九十]{1,3}步/g)?.length ?? 0;
   const code = text.match(/```|`[^`\n]{2,}`/g)?.length ?? 0;
-  const guideTitle = /^(?:\d+\.)+\d*\s+\S/.test(title) || /指南|教程|步骤|示例|howto|\btutorial\b|\bguide\b/i.test(title);
-  if (steps >= 2 || code >= 2) return guideTitle ? 1.22 : 1.15;
-  if (steps === 1 || code === 1 || guideTitle) return 1.08;
-  return 1;
+  const guideTitle = /^(?:\d+\.)+\d*\s+\S/.test(title) || /指南|教程|步骤|示例|使用|howto|\btutorial\b|\bguide\b/i.test(title);
+  const questionTitle = /[?？]\s*$/.test(title) || /^q\d{1,3}\s*[:：.]/i.test(title);
+  let scale = 1;
+  if (steps >= 2 || code >= 2) scale = guideTitle ? 1.22 : 1.15;
+  else if (steps === 1 || code === 1 || guideTitle) scale = 1.08;
+  // A FAQ row with an answer body is a troubleshooting unit, not a one-word label.
+  if (questionTitle && text.length >= 80) scale = Math.max(scale, 1.1);
+  return scale;
 }
 
 /**
@@ -219,15 +223,15 @@ export function fuseRanks(bmRank: number, lexRank: number, lexWeight = LEX_FUSIO
   return 1 / (k + bmRank) + lexWeight / (k + lexRank);
 }
 
-export function lexicalScore(doc: IndexedDoc, plan: LexicalPlan): number {
+export function lexicalScore(doc: IndexedDoc, plan: LexicalPlan, common?: ReadonlySet<string>): number {
   const title = doc.title.toLowerCase();
   const extra = [doc.snippet, doc.text, ...(doc.breadcrumbs ?? [])].filter(Boolean).join(" ").toLowerCase();
   let score = 0;
   let matched = 0;
   let titleMatched = 0;
   for (const matcher of plan.matchers) {
-    // A title made only of generic words (docker, error, install) is not an answer.
-    if (WEAK_TITLE.has(matcher.token)) {
+    // A title made only of generic or very common words is not an answer.
+    if (WEAK_TITLE.has(matcher.token) || common?.has(matcher.token)) {
       if (matcher.test(extra)) {
         score += 1;
         matched += 1;

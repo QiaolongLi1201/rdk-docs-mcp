@@ -1,0 +1,101 @@
+{
+  "note": "Debugging questions in dev/questions.json. Hope paths are diagnosis labels, not the hidden eval. Q&A body merge is an index change, not a runtime flag; before that merge the same questions were top1 16/21 and abstain 3/5. Public retrieval-cases.json (not this file) stays at head hit@1 0.567; warm searchDocs p95 is about 22ms.",
+  "results": {
+    "none": {
+      "top1": 19,
+      "ranked": 21,
+      "abstainOk": 5,
+      "abstainN": 5,
+      "misses": [
+        "s600-gpio -> driver_development_super/driver_gpio_dev#s600-gpio-概述",
+        "cam-no-picture -> FAQ/applications_and_examples#q3-如何运行-gc4633-mipi-摄像头的示例程序"
+      ]
+    },
+    "segment": {
+      "top1": 18,
+      "ranked": 21,
+      "abstainOk": 5,
+      "abstainN": 5,
+      "misses": [
+        "x3-version -> FAQ/hardware_and_system#q18-rdk-x3-不同系统版本的有线网口的-ip-是什么",
+        "s600-gpio -> driver_development_super/driver_gpio_dev#s600-gpio-概述",
+        "cam-no-picture -> FAQ/applications_and_examples#q3-如何运行-gc4633-mipi-摄像头的示例程序"
+      ]
+    },
+    "identifier": {
+      "top1": 19,
+      "ranked": 21,
+      "abstainOk": 5,
+      "abstainN": 5,
+      "misses": [
+        "s600-gpio -> driver_development_super/driver_gpio_dev#s600-gpio-概述",
+        "cam-no-picture -> FAQ/applications_and_examples#q3-如何运行-gc4633-mipi-摄像头的示例程序"
+      ]
+    },
+    "phrase": {
+      "top1": 19,
+      "ranked": 21,
+      "abstainOk": 5,
+      "abstainN": 5,
+      "misses": [
+        "s600-gpio -> driver_development_super/driver_gpio_dev#s600-gpio-概述",
+        "cam-no-picture -> FAQ/applications_and_examples#q3-如何运行-gc4633-mipi-摄像头的示例程序"
+      ]
+    },
+    "board": {
+      "top1": 19,
+      "ranked": 21,
+      "abstainOk": 5,
+      "abstainN": 5,
+      "misses": [
+        "s600-gpio -> driver_development_super/driver_gpio_dev#s600-gpio-概述",
+        "cam-no-picture -> FAQ/applications_and_examples#q3-如何运行-gc4633-mipi-摄像头的示例程序"
+      ]
+    },
+    "titledf": {
+      "top1": 19,
+      "ranked": 21,
+      "abstainOk": 5,
+      "abstainN": 5,
+      "misses": [
+        "s600-gpio -> driver_development_super/driver_gpio_dev#s600-gpio-概述",
+        "cam-no-picture -> FAQ/applications_and_examples#q3-如何运行-gc4633-mipi-摄像头的示例程序"
+      ]
+    },
+    "oos": {
+      "top1": 19,
+      "ranked": 21,
+      "abstainOk": 3,
+      "abstainN": 5,
+      "misses": [
+        "s600-gpio -> driver_development_super/driver_gpio_dev#s600-gpio-概述",
+        "cam-no-picture -> FAQ/applications_and_examples#q3-如何运行-gc4633-mipi-摄像头的示例程序",
+        "oos-jetson",
+        "oos-raspberry"
+      ]
+    },
+    "howto": {
+      "top1": 17,
+      "ranked": 21,
+      "abstainOk": 5,
+      "abstainN": 5,
+      "misses": [
+        "x3-usb-preview -> hardware_introduction/rdk_x3#usb-摄像头",
+        "s600-gpio -> driver_development_super/driver_gpio_dev#s600-gpio-概述",
+        "cam-no-picture -> FAQ/hardware_and_system#q21-我将-x3-板卡的-hdmi-输出接口和电脑的-hdmi-输入输出接口相连为什么电脑没有出现画面",
+        "usb-cam-no-image -> hardware_introduction/rdk_x5#usb-摄像头"
+      ]
+    },
+    "structure": {
+      "top1": 19,
+      "ranked": 21,
+      "abstainOk": 5,
+      "abstainN": 5,
+      "misses": [
+        "s600-gpio -> driver_development_super/driver_gpio_dev#s600-gpio-概述",
+        "cam-no-picture -> FAQ/applications_and_examples#q3-如何运行-gc4633-mipi-摄像头的示例程序"
+      ]
+    }
+  },
+  "warmP95Ms": 21.89
+}
