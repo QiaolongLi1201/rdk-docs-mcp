@@ -348,6 +348,8 @@ type Corpus = {
   gen: Uint32Array;
   epoch: number;
   touched: number[];
+  /** Shorter title length for FAQ question headings. Used only on long queries. */
+  titleForQuery?: Float32Array;
 };
 
 type Concept = { terms: string[]; keys: string[]; minHits: number; original: string[] };
@@ -359,6 +361,12 @@ const BM25_MAGIC = 0x314d4231;
 
 export function markPackagedIndex(docs: IndexedDoc[]): void {
   packaged.add(docs);
+}
+
+/** Build the posting tables now, so the first user query does not pay for it. */
+export function primeIndex(docs: IndexedDoc[]): void {
+  if (docs.length === 0) return;
+  corpusFor(docs);
 }
 
 export function contextBoards(query: string, options: RankOptions = {}): BoardId[] {
@@ -542,6 +550,7 @@ function corpusFor(docs: IndexedDoc[]): Corpus {
   if (packaged.has(docs)) {
     const loaded = loadPackaged(docs);
     if (loaded) {
+      attachQuestionLengths(loaded);
       cache.set(docs, loaded);
       return loaded;
     }
@@ -604,6 +613,7 @@ function corpusFor(docs: IndexedDoc[]): Corpus {
     epoch: 1,
     touched: [],
   };
+  attachQuestionLengths(built);
   cache.set(docs, built);
   if (profile) {
     let posts = 0;
@@ -1294,6 +1304,142 @@ function maxMatchParts(segment: string, df: (term: string) => number, n: number)
 }
 
 /**
+ * Weight a dictionary word recovered from a glued sentence. Small fixtures
+ * keep the legacy curve. On the packaged manuals, a rare word outranks a
+ * common fragment of the same length.
+ */
+function recoveredQtf(part: string, legacy: number, df: (term: string) => number, n: number): number {
+  if (n < 200) return legacy;
+  if (CJK_FILLER.has(part) || isGeneralLanguage(part)) return Math.min(legacy, 0.08);
+  const docs = df(part);
+  if (docs <= 0 || n <= 0) return legacy;
+  const share = docs / n;
+  if (share < RARE_DF) return Math.max(legacy, part.length >= 3 ? 0.95 : 0.7);
+  if (share < COMMON_DF && part.length >= 3) return Math.max(legacy, 0.4);
+  return legacy;
+}
+
+function cjkChars(query: string): number {
+  let count = 0;
+  for (let i = 0; i < query.length; i += 1) {
+    const code = query.charCodeAt(i);
+    if (code >= 0x4e00 && code <= 0x9fff) count += 1;
+  }
+  return count;
+}
+
+/** A heading that is itself a question, with the answer stored beside it. */
+function isQuestionHeading(doc: IndexedDoc): boolean {
+  if (doc.kind !== "heading") return false;
+  if ((doc.answer?.trim().length ?? 0) >= 24) return true;
+  return /[？?]|怎么办|什么原因|如何解决|为什么|如何处理/.test(doc.title);
+}
+
+/** Long FAQ questions are one phrase, not a long document. Cap the length penalty. */
+function questionTitleDl(dl: number): number {
+  const cap = 16;
+  if (dl <= cap) return dl;
+  return cap + (dl - cap) * 0.2;
+}
+
+function attachQuestionLengths(corpus: Corpus): void {
+  if (corpus.titleForQuery) return;
+  const arr = new Float32Array(corpus.n);
+  for (let i = 0; i < corpus.n; i += 1) {
+    const dl = corpus.titleDl[i] ?? 0;
+    const doc = corpus.docs[i];
+    arr[i] = doc && isQuestionHeading(doc) ? questionTitleDl(dl) : dl;
+  }
+  corpus.titleForQuery = arr;
+}
+
+/** Content words worth covering: rare identifiers and uncommon CJK words. */
+function keyConcepts(concepts: Concept[], df: (term: string) => number, n: number): Concept[] {
+  if (n < 200) return [];
+  return concepts.filter((concept) => {
+    const head = concept.keys[0] ?? "";
+    if (!head || CJK_FILLER.has(head) || isGeneralLanguage(head) || BOARD_TOKEN.has(head)) return false;
+    const docs = df(head);
+    if (docs <= 0) return false;
+    const share = docs / n;
+    if (isCodeLike(head) && !GENERIC_ASCII.has(head)) return share < 0.05;
+    return isCjkTerm(head) && head.length >= 3 && share < COMMON_DF;
+  });
+}
+
+const ABSENCE_CUES = ["识别不到", "找不到", "没有", "无法", "不能", "失败", "报错"];
+
+function questionOverlap(doc: IndexedDoc, keys: Concept[], query: string): number {
+  if (!isQuestionHeading(doc)) return 1;
+  const title = doc.title.toLowerCase();
+  let hit = 0;
+  for (const concept of keys) {
+    const head = concept.keys[0];
+    if (head && head.length >= 3 && title.includes(head)) hit += 1;
+  }
+  let cue = 0;
+  for (const item of ABSENCE_CUES) {
+    if (query.includes(item) && title.includes(item)) cue += 1;
+  }
+  if (hit === 0 && cue === 0) return 1;
+  return Math.min(1.55, 1 + 0.1 * hit + 0.3 * Math.min(cue, 1));
+}
+
+/** Empty TOC bullets are not the page that explains the symptom. */
+function emptyLabelScale(doc: IndexedDoc): number {
+  if (isQuestionHeading(doc) || doc.kind === "page") return 1;
+  const text = `${doc.text ?? ""} ${doc.answer ?? ""}`.trim();
+  if (text.length >= 40) return 1;
+  return 0.82;
+}
+
+/** A heading can quote a phrase the posting table never stored as its own term. */
+function addUnindexedTitlePhrases(corpora: Corpus[], phrases: string[]): void {
+  if (phrases.length === 0) return;
+  for (const corpus of corpora) {
+    const docs = corpus.docs;
+    for (let i = 0; i < corpus.n; i += 1) {
+      const title = docs[i]?.title;
+      if (!title) continue;
+      let hit = 0;
+      for (const phrase of phrases) {
+        if (title.includes(phrase)) hit += 1;
+      }
+      if (hit > 0) addScore(corpus, i, 6 * hit);
+    }
+  }
+}
+
+function rareBigramConcepts(query: string, df: (term: string) => number, n: number): Concept[] {
+  if (n < 200) return [];
+  const out: Concept[] = [];
+  const seen = new Set<string>();
+  for (const segment of cjkSegments(query)) {
+    for (let i = 0; i + 2 <= segment.length; i += 1) {
+      const gram = segment.slice(i, i + 2);
+      if (seen.has(gram) || CJK_FILLER.has(gram) || isGeneralLanguage(gram)) continue;
+      const docs = df(gram);
+      if (docs <= 0 || docs / n >= RARE_DF) continue;
+      seen.add(gram);
+      out.push({ terms: [gram], keys: [gram], minHits: 1, original: [gram] });
+      if (out.length >= 4) return out;
+    }
+  }
+  return out;
+}
+
+function titlePhraseScale(doc: IndexedDoc, phrases: string[]): number {
+  if (phrases.length === 0) return 1;
+  const title = doc.title.toLowerCase();
+  let hit = 0;
+  for (const phrase of phrases) {
+    if (title.includes(phrase)) hit += 1;
+  }
+  if (hit === 0) return 1;
+  return Math.min(1.6, 1.35 + 0.1 * (hit - 1));
+}
+
+/**
  * Split CJK that was glued past a real word ("摄像头插上") and, when an
  * underscored identifier is missing, accept a slightly shorter corpus stem.
  */
@@ -1322,10 +1468,23 @@ function adaptPlan(
         // Short pieces ("镜像", "温度") must not outrank a heading that already
         // matches the query. A long in-corpus word ("系统版本号") keeps more weight.
         const ratio = head.length > 0 ? part.length / head.length : 0.5;
-        // Only a long recovered word is allowed to move rank. Shorter pieces
-        // stay in the concept list so a glued topic does not abstain.
-        const qtf = part.length >= 5 ? Math.min(0.75, Math.max(0.5, ratio)) : 0.1;
+        // Only a long recovered word is allowed to move rank on a small corpus.
+        // On the real manuals a rare short word ("左上角") keeps a real weight;
+        // a common fragment ("镜像", "系统") stays quiet.
+        const legacy = part.length >= 5 ? Math.min(0.75, Math.max(0.5, ratio)) : 0.1;
+        // Rare recovered words only move rank inside a long symptom sentence,
+        // or when the missing piece is itself a long phrase. Short queries
+        // keep the legacy weight so a how-to heading is not outranked by a fragment.
+        const recover = cjkChars(query) >= 24 || head.length >= 12;
+        const qtf = recover ? recoveredQtf(part, legacy, df, n) : legacy;
         for (const term of born.terms) bumpTerm(plan, term, term === part ? qtf : qtf * 0.45);
+      }
+      if (n >= 200 && parts.length > 0 && (cjkChars(query) >= 24 || head.length >= 12)) {
+        for (const gram of bigrams(head)) {
+          if (!parts.some((part) => part.length > gram.length && part.includes(gram))) continue;
+          const item = plan.terms.find((row) => row.term === gram);
+          if (item) item.qtf = Math.min(item.qtf, 0.04);
+        }
       }
     }
     plan.concepts = next;
@@ -1372,13 +1531,21 @@ function phraseNeedles(query: string): string[] {
     const text = match[1]?.replace(/\s+/g, " ").trim() ?? "";
     if (text.length >= 6) needles.push(text);
   }
-  if (/error|exception|failed|errno|traceback|invalid|not available|no such|报错/i.test(query)) {
+  if (/error|exception|failed|errno|traceback|invalid|not available|no such|报错|失败/i.test(query)) {
     for (const match of lower.matchAll(/[a-z][a-z0-9_./:-]{2,}(?:\s+[a-z0-9_./:-]+){2,}/g)) {
       const text = match[0].replace(/\s+/g, " ").trim();
       if (text.length >= 12) needles.push(text);
     }
+    for (const match of lower.matchAll(/\b[a-z][a-z0-9_]*(?:error|exception)\b[^。\n]{0,60}/g)) {
+      const text = match[0].replace(/\s+/g, " ").trim();
+      if (text.length >= 8) needles.push(text.slice(0, 80));
+    }
   }
-  return [...new Set(needles)].slice(0, 4);
+  for (const match of lower.matchAll(/\/dev\/[a-z0-9_./-]{2,}/g)) {
+    const text = match[0].replace(/[.,;:]+$/g, "");
+    if (text.length >= 6) needles.push(text);
+  }
+  return [...new Set(needles)].slice(0, 6);
 }
 
 function phraseScale(doc: IndexedDoc, needles: string[]): number {
@@ -1522,6 +1689,51 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
   }
   const lexical = prepareLexical(query);
   const needles = phraseNeedles(query);
+  const focusPhrases: string[] = [];
+  const longQuery = cjkChars(query) >= 24;
+  if (longQuery && n >= 200) {
+    const seenPhrase = new Set<string>();
+    const ranked: Array<{ token: string; docsWith: number }> = [];
+    for (const phrase of lexical.phrases) {
+      const token = phrase.token;
+      if (token.length < 4 || seenPhrase.has(token)) continue;
+      seenPhrase.add(token);
+      ranked.push({ token, docsWith: df(token) });
+    }
+    const continues = (token: string) => {
+      const at = query.indexOf(token);
+      if (at < 0) return false;
+      const next = query.charCodeAt(at + token.length);
+      return next >= 0x4e00 && next <= 0x9fff;
+    };
+    const known = ranked
+      .filter((item) => item.docsWith > 0 && item.docsWith / n < 0.0008)
+      .sort((a, b) => a.docsWith - b.docsWith || b.token.length - a.token.length);
+    const unknown = ranked.filter((item) => item.docsWith === 0 && !continues(item.token));
+    for (const item of [...known, ...unknown]) {
+      focusPhrases.push(item.token);
+      if (focusPhrases.length >= 8) break;
+    }
+  }
+  const focus = longQuery ? keyConcepts(plan.concepts, df, n) : [];
+  const phraseConcepts: Concept[] = focusPhrases
+    .filter((phrase) => df(phrase) > 0)
+    .map((phrase) => ({ terms: [phrase], keys: [phrase], minHits: 1, original: [phrase] }));
+  const coverConcepts =
+    focus.length > 0 ? [...focus, ...rareBigramConcepts(query, df, n), ...phraseConcepts] : abstainConcepts;
+  const weightedTerms = plan.terms.map((qterm) => {
+    let qtf = qterm.qtf;
+    if (longQuery && isCjkTerm(qterm.term)) {
+      const docsWith = df(qterm.term);
+      const share = n > 0 ? docsWith / n : 1;
+      if (qterm.term.length === 2 && share >= COMMON_DF) qtf *= 0.3;
+      else if (qterm.term.length >= 3 && docsWith > 0 && share < RARE_DF) qtf = Math.max(qtf, 0.9);
+    } else if (longQuery && isCodeLike(qterm.term)) {
+      const docsWith = df(qterm.term);
+      if (docsWith > 0 && n > 0 && docsWith / n < RARE_DF) qtf = Math.max(qtf, 1.15);
+    }
+    return { term: qterm.term, qtf };
+  });
   const commonTitle = new Set<string>();
   if (!ablate("titledf") && n >= 800) {
     for (const qterm of plan.terms) {
@@ -1532,25 +1744,27 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
 
   for (const corpus of corpora) beginEpoch(corpus);
   let idfMass = 0;
-  for (const qterm of plan.terms) {
+  for (const qterm of weightedTerms) {
     const docsWith = df(qterm.term);
     if (docsWith === 0) continue;
     const idf = Math.log(1 + (n - docsWith + 0.5) / (docsWith + 0.5));
     idfMass += idf * qterm.qtf;
     const weighted = dampGenericIdf(idf);
     for (const corpus of corpora) {
+      const titleLen = longQuery && corpus.titleForQuery ? corpus.titleForQuery : corpus.titleDl;
       const list = corpus.postings.get(qterm.term);
       if (!list) continue;
       for (let i = 0; i < list.length; i += 4) {
         const doc = list[i];
         const sat =
-          TITLE_W * fieldScore(list[i + 1], corpus.titleDl[doc], avgTitle) +
+          TITLE_W * fieldScore(list[i + 1], titleLen[doc] ?? 0, avgTitle) +
           URL_W * fieldScore(list[i + 2], corpus.urlDl[doc], avgUrl) +
           BODY_W * fieldScore(list[i + 3], corpus.bodyDl[doc], avgBody);
         addScore(corpus, doc, weighted * sat * qterm.qtf);
       }
     }
   }
+  if (longQuery) addUnindexedTitlePhrases(corpora, focusPhrases);
 
   const boards = contextBoards(query, options);
   type Cand = { corpus: Corpus; doc: number; score: number; raw: number; coverage: number; confidence: number };
@@ -1579,8 +1793,12 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
       roleScale(doc) *
       landing *
       boardScale(doc, query, options) *
-      phraseScale(doc, needles);
-    cand.coverage = coverageOf(cand.corpus, cand.doc, abstainConcepts, df, n);
+      phraseScale(doc, needles) *
+      (longQuery ? questionOverlap(doc, focus, query) : 1) *
+      (longQuery ? emptyLabelScale(doc) : 1) *
+      (longQuery ? titlePhraseScale(doc, focusPhrases) : 1);
+    cand.coverage = coverageOf(cand.corpus, cand.doc, coverConcepts, df, n);
+    if (longQuery && focusPhrases.some((phrase) => doc.title.includes(phrase))) cand.coverage = Math.max(cand.coverage, 0.55);
     cand.score = cand.raw * (0.15 + 0.85 * cand.coverage);
     const norm = idfMass > 0 ? cand.raw / idfMass : 0;
     let available = 0;
@@ -1616,7 +1834,16 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
   const best = new Map<string, { hit: SearchHit; page: boolean; doc: IndexedDoc }>();
   for (const cand of pool) {
     const doc = cand.corpus.docs[cand.doc];
-    const base = doc.url.split("#")[0] ?? doc.url;
+    const hash = doc.url.indexOf("#");
+    const titleHasPhrase = focusPhrases.some((phrase) => doc.title.toLowerCase().includes(phrase));
+    // A long symptom query wants the FAQ question, or the heading that contains
+    // a rare phrase from the question. A short query still collapses to the page.
+    const base =
+      longQuery && hash !== -1 && doc.kind === "heading" && (isQuestionHeading(doc) || titleHasPhrase)
+        ? doc.url
+        : hash === -1
+          ? doc.url
+          : doc.url.slice(0, hash);
     const on = boardsOn(doc);
     const coverage = cand.coverage;
     const hit: SearchHit = {

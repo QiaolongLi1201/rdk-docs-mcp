@@ -119,23 +119,105 @@ function activeSynonyms(): Record<string, string[]> {
 
 const CJK_RUN = /[\u4e00-\u9fff]+/g;
 
+/** Grammatical fillers. Removed only when cutting phrases out of a long clause. */
+const PHRASE_PARTICLES = ["之后", "之前", "以后", "然后", "已经", "可是", "但是", "因为", "所以", "这个", "那个", "一直", "非常", "特别", "还是"];
+
+function stripParticles(segment: string): string {
+  let text = segment;
+  for (const particle of PHRASE_PARTICLES) text = text.replaceAll(particle, "");
+  return text;
+}
+
+function cjkCount(query: string): number {
+  let count = 0;
+  for (let i = 0; i < query.length; i += 1) {
+    const code = query.charCodeAt(i);
+    if (code >= 0x4e00 && code <= 0x9fff) count += 1;
+  }
+  return count;
+}
+
 export type LexicalPlan = {
   tokens: string[];
   matchers: Array<{ token: string; test: (text: string) => boolean }>;
+  /** Longer CJK windows from a long clause. They add points and do not dilute coverage. */
+  phrases: Array<{ token: string; test: (text: string) => boolean; title: number }>;
 };
 
-function cjkBigrams(query: string): string[] {
-  const grams: string[] = [];
+function cjkRuns(query: string): string[] {
+  const segments: string[] = [];
   for (const match of query.matchAll(CJK_RUN)) {
     let run = match[0];
     for (const stop of CJK_STOPWORDS) run = run.replaceAll(stop, "\u0000");
     run = [...run].map((ch) => (CJK_STOP_CHARS.has(ch) ? "\u0000" : ch)).join("");
     for (const segment of run.split("\u0000")) {
-      if (segment.length < 2) continue;
-      for (let i = 0; i + 2 <= segment.length; i += 1) grams.push(segment.slice(i, i + 2));
+      if (segment.length >= 2) segments.push(segment);
     }
   }
+  return segments;
+}
+
+function cjkBigrams(query: string): string[] {
+  const grams: string[] = [];
+  for (const segment of cjkRuns(query)) {
+    for (let i = 0; i + 2 <= segment.length; i += 1) grams.push(segment.slice(i, i + 2));
+  }
   return grams;
+}
+
+/**
+ * 3- and 4-character windows from a long CJK clause. Stop-characters split
+ * the clause for matching, but the gate is the raw run, so "左上角" still
+ * counts after "在". Short queries never take this path.
+ */
+function cjkPhrases(query: string): string[] {
+  const buckets: string[][] = [];
+  for (const match of query.matchAll(CJK_RUN)) {
+    const raw = match[0];
+    if (!raw || raw.length < 10) continue;
+    let run = raw;
+    for (const stop of CJK_STOPWORDS) run = run.replaceAll(stop, "\u0000");
+    run = [...run].map((ch) => (CJK_STOP_CHARS.has(ch) ? "\u0000" : ch)).join("");
+    for (const segment of run.split("\u0000")) {
+      const glued = stripParticles(segment);
+      const source = glued.length >= 3 ? glued : segment;
+      if (source.length < 3) continue;
+      const windows: string[] = [];
+      const seenLocal = new Set<string>();
+      const max = Math.min(4, source.length);
+      for (let len = max; len >= 3; len -= 1) {
+        for (let i = 0; i + len <= source.length; i += 1) {
+          const phrase = source.slice(i, i + len);
+          if (seenLocal.has(phrase)) continue;
+          seenLocal.add(phrase);
+          windows.push(phrase);
+        }
+      }
+      windows.sort((a, b) => b.length - a.length);
+      buckets.push(windows.slice(0, 6));
+    }
+  }
+  if (cjkCount(query) >= 24) {
+    for (const segment of cjkRuns(query)) {
+      if (segment.length < 4 || segment.length >= 10) continue;
+      const source = stripParticles(segment);
+      const phrase = (source.length >= 4 ? source : segment).slice(-4);
+      if (phrase.length < 4) continue;
+      buckets.push([phrase]);
+    }
+  }
+  const phrases: string[] = [];
+  const seen = new Set<string>();
+  for (let slot = 0; slot < 6 && phrases.length < 16; slot += 1) {
+    for (const bucket of buckets) {
+      const phrase = bucket[slot];
+      if (!phrase || seen.has(phrase)) continue;
+      seen.add(phrase);
+      phrases.push(phrase);
+      if (phrases.length >= 16) return phrases;
+    }
+  }
+  return phrases;
 }
 
 export function lexicalTokens(query: string): string[] {
@@ -173,7 +255,11 @@ export function prepareLexical(query: string): LexicalPlan {
   if (cached) return cached;
   if (planCache.size > 64) planCache.clear();
   const tokens = lexicalTokens(query);
-  const plan = { tokens, matchers: tokens.map(buildMatcher) };
+  const tokenSet = new Set(tokens);
+  const phrases = cjkPhrases(query.trim().toLowerCase())
+    .filter((phrase) => !tokenSet.has(phrase))
+    .map((token) => ({ ...buildMatcher(token), title: token.length >= 4 ? 14 : 12 }));
+  const plan = { tokens, matchers: tokens.map(buildMatcher), phrases };
   planCache.set(query, plan);
   return plan;
 }
@@ -261,6 +347,11 @@ export function lexicalScore(doc: IndexedDoc, plan: LexicalPlan, common?: Readon
     }
     if (doc.kind === "page" && matcher.test(title)) score += 2;
     if (hit) matched += 1;
+  }
+  for (const phrase of plan.phrases) {
+    if (WEAK_TITLE.has(phrase.token) || common?.has(phrase.token)) continue;
+    if (phrase.test(title)) score += phrase.title;
+    else if (phrase.test(extra) || (answer && phrase.test(answer))) score += 2;
   }
   if (plan.matchers.length > 1) {
     score += Math.round((matched / plan.matchers.length) * 12);

@@ -34,6 +34,24 @@ describe("lexical title scorer", () => {
     expect(fuseRanks(0, 0)).toBeCloseTo(1 / 10 + 0.22 / 10);
   });
 
+  it("pulls a 3-character phrase out of a long clause", () => {
+    const plan = prepareLexical("上板之后所有检测框都挤在图像左上角，框的位置完全不对劲");
+    expect(plan.phrases.some((phrase) => phrase.token === "左上角")).toBe(true);
+    const titled = lexicalScore(
+      doc({
+        title: "检测框都异常地聚集在图像的左上角",
+        url: "https://example.test/faq",
+        kind: "heading",
+      }),
+      plan,
+    );
+    const other = lexicalScore(
+      doc({ title: "检测框的位置出现整体偏移", url: "https://example.test/other", kind: "heading" }),
+      plan,
+    );
+    expect(titled).toBeGreaterThan(other);
+  });
+
   it("down-weights a short landing label and boosts a stepped guide", () => {
     const landing = doc({ title: "X5", url: "https://example.test/home" });
     const guide = doc({
