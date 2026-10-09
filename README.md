@@ -34,7 +34,7 @@ jsDelivr 不可用时，同一文件在：
 | Tool | 做什么 |
 |------|--------|
 | `list_manuals` | 列出资料中心已上架手册（X/S 系列、TROS、Model Zoo、Studio、XBurn、OE、X5 SDK 等） |
-| `search_docs` | BM25 检索（标题/路径权重大于正文，中文按二字切分）。指定手册只搜那一本；不指定时只搜手册。问句或 `board` 点名 X3/X5 时不会返回 S 系列 OE。未传板卡时 `ambiguousBoard=true`，`groups` 按板卡分组。每条命中带 `confidence`（0–1）。`noGoodMatch=true` 只在专有词不在手册里、或顶部得分远低于正常命中时出现；口语对不上不会单凭这一点弃答。 |
+| `search_docs` | BM25 检索（标题/路径权重大于正文，中文按二字切分）。指定手册只搜那一本；不指定时只搜手册。问句或 `board` 点名 X3/X5 时不会返回 S 系列 OE。未传板卡时 `ambiguousBoard=true`，`groups` 按板卡分组。每条命中带参考用的 `confidence`（0–1）。`noGoodMatch=true` 只在问句里的包名、命令、API 或错误码既不在所搜手册里、也不在顶部命中里时出现。没有这个标记不代表命中一定相关。 |
 | `get_page` | 把一页官方文档或一篇论坛主题收成 Markdown。可选 `query` / `section`，或 URL 带 `#anchor`，用来跳过页首、直接打开相关小节。 |
 | `list_toc` | 列出某一本手册的页面目录；`forum` 列出「开发与问题」和「通用」最近帖 |
 | `search_skills` | 在 [D-Robotics/rdk-skills](https://github.com/D-Robotics/rdk-skills) 目录快照里按任务找 Skill（只读，带 `catalog_revision` 溯源） |
@@ -95,8 +95,8 @@ ln -sfn "$(pwd)" ~/.cursor/plugins/local/rdk-docs
 用户问 RDK / TROS / 烧录 / 量化等问题时：
 
 1. `search_docs`（能确定产品就带 `manual`，如 `x5`、`tros`、`xburn`；已知板卡而问句没写型号就带 `board`；只要社区就 `source=forum`，兼容写法 `manual=forum`）
-2. 若 `noGoodMatch=true`，不要用弱命中编答案。问句里的型号会硬过滤另一产品族（问 X3/X5 不会拿到 S 系列 OE）。`matchedVia=alias` 的摘要会说明字面量（如 `hbm_shell`）不在索引里。
-3. 对 1–2 个命中 URL 调用 `get_page`（手册或 `forum.d-robotics.cc` 主题）。长页传 `query` 或 `section`。
+2. 读顶部摘要，自己判断是否答得上。`noGoodMatch=false` 不是相关性证明。`noGoodMatch=true` 只表示某个包名、命令、API 或错误码不在所搜手册和顶部命中里，不要编造这个标识符。摘要答不上就换问法，或补 `board`，或 `source=forum`。问句里的型号会硬过滤另一产品族（问 X3/X5 不会拿到 S 系列 OE）。`matchedVia=alias` 的摘要会说明字面量（如 `hbm_shell`）不在索引里。
+3. 对判断相关的 1–2 个命中 URL 调用 `get_page`（手册或 `forum.d-robotics.cc` 主题）。长页传 `query` 或 `section`。
 4. 用原文回答，并附上官方文档或论坛链接。`imageOnly=true` 时展示 `contentNotes` 里的官方图片，不要编针脚号。
 
 不要凭记忆编 `apt` 包名、镜像版本或管脚复用。

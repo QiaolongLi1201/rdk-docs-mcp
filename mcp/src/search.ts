@@ -1,5 +1,5 @@
 import { RETRIEVAL_ALIASES } from "./aliases.js";
-import { contextBoards, rankCorpora, type RankOptions } from "./bm25.js";
+import { absentCommandToken, contextBoards, rankCorpora, type RankOptions } from "./bm25.js";
 import type { IndexedDoc, ResultBoard, SearchHit } from "./types.js";
 
 export type { RankOptions };
@@ -76,14 +76,23 @@ export function searchManuals(
   return orderHits(groups, query, limit, options);
 }
 
-export function matchQuality(hits: SearchHit[]): {
+export function matchQuality(
+  hits: SearchHit[],
+  groups: IndexedDoc[][] = [],
+  query = "",
+): {
   noGoodMatch: boolean;
   matchQuality: "good" | "weak" | "none";
   confidence: number;
 } {
   const top = hits[0];
-  if (!top || top.score <= 0) return { noGoodMatch: true, matchQuality: "none", confidence: 0 };
-  const confidence = top.confidence ?? 0;
+  const confidence = top?.confidence ?? 0;
+  if (!top || top.score <= 0) {
+    const missing = query ? absentCommandToken(groups, query) : false;
+    return missing
+      ? { noGoodMatch: true, matchQuality: "weak", confidence: 0 }
+      : { noGoodMatch: false, matchQuality: "none", confidence: 0 };
+  }
   if (top.quality === "weak") return { noGoodMatch: true, matchQuality: "weak", confidence };
   return { noGoodMatch: false, matchQuality: "good", confidence };
 }

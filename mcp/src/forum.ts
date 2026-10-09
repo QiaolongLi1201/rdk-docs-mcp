@@ -235,9 +235,7 @@ export function forumHitsFromDocs(
   limit: number,
   fillFrom: IndexedDoc[] = [],
 ): SearchHit[] {
-  const ranked = rankHits(docs, query, Math.max(limit * 3, 12))
-    .filter((hit) => hit.quality !== "weak")
-    .slice(0, limit)
+  const ranked = rankHits(docs, query, Math.max(limit * 3, 12)).slice(0, limit)
     .map((hit) => ({ ...hit, source: "forum" as const }));
   if (ranked.length >= limit) return ranked;
 

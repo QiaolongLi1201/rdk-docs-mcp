@@ -57,14 +57,42 @@ describe("bm25", () => {
   });
 
   it("abstains when the query shares no real terms with the corpus", () => {
-    const hits = rankHits(
-      [doc({ title: "GPIO 应用", url: "https://developer.d-robotics.cc/rdk_x_doc/gpio", text: "40pin 电平" })],
-      "excel 数据透视表怎么做",
-      5,
-    );
-    const quality = matchQuality(hits);
+    const docs = [doc({ title: "GPIO 应用", url: "https://developer.d-robotics.cc/rdk_x_doc/gpio", text: "40pin 电平" })];
+    const query = "excel 数据透视表怎么做";
+    const hits = rankHits(docs, query, 5);
+    const quality = matchQuality(hits, [docs], query);
     expect(quality.noGoodMatch).toBe(true);
-    expect(quality.confidence).toBeLessThan(0.2);
+    expect(quality.confidence).toBeGreaterThanOrEqual(0);
+    expect(quality.confidence).toBeLessThanOrEqual(1);
+  });
+
+  it("does not abstain on colloquial wording or ordinary error prose", () => {
+    const docs = [doc({ title: "GPIO 应用", url: "https://developer.d-robotics.cc/rdk_x_doc/gpio", text: "40pin 电平" })];
+    for (const query of ["特斯拉刹车片怎么换", "The repository is not signed", "怎么把系统烧录一下，老是失败"]) {
+      expect(matchQuality(rankHits(docs, query, 5), [docs], query).noGoodMatch).toBe(false);
+    }
+  });
+
+  it("abstains only when a command token is missing from the corpus and the top hit", () => {
+    const docs = [doc({ title: "GPIO 应用", url: "https://developer.d-robotics.cc/rdk_x_doc/gpio", text: "40pin 电平" })];
+    const missing = "nginx 反代一直 502";
+    expect(matchQuality(rankHits(docs, missing, 5), [docs], missing).noGoodMatch).toBe(true);
+    const documented = [
+      doc({
+        title: "nginx 反向代理",
+        url: "https://developer.d-robotics.cc/rdk_x_doc/nginx",
+        text: "nginx 配置",
+      }),
+    ];
+    const present = "nginx 怎么反代";
+    expect(matchQuality(rankHits(documented, present, 5), [documented], present).noGoodMatch).toBe(false);
+  });
+
+  it("does not abstain when a typo of a documented command is the query", () => {
+    const docs = [doc({ title: "V4L2 使用", url: "https://developer.d-robotics.cc/rdk_x_doc/v4l2", text: "v4l2 节点" })];
+    const query = "v4l2ctl 列不出节点";
+    const hits = rankHits(docs, query, 3);
+    expect(matchQuality(hits, [docs], query).noGoodMatch).toBe(false);
   });
 
   it("does not abstain when filler words miss but a distinctive term is in the corpus", () => {

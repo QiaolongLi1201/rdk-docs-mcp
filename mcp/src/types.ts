@@ -24,9 +24,8 @@ export type SearchHit = {
   /** Fraction of query concepts found on this page. */
   coverage?: number;
   /**
-   * 0–1 overlap of the query's distinctive terms with this page, mixed with
-   * how strong the score is for this corpus. Callers can threshold this.
-   * `noGoodMatch` stays conservative and does not follow a low value by itself.
+   * Advisory 0–1 overlap of the query with this page. It does not decide
+   * `noGoodMatch`, and a high value is not proof the page answers the question.
    */
   confidence?: number;
   /** Set when the hit came from an alias because the literal identifier is not indexed. */

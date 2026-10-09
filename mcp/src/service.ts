@@ -199,6 +199,7 @@ export async function searchDocs(
     warnings.push("Comparison evidence must be checked per board; do not infer a missing model's facts from another model.");
 
   let docHits: SearchHit[] = [];
+  let searched: IndexedDoc[][] = [];
   if (includeDocs) {
     const { targets, warnings: catalogWarnings } = manualsForSearch(input.manual, query);
     warnings.push(...catalogWarnings);
@@ -218,12 +219,8 @@ export async function searchDocs(
     );
     warnings.push(...loaded.map((item) => item.warning).filter((item): item is string => Boolean(item)));
     warnings.push(...drainIndexNotes());
-    docHits = searchManuals(
-      loaded.map((item) => item.docs),
-      query,
-      limit,
-      { board: input.board },
-    ).map((hit) => ({
+    searched = loaded.map((item) => item.docs);
+    docHits = searchManuals(searched, query, limit, { board: input.board }).map((hit) => ({
       ...hit,
       source: "docs" as const,
     }));
@@ -249,10 +246,10 @@ export async function searchDocs(
   const groups = groupHits(hits);
   const boardGroups = groups.filter((group) => group.board !== "agnostic" && group.board !== "multiple");
   const ambiguousBoard = mentioned.length === 0 && !input.board && boardGroups.length > 1;
-  const quality = matchQuality(hits);
+  const quality = matchQuality(hits, searched, query);
   if (quality.noGoodMatch) {
     warnings.push(
-      "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits.",
+      "noGoodMatch: a package, command, API, or error code in the query is absent from the searched manuals and from the top hit. Do not invent that identifier.",
     );
   }
   if (ambiguousBoard) {
@@ -266,8 +263,8 @@ export async function searchDocs(
     ambiguousBoard,
     warnings,
     guidance: quality.noGoodMatch
-      ? "noGoodMatch. Do not answer from these hits. Say the manuals did not contain a strong page, and ask for the board or the exact tool name."
-      : searchGuidance(),
+      ? "noGoodMatch: a package, command, API, or error code in the query is absent from the searched manuals and from the top hit. Do not invent that identifier. Read the snippets; if they do not answer, reformulate the query, pass board, or set source=forum."
+      : `${searchGuidance()} Read the top snippets and decide whether they answer the question. noGoodMatch=false is not proof of relevance. confidence is advisory. If the snippets do not answer, reformulate the query, pass board, or set source=forum.`,
     noGoodMatch: quality.noGoodMatch,
     matchQuality: quality.matchQuality,
     confidence: quality.confidence,

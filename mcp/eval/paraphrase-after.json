@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-09T07:27:37.792Z",
-  "cacheDir": "/tmp/rdk-retrieval-eval-CtM97s",
+  "generatedAt": "2026-10-09T07:38:50.490Z",
+  "cacheDir": "/tmp/rdk-retrieval-eval-JKVAeM",
   "prebuilt": "default",
   "offline": true,
   "latency": {
-    "coldSearchMs": 234,
-    "warmSearchMs": 4,
-    "scopedSearchMs": 19,
+    "coldSearchMs": 238,
+    "warmSearchMs": 7,
+    "scopedSearchMs": 20,
     "forumSearchMs": null,
     "coldTop": "https://developer.d-robotics.cc/rdk_studio_doc/faq/camera-no-image",
     "forumTop": null
@@ -16,8 +16,8 @@
     "hitAt1": 0.625,
     "hitAt3": 0.7,
     "mrr": 0.672,
-    "meanMs": 6,
-    "p95Ms": 14
+    "meanMs": 7,
+    "p95Ms": 15
   },
   "pages": {
     "n": 0,
@@ -35,7 +35,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/burn-sd-card#sd-卡在板烧录",
       "topTitle": "烧录系统镜像",
-      "ms": 8
+      "ms": 4
     },
     {
       "id": "p-flash-typo",
@@ -44,10 +44,10 @@
       "hitAt3": false,
       "reciprocalRank": 0,
       "allInTop3": null,
-      "noGoodMatch": false,
+      "noGoodMatch": true,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/RDK#rdk-x5",
       "topTitle": "RDK X5",
-      "ms": 11
+      "ms": 10
     },
     {
       "id": "p-s100-flash",
@@ -59,7 +59,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_studio_doc/user-guide/system-flashing/emmc#emmc-备份",
       "topTitle": "3.7.3 eMMC 烧录",
-      "ms": 11
+      "ms": 9
     },
     {
       "id": "p-wifi-colloquial",
@@ -71,7 +71,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/System_configuration/network_blueteeth#无线网络",
       "topTitle": "2.1 网络与蓝牙配置",
-      "ms": 0
+      "ms": 1
     },
     {
       "id": "p-wifi-en",
@@ -95,7 +95,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/40pin_define#40pin_define",
       "topTitle": "管脚定义与应用",
-      "ms": 3
+      "ms": 2
     },
     {
       "id": "p-gpio-typo",
@@ -107,7 +107,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/linux_development/driver_development_x5/driver_gpio_dev#x5-gpio-irq",
       "topTitle": "GPIO 调试指南",
-      "ms": 11
+      "ms": 9
     },
     {
       "id": "p-i2c",
@@ -155,7 +155,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/vision/RDK_X5/usb_camera",
       "topTitle": "USB 摄像头使用",
-      "ms": 3
+      "ms": 2
     },
     {
       "id": "p-v4l2-typo",
@@ -167,7 +167,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/hardware_development/rdk_x5/V4l2#v4l2-ctl-指令",
       "topTitle": "V4L2-CTL 指令",
-      "ms": 3
+      "ms": 4
     },
     {
       "id": "p-apt-colloquial",
@@ -179,7 +179,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Appendix/linux-command-manual/cmd_apt",
       "topTitle": "apt",
-      "ms": 2
+      "ms": 4
     },
     {
       "id": "p-apt-error",
@@ -191,7 +191,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/applications_and_examples#q12-地瓜机器人-trosb-的-1x-版本和-2x-版本及更新版本之间有什么主要说明和差异",
       "topTitle": "Q12: 地瓜机器人 tros.b 的 1.x 版本和 2.x 版本（及更新版本）之间有什么主要说明和差异？",
-      "ms": 2
+      "ms": 3
     },
     {
       "id": "p-apt-s100",
@@ -215,7 +215,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/accessories_bmi088_doc/software/ros2#启动方式",
       "topTitle": "SDK ROS2 功能包使用说明",
-      "ms": 6
+      "ms": 4
     },
     {
       "id": "p-x5-quant",
@@ -239,7 +239,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/oe_x3_doc/cn/oe_mapper/source/ptq/ptq_tool/hb_mapper.html",
       "topTitle": "4.1.2.2. hb_mapper 工具",
-      "ms": 22
+      "ms": 18
     },
     {
       "id": "p-s100-quant",
@@ -251,7 +251,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/oe_s_doc/guide/ptq/ptq_faq_troubleshooting/ptq_faq#如何理解ptq模型转换过程中的主动量化和被动量化",
       "topTitle": "训练后量化（PTQ）常见问题",
-      "ms": 18
+      "ms": 13
     },
     {
       "id": "p-x5-docker-iptables",
@@ -275,7 +275,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/model_zoo_doc/model_zoo_intro#rdk_x5",
       "topTitle": "rdk_x5",
-      "ms": 11
+      "ms": 8
     },
     {
       "id": "p-thermal",
@@ -287,7 +287,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Application_case/amr#3-同一局域网下的-pc-打开浏览器在网址处输入板子-ip即可查看识别效果",
       "topTitle": "3. 同一局域网下的 PC 打开浏览器，在网址处输入：板子 ip:8000，即可查看识别效果",
-      "ms": 0
+      "ms": 1
     },
     {
       "id": "p-ssh",
@@ -311,7 +311,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/model_zoo_doc/model_zoo_intro#rdk_x5",
       "topTitle": "rdk_x5",
-      "ms": 11
+      "ms": 13
     },
     {
       "id": "p-pinmap",
@@ -323,7 +323,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/40pin_define#40pin_define",
       "topTitle": "管脚定义与应用",
-      "ms": 2
+      "ms": 3
     },
     {
       "id": "p-spi",
@@ -347,7 +347,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system#q39-如何升级-rdk-x5-的-miniboot",
       "topTitle": "Q39: 如何升级 RDK X5 的 MiniBoot？",
-      "ms": 11
+      "ms": 14
     },
     {
       "id": "p-hobot-typo",
@@ -359,7 +359,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system#q37-如何在-conda-虚拟环境中获取和使用地瓜机器人-rdk-特定的-python-包如-hobotgpio-hobot_dnn-等",
       "topTitle": "Q37: 如何在 Conda 虚拟环境中获取和使用地瓜机器人 RDK 特定的 Python 包（如 hobot.GPIO, hobot_dnn 等）？",
-      "ms": 1
+      "ms": 2
     },
     {
       "id": "p-hbm-tool",
@@ -371,7 +371,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/oe_s_doc/guide/ucp/runtime/tool_introduction/hrt_model_exec",
       "topTitle": "hrt_model_exec 工具介绍",
-      "ms": 7
+      "ms": 10
     },
     {
       "id": "p-s100-mipi",
@@ -383,7 +383,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/hardware_and_system#q29-imx219等-mipi-摄像头如何连接到-rdk-s100-连接后如何验证",
       "topTitle": "Q29: IMX219等 MIPI 摄像头如何连接到 RDK S100? 连接后如何验证？",
-      "ms": 8
+      "ms": 11
     },
     {
       "id": "p-s600-gpio",
@@ -395,7 +395,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/03_40pin_user_guide/s600/gpio#测试例程",
       "topTitle": "3.3.2.2 GPIO 应用",
-      "ms": 10
+      "ms": 12
     },
     {
       "id": "p-x3-x5-diff",
@@ -407,7 +407,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/System_configuration/network_blueteeth#有线网络rdk-x5-330rdk-x3-302",
       "topTitle": "有线网络：RDK X5（>= 3.3.0）RDK X3（>= 3.0.2）",
-      "ms": 11
+      "ms": 20
     },
     {
       "id": "p-can",
@@ -419,7 +419,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/hardware_development/rdk_x5/can",
       "topTitle": "CAN 使用",
-      "ms": 9
+      "ms": 15
     },
     {
       "id": "p-version",
@@ -431,7 +431,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system#q3-不同-rdk-os-系统版本和硬件平台之间有什么对应关系",
       "topTitle": "Q3: 不同 RDK OS 系统版本和硬件平台之间有什么对应关系？",
-      "ms": 3
+      "ms": 5
     },
     {
       "id": "p-nmcli",
@@ -440,10 +440,10 @@
       "hitAt3": false,
       "reciprocalRank": 0.16666666666666666,
       "allInTop3": null,
-      "noGoodMatch": false,
+      "noGoodMatch": true,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/tros_ros#q8-启动-usb-或-mipi-摄像头节点后终端提示标定数据不存在例如-usb_camera_calibrationyaml-does-not-exist这是正常的吗",
       "topTitle": "Q8: 启动 USB 或 MIPI 摄像头节点后，终端提示“标定数据不存在”（例如 [usb_camera_calibration.yaml] does not exist!），这是正常的吗？",
-      "ms": 0
+      "ms": 1
     },
     {
       "id": "ood-excel",
@@ -455,19 +455,19 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/hardware_introduction/rdk_s100/FAQ#q1rdk-s100-pinlist-excel-文件中的-pull-updown-列表达的是什么意思",
       "topTitle": "1.1.4 FAQ",
-      "ms": 3
+      "ms": 5
     },
     {
       "id": "ood-iphone",
-      "rank": null,
-      "hitAt1": false,
-      "hitAt3": false,
-      "reciprocalRank": 0,
+      "rank": 1,
+      "hitAt1": true,
+      "hitAt3": true,
+      "reciprocalRank": 1,
       "allInTop3": null,
-      "noGoodMatch": false,
+      "noGoodMatch": true,
       "topUrl": "https://developer.d-robotics.cc/rdk_studio_doc/quick-start/first-conversation#选择工作方式和回复模式",
       "topTitle": "选择工作方式和回复模式",
-      "ms": 3
+      "ms": 6
     },
     {
       "id": "ood-k8s",
@@ -479,19 +479,19 @@
       "noGoodMatch": true,
       "topUrl": "https://developer.d-robotics.cc/oe_llm_s600_doc/en/guide/env_install/x86_env#install-dependencies",
       "topTitle": "x86 Environment Setup",
-      "ms": 3
+      "ms": 5
     },
     {
       "id": "ood-brake",
-      "rank": 1,
-      "hitAt1": true,
-      "hitAt3": true,
-      "reciprocalRank": 1,
+      "rank": null,
+      "hitAt1": false,
+      "hitAt3": false,
+      "reciprocalRank": 0,
       "allInTop3": null,
-      "noGoodMatch": true,
+      "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/oe_s_doc/en/guide/plugin/terminology#quantized-model--fixed-point-model--quantized-model",
       "topTitle": "Quantized model / fixed-point model / quantized model",
-      "ms": 3
+      "ms": 4
     },
     {
       "id": "ood-nginx",
@@ -503,7 +503,7 @@
       "noGoodMatch": true,
       "topUrl": "https://developer.d-robotics.cc/oe_s_doc/en/guide/plugin/user_guide/quant_analysis#set_bad_case",
       "topTitle": "set_bad_case",
-      "ms": 2
+      "ms": 3
     }
   ],
   "pageCases": []

@@ -20,15 +20,17 @@ description: Retrieves official D-Robotics RDK documentation from developer.d-ro
 
 1. 识别产品：X3/X5 → `rdk-x` / `x5`；S100/S600 → `rdk-s`；TROS → `tros`；烧录 → `xburn`；Studio → `studio`。
 2. `search_docs`，查询词用用户中文原词，必要时再补英文。已知板卡而问句没写型号时传 `board`（`x3` | `x5` | `s100` | `s600`）；问句已经点名型号就不要再传。标识符保持整词（`hobot_dnn`、`hrt_model_exec`）。
-3. 看返回里的 `score`、`confidence`、`board`、`url`。`noGoodMatch=true` 只表示问句里的专有词在手册里不存在，或顶部得分远低于正常命中。这时不要编命令、针脚或板级事实，并向用户要板卡或工具全名。`noGoodMatch=false` 时即使用词和页面不完全重合（`confidence` 偏低），也要打开顶部命中，不要因为口语被跳过。问句里写了 X3/X5 就不会返回 S 系列 OE，写了 S100/S600 就不会返回 X 系列 OE。`matchedVia=alias` 表示字面量不在索引里，摘要写的是最近的已写页面（例如 `hbm_shell` → `hrt_model_exec`）。`sun55iw3` 不在手册里，不要把它当成 X5。
-4. 打开第一条命中。若正文以「空壳页」开头，立刻改开下一条，不要对用户说「手册没写」。
-5. 问句点名 X3 / X5 / S100 / S600 时，跨型号分开检索，不要用另一型号的专题页当答案。问句没写型号时看返回的 `groups` 和 `ambiguousBoard`：每种板卡各有一条，不要把 `hits[0]` 当成用户的板。Moss 等已知当前板卡的 Agent 必须传 `board`。
-6. 保留检索结果中的版本标签；缺少型号、系统版本或其他决定性参数时，先向用户澄清。
-7. 证据不足时明确说明无法确认，不得推断支持或不支持。
-8. 规格（几路 USB、供电、算力、接口编号）优先硬件简介或套件页（S100 是 `01_rdk_s100_kit`，不是 S 系列首页），不要先开烧录 / 网络配置 / 驱动指南。
-9. 手册能回答的部分以手册为准，带可点击链接。
-10. S 系列 OE / OE LLM 是 Rspress 空壳，`get_page` 会从站点 `search_index` 还原正文。
-11. 打开长页时传 `query` 或 `section`，或在 URL 上带 `#anchor`。`apt` 软件源步骤不在 FAQ 开头。`imageOnly=true` 时关键内容只在 `contentNotes` 列出的图片里。
+3. 读顶部几条的 `title`、`snippet`、`url`，自己判断能不能回答这句。`confidence` 只是参考。`noGoodMatch=false` 不是「这条一定相关」的证明，不要因为没有这个标记就直接作答。
+4. `noGoodMatch=true` 只表示问句里的包名、命令、API 或错误码在所搜手册里一次都没出现，而且顶部命中也不含这个词。不要把这个词编成手册里的命令。其它问法即使页面对得不紧，也先读摘要再决定。
+5. 摘要答不上时，换一种问法再搜，或补上 `board`，或改用 `source=forum`。问句里写了 X3/X5 就不会返回 S 系列 OE，写了 S100/S600 就不会返回 X 系列 OE。`matchedVia=alias` 表示字面量不在索引里，摘要写的是最近的已写页面（例如 `hbm_shell` → `hrt_model_exec`）。`sun55iw3` 不在手册里，不要把它当成 X5。
+6. 打开最像答案的那条。若正文以「空壳页」开头，立刻改开下一条，不要对用户说「手册没写」。
+7. 问句点名 X3 / X5 / S100 / S600 时，跨型号分开检索，不要用另一型号的专题页当答案。问句没写型号时看返回的 `groups` 和 `ambiguousBoard`：每种板卡各有一条，不要把 `hits[0]` 当成用户的板。Moss 等已知当前板卡的 Agent 必须传 `board`。
+8. 保留检索结果中的版本标签；缺少型号、系统版本或其他决定性参数时，先向用户澄清。
+9. 证据不足时明确说明无法确认，不得推断支持或不支持。
+10. 规格（几路 USB、供电、算力、接口编号）优先硬件简介或套件页（S100 是 `01_rdk_s100_kit`，不是 S 系列首页），不要先开烧录 / 网络配置 / 驱动指南。
+11. 手册能回答的部分以手册为准，带可点击链接。
+12. S 系列 OE / OE LLM 是 Rspress 空壳，`get_page` 会从站点 `search_index` 还原正文。
+13. 打开长页时传 `query` 或 `section`，或在 URL 上带 `#anchor`。`apt` 软件源步骤不在 FAQ 开头。`imageOnly=true` 时关键内容只在 `contentNotes` 列出的图片里。
 
 ## 社区经验（MCP 优先）
 

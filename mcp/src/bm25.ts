@@ -29,8 +29,6 @@ const RARE_DF = 0.02;
  * but it cannot carry a page by itself.
  */
 const IDF_FLOOR = 3.2;
-/** Top score / undamped IDF mass below this is far under a real match. */
-const FAR_BELOW = 0.45;
 
 const ASCII = /[a-z0-9][a-z0-9_.-]*/g;
 const BOARDS: BoardId[] = ["s600", "s100", "x5", "x3"];
@@ -760,14 +758,89 @@ function looksLikeContent(term: string): boolean {
   return true;
 }
 
-/** Digit, underscore, or a longer token. Generic collision words are already excluded. */
-function isIdentifier(term: string): boolean {
-  if (!looksLikeContent(term) || isCjkTerm(term)) return false;
-  return /[0-9_\-]/.test(term) || term.length >= 5;
+/**
+ * Ordinary English from error text. These are not package, command, API, or
+ * error-code tokens, so a missing one must not set noGoodMatch.
+ */
+const ORDINARY_EN = new Set([
+  "repository",
+  "signed",
+  "found",
+  "join",
+  "import",
+  "does",
+  "exist",
+  "exists",
+  "missing",
+  "cannot",
+  "please",
+  "following",
+  "available",
+  "already",
+  "something",
+  "anything",
+  "nothing",
+  "without",
+  "between",
+  "through",
+  "during",
+  "before",
+  "after",
+  "where",
+  "which",
+  "their",
+  "about",
+  "other",
+  "using",
+  "based",
+  "would",
+  "could",
+  "should",
+  "there",
+]);
+
+/** Package, command, API, or error code. Colloquial words and prose are not. */
+function isCodeLike(term: string): boolean {
+  if (!looksLikeContent(term) || isCjkTerm(term) || ORDINARY_EN.has(term)) return false;
+  if (term.includes("_") || term.includes(".")) return true;
+  if (/[a-z]/.test(term) && /\d/.test(term)) return true;
+  return /^[a-z]{4,}$/.test(term);
 }
 
-function termFound(term: string, df: (term: string) => number): boolean {
-  return df(term) > 0 && looksLikeContent(term);
+function hitContainsToken(hit: SearchHit, doc: IndexedDoc, token: string): boolean {
+  const blob = `${hit.title}\n${hit.url}\n${hit.snippet}\n${doc.title}\n${doc.url}\n${doc.text ?? ""}\n${doc.snippet ?? ""}`.toLowerCase();
+  return blob.includes(token.toLowerCase());
+}
+
+/**
+ * True only when some package/command/API/error-code token is absent from the
+ * searched manuals and the top hit does not contain it. A typo prefix that is
+ * in the manuals counts as the token appearing.
+ */
+/** Package/command/API/error code absent from these manuals and, when present, the top hit. */
+export function absentCommandToken(groups: IndexedDoc[][], query: string): boolean {
+  const corpora = groups.filter((docs) => docs.length > 0).map(corpusFor);
+  if (corpora.length === 0) return false;
+  const plan = analyzeQuery(query);
+  if (plan.concepts.length === 0) return false;
+  const df = (term: string) => dfOf(corpora, term);
+  addTypoVariants(plan.concepts, plan.terms, (term) => df(term) > 0);
+  return missingCodeToken(plan.concepts, df, undefined);
+}
+
+function missingCodeToken(
+  concepts: Concept[],
+  df: (term: string) => number,
+  top: { hit: SearchHit; doc: IndexedDoc } | undefined,
+): boolean {
+  for (const concept of concepts) {
+    const codes = concept.original.filter((term) => isCodeLike(term));
+    if (codes.length === 0) continue;
+    if (concept.terms.some((term) => df(term) > 0)) continue;
+    if (top && codes.some((term) => hitContainsToken(top.hit, top.doc, term))) continue;
+    return true;
+  }
+  return false;
 }
 
 /** In-corpus and rare. A term that never occurs is handled on the concept, not here. */
@@ -933,25 +1006,6 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
   cands.sort((a, b) => b.score - a.score);
   const pool = cands.slice(0, 300);
   const distinctive = distinctiveOf(plan.concepts, df, n);
-  const identifierConcepts = plan.concepts.filter((concept) => concept.original.some((term) => isIdentifier(term)));
-  const cjkConcepts = plan.concepts.filter((concept) =>
-    concept.original.some((term) => isCjkTerm(term) && looksLikeContent(term)),
-  );
-  const cjkOriginalInCorpus = cjkConcepts.some((concept) =>
-    concept.original.some((term) => isCjkTerm(term) && looksLikeContent(term) && df(term) > 0),
-  );
-  // An identifier that never occurs abstains only when the query also has no
-  // in-corpus CJK content word. Colloquial wording can miss the identifier
-  // and still name a real topic (烧录, 无线).
-  const identifiersAbsent =
-    identifierConcepts.length > 0 &&
-    identifierConcepts.every((concept) => !concept.terms.some((term) => termFound(term, df))) &&
-    !cjkOriginalInCorpus;
-  const cjkAbsent =
-    identifierConcepts.length === 0 &&
-    cjkConcepts.length > 0 &&
-    cjkConcepts.every((concept) => !concept.terms.some((term) => df(term) > 0 && isCjkTerm(term) && looksLikeContent(term)));
-  const allDistinctiveAbsent = identifiersAbsent || cjkAbsent;
   for (const cand of pool) {
     const doc = cand.corpus.docs[cand.doc];
     cand.raw =
@@ -969,16 +1023,11 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
       if (conceptMatches(cand.corpus, cand.doc, concept, df, n)) onHit += 1;
     }
     const scorePart = Math.max(0, Math.min(1, norm / 2.2));
-    if (allDistinctiveAbsent) cand.confidence = round3(Math.min(0.15, scorePart));
-    else if (available === 0) cand.confidence = round3(scorePart);
-    else cand.confidence = round3(0.75 * (onHit / available) + 0.25 * scorePart);
+    cand.confidence = available === 0 ? round3(scorePart) : round3(0.75 * (onHit / available) + 0.25 * scorePart);
   }
   pool.sort((a, b) => b.score - a.score || a.doc - b.doc);
-  const topNorm = pool.length > 0 && idfMass > 0 ? pool[0].raw / idfMass : 0;
-  const farBelow = pool.length === 0 || topNorm < FAR_BELOW;
-  const weakQuery = allDistinctiveAbsent || farBelow;
 
-  const best = new Map<string, { hit: SearchHit; page: boolean }>();
+  const best = new Map<string, { hit: SearchHit; page: boolean; doc: IndexedDoc }>();
   for (const cand of pool) {
     const doc = cand.corpus.docs[cand.doc];
     const base = doc.url.split("#")[0] ?? doc.url;
@@ -992,13 +1041,13 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
       score: cand.score,
       source: doc.manualId === "forum" ? "forum" : "docs",
       board: on.length === 1 ? on[0] : on.length > 1 ? "multiple" : undefined,
-      quality: weakQuery ? "weak" : "good",
+      quality: "good",
       coverage: Math.round(coverage * 1000) / 1000,
       confidence: cand.confidence,
     };
     const prev = best.get(base);
     if (!prev) {
-      best.set(base, { hit, page: doc.kind === "page" });
+      best.set(base, { hit, page: doc.kind === "page", doc });
       continue;
     }
     const nextIsPage = doc.kind === "page";
@@ -1010,6 +1059,7 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
     const url = hit.score > prev.hit.score ? hit.url : prev.hit.url;
     const coverageOut = hit.score > prev.hit.score ? hit.coverage : prev.hit.coverage;
     const confidenceOut = hit.score > prev.hit.score ? hit.confidence : prev.hit.confidence;
+    const winnerDoc = hit.score > prev.hit.score ? doc : prev.doc;
     best.set(base, {
       hit: {
         ...winner,
@@ -1019,15 +1069,18 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
         score: Math.max(hit.score, prev.hit.score),
         coverage: coverageOut,
         confidence: confidenceOut,
-        quality: winner.quality,
+        quality: "good",
       },
       page: prev.page || nextIsPage,
+      doc: winnerDoc,
     });
   }
 
-  return [...best.values()]
-    .map((item) => item.hit)
-    .sort((a, b) => b.score - a.score || a.url.localeCompare(b.url));
+  const ranked = [...best.values()].sort((a, b) => b.hit.score - a.hit.score || a.hit.url.localeCompare(b.hit.url));
+  if (missingCodeToken(plan.concepts, df, ranked[0])) {
+    for (const item of ranked) item.hit.quality = "weak";
+  }
+  return ranked.map((item) => item.hit);
 }
 
 function quantize(tf: number): number {
