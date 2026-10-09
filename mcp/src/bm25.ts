@@ -839,14 +839,15 @@ function prefixIndex(dfMap: Map<string, number>): Map<string, string[]> {
   return index;
 }
 
-function expandPrefixes(concepts: Concept[], terms: QTerm[], corpora: Corpus[]): void {
+function expandPrefixes(
+  concepts: Concept[],
+  terms: QTerm[],
+  corpora: Corpus[],
+  present: (term: string) => number = (term) => dfOf(corpora, term),
+): void {
   const maps = corpora.map((corpus) => prefixIndex(corpus.df));
   const have = new Set(terms.map((item) => item.term));
-  const df = (term: string) => {
-    let n = 0;
-    for (const corpus of corpora) n += corpus.df.get(term) ?? 0;
-    return n;
-  };
+  const df = present;
   for (const concept of concepts) {
     for (const term of [...concept.original]) {
       if (!/^[a-z][a-z0-9]*$/.test(term) || term.length < 4 || term.length > 8 || df(term) > 0) continue;
@@ -860,6 +861,7 @@ function expandPrefixes(concepts: Concept[], terms: QTerm[], corpora: Corpus[]):
           // yolo → yolov5. An open-ended prefix (helm → helmfile) is not a version.
           const rest = candidate.slice(term.length);
           if (!/^v?\d/.test(rest)) continue;
+          if (df(candidate) <= 0) continue;
           found.add(candidate);
         }
       }
@@ -1495,12 +1497,17 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
   const avgUrl = n > 0 ? sumUrl / n : 1;
   const avgBody = n > 0 ? sumBody / n : 1;
   const df = (term: string) => dfOf(corpora, term);
+  const dfAbstain = (term: string) => dfOutsideAnswers(corpora, term);
+  const abstainTerms = plan.terms.map((item) => ({ ...item }));
   adaptPlan(plan, query, df, n);
   if (!ablate("typo")) {
     addTypoVariants(plan.concepts, plan.terms, df);
-    addTypoVariants(abstainConcepts, [], df);
+    addTypoVariants(abstainConcepts, abstainTerms, dfAbstain);
   }
-  if (!ablate("prefix")) expandPrefixes(plan.concepts, plan.terms, corpora);
+  if (!ablate("prefix")) {
+    expandPrefixes(plan.concepts, plan.terms, corpora);
+    expandPrefixes(abstainConcepts, abstainTerms, corpora, dfAbstain);
+  }
   // When the full identifier is absent (hbm_shell) its documented alias
   // should carry the query, not the leftover fragment (hbm) at qtf 0.2.
   for (const concept of plan.concepts) {
@@ -1657,16 +1664,10 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
   }
 
   const ranked = [...best.values()].sort((a, b) => b.hit.score - a.hit.score || a.hit.url.localeCompare(b.hit.url));
-  // Same rule as main, judged on the query before segmentation. A glued
-  // in-corpus word ("摄像头" inside "摄像头插上") still counts, so a real how-to
-  // does not abstain. An unknown command does not get that waiver.
-  const dfAbstain = (term: string) => dfOutsideAnswers(corpora, term);
-  const recovered = plan.concepts.some((concept) => conceptDomain(concept, df, n));
-  const unknownCommand = abstainConcepts.some(
-    (concept) => conceptAbsent(concept, dfAbstain) && concept.original.some((term) => isCodeLike(term)),
-  );
-  const gluedTopic = recovered && !unknownCommand;
-  if (!ablate("oos") && missingCodeToken(abstainConcepts, dfAbstain, n) && !gluedTopic) {
+  // Refusal uses the query before segmentation, and ignores tokens that
+  // occur only in an FAQ answer. A glued phrase must not become in-corpus
+  // just because one piece of it is.
+  if (!ablate("oos") && missingCodeToken(abstainConcepts, dfAbstain, n)) {
     for (const item of ranked) item.hit.quality = "weak";
   }
   return ranked.map((item) => item.hit);

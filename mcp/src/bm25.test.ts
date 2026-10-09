@@ -280,7 +280,7 @@ describe("bm25", () => {
       doc({
         title: "USB 摄像头使用",
         url: "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/vision/RDK_X3/usb_camera",
-        text: "USB 摄像头预览",
+        text: "USB 摄像头预览 不出图",
       }),
     ];
     const query = "USB 摄像头插上了但是不出图";
