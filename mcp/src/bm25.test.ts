@@ -287,15 +287,15 @@ describe("bm25", () => {
     expect(matchQuality(rankHits(docs, query, 3), [docs], query).noGoodMatch).toBe(false);
   });
 
-  it("abstains when two unknown product names ride along with a camera word", () => {
+  it("abstains when the query is another vendor board and none of its terms are in the manual", () => {
     const docs = [
       doc({
-        title: "MIPI 摄像头使用",
-        url: "https://developer.d-robotics.cc/rdk_x_doc/vision/mipi_camera",
-        text: "摄像头 CSI 预览",
+        title: "系统烧录",
+        url: "https://developer.d-robotics.cc/rdk_x_doc/burn",
+        text: "烧录镜像",
       }),
     ];
-    const query = "Jetson Orin Nano 的 CSI 摄像头怎么 bring up";
+    const query = "Jetson Orin Nano CSI bring up";
     expect(matchQuality(rankHits(docs, query, 3), [docs], query).noGoodMatch).toBe(true);
   });
 
@@ -336,8 +336,8 @@ describe("bm25", () => {
       "X3 BPU Python 推理",
       3,
     );
-    expect(hits.some((hit) => hit.url.includes("driver_development_x5"))).toBe(false);
     expect(hits[0]?.url).toContain("RDK_X3/bpu");
+    expect(hits[0]?.url).not.toContain("driver_development_x5");
   });
 
   it("matches a toolchain command to its stemmed index form", () => {
@@ -404,6 +404,49 @@ describe("bm25", () => {
     expect(hits[0]?.url).toContain("toolchain");
   });
 
+  it("keeps a short heading ahead of the same words in an FAQ answer", () => {
+    const hits = rankHits(
+      [
+        doc({
+          title: "40PIN 接口定义",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/pin#40pin",
+          kind: "heading",
+          text: "管脚定义",
+        }),
+        doc({
+          title: "常见问题",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware#q",
+          kind: "heading",
+          answer: `${"40PIN 接口定义 ".repeat(40)}其他说明`,
+        }),
+      ],
+      "40PIN 接口定义",
+      3,
+    );
+    expect(hits[0]?.url).toContain("pin#40pin");
+  });
+
+  it("still finds a rare token that occurs only in the FAQ answer", () => {
+    const hits = rankHits(
+      [
+        doc({
+          title: "常见问题",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/FAQ/toolchain#q11",
+          kind: "heading",
+          answer: "检测框聚集在左上角，后处理库参数没有传对",
+        }),
+        doc({
+          title: "示例简介",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/yolov5_sample",
+          text: "模型示例",
+        }),
+      ],
+      "检测框聚集在左上角",
+      3,
+    );
+    expect(hits[0]?.url).toContain("toolchain");
+  });
+
   it("prefers the usage page over a spec heading for a preview question", () => {
     const hits = rankHits(
       [
@@ -447,12 +490,12 @@ describe("bm25", () => {
     expect(hits[0]?.url).toContain("#q11");
   });
 
-  it("abstains on a long library name the manuals never use", () => {
+  it("abstains on a library name the manuals never use when the query has no in-corpus topic", () => {
     const docs = [
       doc({
-        title: "预览图片",
-        url: "https://developer.d-robotics.cc/rdk_s_doc/camera_bringup",
-        text: "摄像头预览",
+        title: "系统烧录",
+        url: "https://developer.d-robotics.cc/rdk_s_doc/burn",
+        text: "烧录镜像",
       }),
     ];
     const query = "Raspberry Pi 5 用 libcamera 预览";

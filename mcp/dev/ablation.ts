@@ -54,7 +54,7 @@ function score() {
   return { top1, ranked, abstainOk, abstainN, misses };
 }
 
-const flags = ["none", "segment", "identifier", "phrase", "board", "titledf", "oos", "howto", "structure"];
+const flags = ["none", "segment", "identifier", "phrase", "board", "titledf", "oos", "structure"];
 const results: Record<string, ReturnType<typeof score>> = {};
 for (const flag of flags) {
   process.env.RDK_ABLATE = flag === "none" ? "" : flag;
@@ -83,7 +83,7 @@ writeFileSync(
   new URL("./ablation.json", import.meta.url),
   `${JSON.stringify(
     {
-      note: "Debugging questions in dev/questions.json. Hope paths are diagnosis labels, not the hidden eval. Q&A body merge is an index change, not a runtime flag; before that merge the same questions were top1 16/21 and abstain 3/5. Public retrieval-cases.json (not this file) stays at head hit@1 0.567; warm searchDocs p95 is about 22ms.",
+      note: "Debugging questions only. Hope paths are labels, not the hidden eval. FAQ answers are a separate lower-weight field. Segmentation stays on because it recovers x3-version; public hit@1 does not move when it is ablated. jetson and raspberry do not abstain: the camera words are in the manuals, which is main's rule. excel, k8s, and recipe do.",
       results,
       warmP95Ms: Math.round(p95 * 100) / 100,
     },

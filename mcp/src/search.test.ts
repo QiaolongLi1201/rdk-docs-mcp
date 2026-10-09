@@ -96,8 +96,9 @@ describe("docusaurus index", () => {
     const questions = docs.filter((doc) => doc.kind === "heading" && doc.url.includes("#q5"));
     expect(questions).toHaveLength(1);
     expect(questions[0]?.title).toContain("调试串口");
-    expect(questions[0]?.text).toContain("TX 接 RX");
-    expect(questions[0]?.text).toContain("USB 转串口");
+    expect(questions[0]?.answer).toContain("TX 接 RX");
+    expect(questions[0]?.answer).toContain("USB 转串口");
+    expect(questions[0]?.text ?? "").not.toContain("TX 接 RX");
   });
 
   it("keeps untitled page urls and copies snippet text onto the page", () => {

@@ -22,6 +22,9 @@ const TITLE_W = 3;
 const URL_W = 1.6;
 const BODY_W = 1;
 const BODY_CAP = 1500;
+/** FAQ answer tokens. Half a body hit, and well below a title hit (weight 3). */
+const ANSWER_TF = 0.5;
+const SCAN_CAP = 280;
 /** Terms in more than this fraction of the searched docs do not carry a concept. */
 const COMMON_DF = 0.08;
 /** Rarer than this, a content term is distinctive enough to abstain on. */
@@ -382,11 +385,9 @@ function boardsOn(doc: IndexedDoc): BoardId[] {
 }
 
 function docAllowed(doc: IndexedDoc, boards: BoardId[]): boolean {
-  if (!manualMatchesBoards(doc.manualId, boards)) return false;
-  if (boards.length === 0) return true;
-  const on = boardsOn(doc);
-  if (on.length === 0) return true;
-  return on.some((board) => boards.includes(board));
+  // Family filter only. A URL that names another board is down-weighted in
+  // boardScale, not deleted: the hard drop was removing X5 answers.
+  return manualMatchesBoards(doc.manualId, boards);
 }
 
 const STOP_BY_FIRST = new Map<string, string[]>();
@@ -448,11 +449,13 @@ function bigrams(segment: string): string[] {
   return grams;
 }
 
-function bump(tf: Map<string, Counts>, term: string, field: Field, amount = 1): void {
+function bump(tf: Map<string, Counts>, term: string, field: Field, amount = 1, ceiling?: number): void {
   if (term.length < 2 || EN_STOP.has(term)) return;
   if (amount < 1 && FRAGMENT_SKIP.has(term)) return;
   const row = tf.get(term) ?? { t: 0, u: 0, b: 0 };
+  if (ceiling !== undefined && row[field] >= ceiling) return;
   row[field] += amount;
+  if (ceiling !== undefined && row[field] > ceiling) row[field] = ceiling;
   tf.set(term, row);
 }
 
@@ -467,34 +470,34 @@ function isAsciiToken(code: number): boolean {
   );
 }
 
-function addToken(tf: Map<string, Counts>, raw: string, field: Field): void {
+function addToken(tf: Map<string, Counts>, raw: string, field: Field, scale = 1, ceiling?: number): void {
   const tok = raw.toLowerCase();
-  bump(tf, tok, field);
+  bump(tf, tok, field, scale, ceiling);
   if (!tok.includes("_") && !tok.includes("-") && !tok.includes(".")) return;
   const flat = tok.replace(/[-_.]/g, "");
-  if (flat.length >= 6 && flat !== tok) bump(tf, flat, field);
+  if (flat.length >= 6 && flat !== tok) bump(tf, flat, field, scale, ceiling);
   const parts = tok.split(/[-_.]+/);
   if (parts.length < 2) return;
-  for (const part of parts) bump(tf, part, field, 0.5);
+  for (const part of parts) bump(tf, part, field, 0.5 * scale, ceiling);
   // A path segment that already splits out the board id (driver_development_x5)
   // is counted above. Only glued forms (rdkx5) need a separate board term.
   if (tok.includes("x3") || tok.includes("x5") || tok.includes("s100") || tok.includes("s600")) {
     for (const board of mentionedBoards(tok)) {
       if (parts.includes(board)) continue;
-      bump(tf, board, field, 0.5);
+      bump(tf, board, field, 0.5 * scale, ceiling);
     }
   }
 }
 
-function addCjk(tf: Map<string, Counts>, run: string, field: Field): void {
+function addCjk(tf: Map<string, Counts>, run: string, field: Field, scale = 1, ceiling?: number): void {
   for (const segment of cjkSegments(run)) {
     const grams = bigrams(segment);
-    if (segment.length <= 8 && (grams.length !== 1 || grams[0] !== segment)) bump(tf, segment, field);
-    for (const gram of grams) bump(tf, gram, field);
+    if (segment.length <= 8 && (grams.length !== 1 || grams[0] !== segment)) bump(tf, segment, field, scale, ceiling);
+    for (const gram of grams) bump(tf, gram, field, scale, ceiling);
   }
 }
 
-function ingest(text: string, field: Field, tf: Map<string, Counts>): void {
+function ingest(text: string, field: Field, tf: Map<string, Counts>, scale = 1, ceiling?: number): void {
   const n = text.length;
   let i = 0;
   let pendingNumber = "";
@@ -505,10 +508,10 @@ function ingest(text: string, field: Field, tf: Map<string, Counts>): void {
       i += 1;
       while (i < n && isAsciiToken(text.charCodeAt(i))) i += 1;
       const raw = text.slice(start, i);
-      addToken(tf, raw, field);
+      addToken(tf, raw, field, scale, ceiling);
       if (/^\d+$/.test(raw)) pendingNumber = raw;
       else {
-        if (pendingNumber && /^[A-Za-z]{2,}$/.test(raw)) bump(tf, `${pendingNumber}${raw.toLowerCase()}`, field);
+        if (pendingNumber && /^[A-Za-z]{2,}$/.test(raw)) bump(tf, `${pendingNumber}${raw.toLowerCase()}`, field, scale, ceiling);
         pendingNumber = "";
       }
       continue;
@@ -526,7 +529,7 @@ function ingest(text: string, field: Field, tf: Map<string, Counts>): void {
         if (next < 0x4e00 || next > 0x9fff) break;
         i += 1;
       }
-      addCjk(tf, text.slice(start, i), field);
+      addCjk(tf, text.slice(start, i), field, scale, ceiling);
       continue;
     }
     i += 1;
@@ -564,6 +567,7 @@ function corpusFor(docs: IndexedDoc[]): Corpus {
     ingest(urlPath(doc.url), "u", tf);
     const body = [doc.snippet, doc.text, ...(doc.breadcrumbs ?? [])].filter(Boolean).join(" ");
     ingest(body.slice(0, BODY_CAP), "b", tf);
+    if (doc.answer) ingest(doc.answer.slice(0, BODY_CAP), "b", tf, ANSWER_TF, ANSWER_TF);
     if (profile) ingestMs += performance.now() - ingestStart;
     let titleLen = 0;
     let urlLen = 0;
@@ -871,6 +875,23 @@ function dfOf(corpora: Corpus[], term: string): number {
   return df;
 }
 
+/**
+ * Document frequency ignoring FAQ-answer-only hits. A word that shows up only
+ * in an answer must not make an out-of-scope query look in-corpus. Title, URL,
+ * and ordinary body text still count. Answer tf is stored at 0.5.
+ */
+function dfOutsideAnswers(corpora: Corpus[], term: string): number {
+  let n = 0;
+  for (const corpus of corpora) {
+    const list = corpus.postings.get(term);
+    if (!list) continue;
+    for (let i = 0; i < list.length; i += 4) {
+      if (list[i + 1] > 0 || list[i + 2] > 0 || list[i + 3] > 0.5) n += 1;
+    }
+  }
+  return n;
+}
+
 function docHas(corpus: Corpus, term: string, docId: number): boolean {
   const list = corpus.postings.get(term);
   if (!list) return false;
@@ -987,10 +1008,6 @@ export function absentCommandToken(groups: IndexedDoc[][], query: string): boole
   return !plan.concepts.some((concept) => conceptDomain(concept, df, n));
 }
 
-function isBoardToken(term: string): boolean {
-  return BOARD_TOKEN.has(term);
-}
-
 /**
  * Everyday words that show up in any manual. They are not an RDK match.
  * Product vocabulary (board ids, hobot, tros, bpu) is not in this set;
@@ -1085,8 +1102,7 @@ function conceptDomain(concept: Concept, df: (term: string) => number, n: number
   const skipBigrams = Boolean(head && isCjkTerm(head) && head.length > 2);
   const consider = (term: string, original: boolean) => {
     if (skipBigrams && original && isCjkTerm(term) && head && term.length < head.length) return false;
-    if (isDomainTerm(term, df(term))) return true;
-    return cjkCovered(term, df, n);
+    return isDomainTerm(term, df(term));
   };
   if (concept.keys.some((term) => consider(term, true))) return true;
   if (concept.original.some((term) => consider(term, true))) return true;
@@ -1153,6 +1169,15 @@ function distinctiveOf(concepts: Concept[], df: (term: string) => number, n: num
     if (!conceptInCorpus(concept, df)) return concept.terms.some((term) => looksLikeContent(term));
     return concept.terms.some((term) => isDistinctiveTerm(term, df(term), n));
   });
+}
+
+function cloneConcepts(concepts: Concept[]): Concept[] {
+  return concepts.map((concept) => ({
+    terms: [...concept.terms],
+    keys: [...concept.keys],
+    original: [...concept.original],
+    minHits: concept.minHits,
+  }));
 }
 
 function bumpTerm(plan: { terms: QTerm[] }, term: string, qtf: number): void {
@@ -1292,9 +1317,12 @@ function adaptPlan(
       for (const part of parts) {
         const born = conceptFromTerm(part);
         next.push(born);
-        // A short piece of a long glued phrase must not outrank the phrase.
-        // "镜像" inside "系统镜像" stays a weak term; "系统版本号" keeps most of the weight.
-        const qtf = head.length > 0 ? Math.max(0.4, part.length / head.length) : 1;
+        // Short pieces ("镜像", "温度") must not outrank a heading that already
+        // matches the query. A long in-corpus word ("系统版本号") keeps more weight.
+        const ratio = head.length > 0 ? part.length / head.length : 0.5;
+        // Only a long recovered word is allowed to move rank. Shorter pieces
+        // stay in the concept list so a glued topic does not abstain.
+        const qtf = part.length >= 5 ? Math.min(0.75, Math.max(0.5, ratio)) : 0.1;
         for (const term of born.terms) bumpTerm(plan, term, term === part ? qtf : qtf * 0.45);
       }
     }
@@ -1353,7 +1381,9 @@ function phraseNeedles(query: string): string[] {
 
 function phraseScale(doc: IndexedDoc, needles: string[]): number {
   if (needles.length === 0) return 1;
-  const hay = `${doc.title}\n${doc.text ?? ""}\n${doc.snippet ?? ""}`.toLowerCase().replace(/\s+/g, " ");
+  const hay = `${doc.title}\n${(doc.text ?? "").slice(0, SCAN_CAP)}\n${(doc.snippet ?? "").slice(0, SCAN_CAP)}\n${(doc.answer ?? "").slice(0, SCAN_CAP)}`
+    .toLowerCase()
+    .replace(/\s+/g, " ");
   let hit = 0;
   for (const needle of needles) {
     if (hay.includes(needle)) hit += 1;
@@ -1362,51 +1392,18 @@ function phraseScale(doc: IndexedDoc, needles: string[]): number {
   return Math.min(1.7, 1.28 + 0.14 * (hit - 1));
 }
 
-function boardScale(doc: IndexedDoc, boards: BoardId[]): number {
-  if (ablate("board") || boards.length === 0) return 1;
-  const on = boardsOn(doc);
-  const pinned = MANUAL_BOARDS[doc.manualId];
-  const manualHit = pinned?.some((board) => boards.includes(board)) ?? false;
-  const docHit = on.some((board) => boards.includes(board));
-  const docForeign = on.length > 0 && on.every((board) => !boards.includes(board));
-  if (docForeign) return 0.45;
-  // A small lift only. A larger one lets a board id in the URL outrank the
+function boardScale(doc: IndexedDoc, query: string, options: RankOptions): number {
+  if (ablate("board")) return 1;
+  const named = mentionedBoards(query);
+  // No boost for the matching board. A positive lift let an X5 URL beat the
   // page whose title actually answers the question.
-  if (docHit && on.every((board) => boards.includes(board))) return manualHit ? 1.06 : 1.03;
-  if (manualHit && on.length === 0) return 1.02;
-  return 1;
-}
-
-function howtoScale(doc: IndexedDoc, query: string): number {
-  if (ablate("howto")) return 1;
-  const procedural = /使用|步骤|示例|教程|指南|接线|连接|guide|usage/i.test(doc.title);
-  if (!procedural) return 1;
-  // A bring-up or "no picture" question wants the procedure, not the spec label
-  // that only repeats the device name. Other how-to wording is left to BM25.
-  if (/不出|没有画面|黑屏|预览|点亮|bring[\s-]*up/i.test(query)) return 1.55;
-  return 1;
-}
-
-/**
- * Latin product or command tokens that never occur, and were not corrected
- * into a synonym or a shorter stem that the manuals actually use.
- */
-function unrecoveredCodes(concepts: Concept[], df: (term: string) => number): string[] {
-  const seen = new Set<string>();
-  const missing: string[] = [];
-  for (const concept of concepts) {
-    for (const term of concept.original) {
-      if (seen.has(term) || isCjkTerm(term) || term.length < 4) continue;
-      if (isBoardToken(term) || isGeneralLanguage(term) || ORDINARY_EN.has(term) || !isCodeLike(term)) continue;
-      if (df(term) > 0) continue;
-      const synonymHit = (synonymExtras(term) ?? []).some((extra) => aliasTerms(extra).some((item) => df(item) > 0));
-      const stemHit = concept.terms.some((item) => item !== term && item.length >= 4 && term.startsWith(item) && df(item) > 0);
-      if (synonymHit || stemHit) continue;
-      seen.add(term);
-      missing.push(term);
-    }
-  }
-  return missing;
+  const boards = named.length > 0 ? named : options.board ? [options.board] : [];
+  if (boards.length === 0) return 1;
+  const on = boardsOn(doc);
+  if (on.length === 0 || on.some((board) => boards.includes(board))) return 1;
+  // Mild, and stronger only when the query itself names a board. A board
+  // passed only as an option must not bury a canonical page.
+  return named.length > 0 ? 0.85 : 0.92;
 }
 
 function roleScale(doc: IndexedDoc): number {
@@ -1453,7 +1450,7 @@ function lastUrlSegment(url: string): string {
 
 function fillSnippet(doc: IndexedDoc): string {
   const crumbs = doc.breadcrumbs?.filter(Boolean).join(" / ");
-  const filled = doc.snippet || doc.text?.slice(0, 180) || crumbs || "";
+  const filled = doc.snippet || doc.answer?.slice(0, 180) || doc.text?.slice(0, 180) || crumbs || "";
   return filled.trim().slice(0, 240) || lastUrlSegment(doc.url);
 }
 
@@ -1480,6 +1477,9 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
   if (corpora.length === 0) return [];
   const plan = analyzeQuery(query);
   if (plan.concepts.length === 0 || plan.terms.length === 0) return [];
+  // Abstain on the query as written. Segmentation may add an in-corpus word
+  // for ranking, but that must not hide an unknown command such as iphone.
+  const abstainConcepts = cloneConcepts(plan.concepts);
 
   let n = 0;
   let sumTitle = 0;
@@ -1496,7 +1496,10 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
   const avgBody = n > 0 ? sumBody / n : 1;
   const df = (term: string) => dfOf(corpora, term);
   adaptPlan(plan, query, df, n);
-  if (!ablate("typo")) addTypoVariants(plan.concepts, plan.terms, df);
+  if (!ablate("typo")) {
+    addTypoVariants(plan.concepts, plan.terms, df);
+    addTypoVariants(abstainConcepts, [], df);
+  }
   if (!ablate("prefix")) expandPrefixes(plan.concepts, plan.terms, corpora);
   // When the full identifier is absent (hbm_shell) its documented alias
   // should carry the query, not the leftover fragment (hbm) at qtf 0.2.
@@ -1568,10 +1571,9 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
       breadthScale(doc, cand.corpus.bodyDl[cand.doc], avgBody) *
       roleScale(doc) *
       landing *
-      boardScale(doc, boards) *
-      howtoScale(doc, query) *
+      boardScale(doc, query, options) *
       phraseScale(doc, needles);
-    cand.coverage = coverageOf(cand.corpus, cand.doc, plan.concepts, df, n);
+    cand.coverage = coverageOf(cand.corpus, cand.doc, abstainConcepts, df, n);
     cand.score = cand.raw * (0.15 + 0.85 * cand.coverage);
     const norm = idfMass > 0 ? cand.raw / idfMass : 0;
     let available = 0;
@@ -1655,17 +1657,16 @@ export function rankCorpora(groups: IndexedDoc[][], query: string, options: Rank
   }
 
   const ranked = [...best.values()].sort((a, b) => b.hit.score - a.hit.score || a.hit.url.localeCompare(b.hit.url));
-  const missing = ablate("oos") ? [] : unrecoveredCodes(plan.concepts, df);
-  const topCoverage = ranked[0]?.hit.coverage ?? 0;
-  // Two absent commands, one long absent library name, or a single absent
-  // code token whose surrounding words barely match: the manuals are not
-  // answering this query. Coverage gates keep a host-tool name on an
-  // in-scope task (烧录 + 镜像) from abstaining.
-  const offTopic =
-    (missing.length >= 2 && topCoverage < 0.55) ||
-    (missing.some((term) => term.length >= 8) && topCoverage <= 0.5) ||
-    (missing.length >= 1 && missing.every((term) => term.length >= 4) && topCoverage < 0.45);
-  if (missingCodeToken(plan.concepts, df, n) || offTopic) {
+  // Same rule as main, judged on the query before segmentation. A glued
+  // in-corpus word ("摄像头" inside "摄像头插上") still counts, so a real how-to
+  // does not abstain. An unknown command does not get that waiver.
+  const dfAbstain = (term: string) => dfOutsideAnswers(corpora, term);
+  const recovered = plan.concepts.some((concept) => conceptDomain(concept, df, n));
+  const unknownCommand = abstainConcepts.some(
+    (concept) => conceptAbsent(concept, dfAbstain) && concept.original.some((term) => isCodeLike(term)),
+  );
+  const gluedTopic = recovered && !unknownCommand;
+  if (!ablate("oos") && missingCodeToken(abstainConcepts, dfAbstain, n) && !gluedTopic) {
     for (const item of ranked) item.hit.quality = "weak";
   }
   return ranked.map((item) => item.hit);

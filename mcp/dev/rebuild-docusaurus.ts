@@ -20,7 +20,7 @@ for (const manual of manuals) {
   writeFileSync(join(dir, `${manual.id}.json.gz`), gzipSync(Buffer.from(JSON.stringify(body))));
   const postings = gzipSync(encodeBm25(docs));
   writeFileSync(join(dir, `${manual.id}.bm25.gz`), postings);
-  const answers = docs.filter((doc) => doc.kind === "heading" && (doc.text?.length ?? 0) > 40).length;
+  const answers = docs.filter((doc) => doc.kind === "heading" && (doc.answer?.length ?? 0) > 40).length;
   process.stderr.write(
     `${manual.id}\tdocs ${docs.length}\tanswers ${answers}\tjson ${jsonBytes}\tbm25 ${postings.length}\t${Date.now() - started}ms\n`,
   );

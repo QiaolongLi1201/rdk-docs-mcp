@@ -34,10 +34,10 @@ export function titleFromDoc(item: { t?: string; s?: string; b?: string[]; u: st
   return item.u.split("/").filter(Boolean).at(-1) || item.u;
 }
 
-function appendChunk(doc: IndexedDoc, chunk: string): void {
-  const text = doc.text ?? "";
+function appendAnswer(doc: IndexedDoc, chunk: string): void {
+  const text = doc.answer ?? "";
   if (!chunk || text.includes(chunk)) return;
-  doc.text = text ? `${text}\n${chunk}` : chunk;
+  doc.answer = text ? `${text}\n${chunk}` : chunk;
 }
 
 export function compactDocusaurusIndex(raw: unknown, manualId: string): IndexedDoc[] {
@@ -73,7 +73,8 @@ export function compactDocusaurusIndex(raw: unknown, manualId: string): IndexedD
           if (!doc.breadcrumbs?.length && item.b?.length) doc.breadcrumbs = item.b;
         }
         // Shard headings store the question in `s` and the answer paragraphs in `t`.
-        if (section && body && body !== section) appendChunk(doc, body);
+        // Keep the answer off the heading body so title matches stay ahead of it.
+        if (section && body && body !== section) appendAnswer(doc, body);
         continue;
       }
 
@@ -111,7 +112,7 @@ export function compactDocusaurusIndex(raw: unknown, manualId: string): IndexedD
   }
 
   for (const doc of docs) {
-    if (doc.kind !== "heading" || doc.snippet?.trim() || doc.text?.trim()) continue;
+    if (doc.kind !== "heading" || doc.snippet?.trim() || doc.text?.trim() || doc.answer?.trim()) continue;
     const page = pagesByUrl.get(dehashedUrl(doc.url));
     const fromCrumbs = doc.breadcrumbs?.filter(Boolean).join(" / ");
     const filled = page?.title?.trim() || fromCrumbs?.trim();
