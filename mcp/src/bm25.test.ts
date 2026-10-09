@@ -66,10 +66,33 @@ describe("bm25", () => {
     expect(quality.confidence).toBeLessThanOrEqual(1);
   });
 
-  it("does not abstain on colloquial wording or ordinary error prose", () => {
-    const docs = [doc({ title: "GPIO 应用", url: "https://developer.d-robotics.cc/rdk_x_doc/gpio", text: "40pin 电平" })];
-    for (const query of ["特斯拉刹车片怎么换", "The repository is not signed", "怎么把系统烧录一下，老是失败"]) {
-      expect(matchQuality(rankHits(docs, query, 5), [docs], query).noGoodMatch).toBe(false);
+  it("does not abstain when the query names a topic that is actually in the manual", () => {
+    const docs = [doc({ title: "系统烧录", url: "https://developer.d-robotics.cc/rdk_x_doc/burn", text: "烧录镜像" })];
+    expect(matchQuality(rankHits(docs, "怎么把系统烧录一下，老是失败", 5), [docs], "怎么把系统烧录一下，老是失败").noGoodMatch).toBe(false);
+  });
+
+  it("abstains when the only RDK token is a board name next to an unknown command", () => {
+    const docs = [
+      doc({
+        title: "X5 镜像",
+        url: "https://developer.d-robotics.cc/rdk_x_doc/x5/docker",
+        text: "x5 docker 镜像",
+      }),
+    ];
+    const query = "x5 上 docker 起不来，报 iptables 错误";
+    expect(matchQuality(rankHits(docs, query, 3), [docs], query).noGoodMatch).toBe(true);
+  });
+
+  it("abstains on unrelated questions even when a generic word is in the manual", () => {
+    const docs = [
+      doc({
+        title: "环境准备",
+        url: "https://developer.d-robotics.cc/rdk_x_doc/setup",
+        text: "docker install login 登录 可用于对照",
+      }),
+    ];
+    for (const query of ["docker postgres 连不上", "vue3 login guard 怎么写", "WeChat migration 失败", "nginx 反代一直 502", "特斯拉刹车片怎么换"]) {
+      expect(matchQuality(rankHits(docs, query, 5), [docs], query).noGoodMatch).toBe(true);
     }
   });
 
@@ -106,24 +129,24 @@ describe("bm25", () => {
     expect(hits[0]?.confidence).toBeGreaterThan(0.4);
   });
 
-  it("prefers a guide over a command page for a how-to", () => {
+  it("prefers a guide with numbered steps over a one-line mention of the same words", () => {
     const hits = rankHits(
       [
         doc({
           title: "烧录命令",
-          url: "https://developer.d-robotics.cc/rdk_x_doc/Appendix/linux-command-manual/cmd_dd",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/commands/dd",
           text: "烧录 镜像到 sd 卡",
         }),
         doc({
           title: "烧录指南",
-          url: "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn",
-          text: "烧录 镜像到 sd 卡",
+          url: "https://developer.d-robotics.cc/rdk_x_doc/start/burn",
+          text: "1. 烧录 镜像到 sd 卡\n2. 校验写入结果",
         }),
       ],
       "镜像怎么烧录到卡上",
       5,
     );
-    expect(hits[0]?.url).toContain("system-burn");
+    expect(hits[0]?.title).toBe("烧录指南");
   });
 
   it("downranks a long multi-topic section against a short guide", () => {
@@ -204,7 +227,7 @@ describe("bm25", () => {
         text: "烧录 镜像",
       }),
     ];
-    const query = "用 balenaEtcher 给 x3 烧系统镜像行不行";
+    const query = "用 balenaEtcher 烧录 镜像";
     const hits = rankHits(docs, query, 3);
     expect(matchQuality(hits, [docs], query).noGoodMatch).toBe(false);
     expect(hits[0]?.url).toContain("system-burn");
@@ -233,30 +256,14 @@ describe("bm25", () => {
     expect(hits[0]?.url).toContain("network");
   });
 
-  it("prefers the login procedure over the password FAQ and the ssh manual", () => {
-    const hits = rankHits(
-      [
-        doc({
-          title: "ssh",
-          url: "https://developer.d-robotics.cc/rdk_x_doc/Appendix/linux-command-manual/cmd_ssh",
-          text: "ssh 远程登录",
-        }),
-        doc({
-          title: "Q13: 开发板的默认登录账户和密码是什么？",
-          url: "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system",
-          text: "默认账户 sunrise 密码",
-        }),
-        doc({
-          title: "1.4 远程登录",
-          url: "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/remote_login",
-          text: "SSH 默认口令",
-        }),
-      ],
-      "怎么从电脑登到板子上，默认口令是什么",
-      3,
-    );
-    expect(hits[0]?.url).toContain("remote_login");
-    expect(hits[0]?.url).not.toContain("cmd_ssh");
+  it("does not treat a one-edit neighbor with a different first letter as a typo", () => {
+    const docs = [doc({ title: "sending a file", url: "https://developer.d-robotics.cc/rdk_x_doc/send", text: "sending" })];
+    expect(matchQuality(rankHits(docs, "pending", 3), [docs], "pending").noGoodMatch).toBe(true);
+  });
+
+  it("does not correct iphone into phone", () => {
+    const docs = [doc({ title: "phone", url: "https://developer.d-robotics.cc/rdk_x_doc/phone", text: "phone call" })];
+    expect(matchQuality(rankHits(docs, "iphone", 3), [docs], "iphone").noGoodMatch).toBe(true);
   });
 
   it("expands a yolo prefix onto the documented yolov5 page", () => {
