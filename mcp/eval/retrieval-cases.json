@@ -83,7 +83,9 @@
       "id": "bpu-inference-newer",
       "query": "BPU inference",
       "manual": "rdk-x",
-      "expectUrlIncludes": ["RDK_X5"]
+      "expectUrlIncludes": ["RDK_X5", "RDK_X3"],
+      "expectAllInTop3": ["RDK_X5", "RDK_X3"],
+      "note": "Unscoped query. Either board may be hit@1. Both API pages should be visible. Do not require the newer board."
     },
     {
       "id": "bpu-inference-x5-context",

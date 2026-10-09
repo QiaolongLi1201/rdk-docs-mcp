@@ -1,7 +1,7 @@
 import { RETRIEVAL_ALIASES } from "./aliases.js";
 import { GLOSSARY_ALIASES } from "./glossary-aliases.js";
 import { mentionedBoards, soleBoard, urlLooksLikeBoard, type BoardId } from "./products.js";
-import type { IndexedDoc, SearchHit } from "./types.js";
+import type { IndexedDoc, ResultBoard, SearchHit } from "./types.js";
 
 /** Question filler that carries no retrieval signal in Chinese queries. */
 const CJK_STOPWORDS = [
@@ -45,8 +45,50 @@ function mergeSynonyms(...maps: Array<Record<string, string[]>>): Record<string,
 const ALL_SYNONYMS = mergeSynonyms(SYNONYMS, GLOSSARY_ALIASES, RETRIEVAL_ALIASES);
 
 const CJK_RUN = /[\u4e00-\u9fff]+/g;
-const NEWER: Record<BoardId, number> = { s600: 4, s100: 3, x5: 2, x3: 1 };
 const BOARDS: BoardId[] = ["s600", "s100", "x5", "x3"];
+
+/**
+ * Words that are topics, not page-identifying names. A query token outside this
+ * set must appear on a page before that page can outrank one that contains it.
+ */
+const GENERIC_TOKENS = new Set([
+  "apt",
+  "api",
+  "bpu",
+  "burn",
+  "camera",
+  "demo",
+  "doc",
+  "docs",
+  "error",
+  "flash",
+  "gpio",
+  "guide",
+  "how",
+  "image",
+  "inference",
+  "install",
+  "list",
+  "mipi",
+  "pin",
+  "python",
+  "rdk",
+  "sample",
+  "source",
+  "system",
+  "update",
+  "usb",
+  "wifi",
+  "with",
+  "x3",
+  "x5",
+  "s100",
+  "s600",
+  "安装",
+  "推理",
+  "摄像头",
+  "烧录",
+]);
 
 function cjkPieces(query: string): string[] {
   const grams: string[] = [];
@@ -135,21 +177,30 @@ function contextBoard(query: string, options: RankOptions): BoardId | undefined 
   return soleBoard(query) ?? options.board;
 }
 
-function newerRank(doc: IndexedDoc): number {
-  let best = 0;
-  for (const board of BOARDS) {
-    if (urlLooksLikeBoard(doc.url, board) || urlLooksLikeBoard(doc.title, board)) {
-      best = Math.max(best, NEWER[board]);
-    }
-  }
-  return best;
-}
-
 function boardsOn(doc: IndexedDoc): BoardId[] {
   return BOARDS.filter((board) => urlLooksLikeBoard(doc.url, board) || urlLooksLikeBoard(doc.title, board));
 }
 
-function scoreDoc(doc: IndexedDoc, matchers: Matcher[], query: string, options: RankOptions): number {
+function isDistinctive(token: string): boolean {
+  if (GENERIC_TOKENS.has(token) || RETRIEVAL_ALIASES[token]) return false;
+  if (token.includes("_")) return true;
+  return /^[a-z][a-z0-9]{3,}$/.test(token);
+}
+
+/** True when `token` occurs only as part of a longer snake_case or kebab identifier. */
+function compoundFragment(token: string, text: string): boolean {
+  if (!/^[a-z0-9]+$/.test(token) || token.length < 4) return false;
+  const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return !new RegExp(`(?<![a-z0-9_-])${escaped}(?![a-z0-9_-])`, "i").test(text);
+}
+
+function scoreDoc(
+  doc: IndexedDoc,
+  matchers: Matcher[],
+  query: string,
+  options: RankOptions,
+  requiredDistinctive: Matcher[],
+): number {
   const { title, extra, url } = haystack(doc);
   const queryTokens = matchers.map((item) => item.token);
   let score = 0;
@@ -163,18 +214,20 @@ function scoreDoc(doc: IndexedDoc, matchers: Matcher[], query: string, options: 
       hit = true;
       titleMatched += 1;
     } else if (test(title)) {
-      score += 10 * weight;
+      const compound = compoundFragment(token, title);
+      score += (compound ? 2 : 10) * weight;
       hit = true;
-      titleMatched += 1;
+      if (!compound) titleMatched += 1;
     }
     if (test(extra)) {
-      score += 3 * weight;
+      score += (compoundFragment(token, extra) ? 1 : 3) * weight;
       hit = true;
     }
     if (test(url)) {
-      score += 4 * weight;
+      const compound = compoundFragment(token, url);
+      score += (compound ? 1 : 4) * weight;
       hit = true;
-      if (ident) score += 10;
+      if (ident && !compound) score += 10;
     }
     if (doc.kind === "page" && test(title)) score += 2;
     if (ident && hit) score += 8;
@@ -196,8 +249,6 @@ function scoreDoc(doc: IndexedDoc, matchers: Matcher[], query: string, options: 
   const wantsInfer = queryTokens.some((token) => ["inference", "推理", "bpu"].includes(token));
   const wantsApt = queryTokens.some((token) => ["apt", "软件源", "sources.list"].includes(token));
   const wantsMipi = queryTokens.some((token) => token === "mipi" || token === "摄像头" || token === "camera");
-  const wantsV4l2 = queryTokens.some((token) => token === "v4l2");
-  const bareIdent = /^[a-z][a-z0-9_.-]+$/i.test(query.trim());
   const comparison = /对比|区别|不同|相比|\bvs\b|versus|比较/i.test(query);
   const phrase = query.trim().toLowerCase();
   if (phrase.length >= 2 && extra.includes(phrase) && !title.includes(phrase)) score += 9;
@@ -209,18 +260,17 @@ function scoreDoc(doc: IndexedDoc, matchers: Matcher[], query: string, options: 
   if (wantsPin && /40pin|user_sample/.test(url)) score += 8;
   if (wantsCases && (/\/case\/?$/.test(url) || title.includes("应用案例"))) score += 10;
   if (wantsMipi && /mipi_camera|mipi-camera/.test(url)) score += 12;
-  if (wantsV4l2 && /v4l2/.test(url)) score += 24;
-  if (wantsV4l2 && /mipi_camera|usb_camera|web_display_camera/.test(url) && !/mipi|usb/i.test(query)) score -= 60;
   if (wantsInfer && /bpu_api|pyeasy_dnn|ai-python-api|python-api/.test(url)) score += 12;
   if (wantsInfer && /bpu_mem|stress|sysfs/.test(url) && !/内存|占用|sysfs/.test(query)) score -= 10;
   if (wantsApt && /hardware_and_system/.test(url)) score += 8;
-  if (wantsApt && /sources\.list/.test(query) && /hardware_and_system/.test(url)) score += 12;
-  if (wantsApt && /isp_|light_source|awb/.test(url)) score -= 24;
   if (wantsApt && /tros_ros/.test(url) && !/ros|tros/i.test(query)) score -= 12;
   if (titleMatched > 0 && (/\/overview(?:\.html)?$/.test(url) || title.includes("概述"))) score += 4;
   if (/\/faq\/|accessory|release_note|changelog|config_txt/.test(url)) score -= 6;
-  if (bareIdent && /\/faq\//.test(url)) score -= 14;
+  if (literalTokens(query).some((token) => isIdentifier(token)) && /\/faq\//.test(url)) score -= 14;
 
+  // Class rule, not a single query: "X vs Y" / 区别 / 不同 should open the hardware
+  // overview leaf for the boards named, and lose network, demo, driver, and
+  // expansion-board pages unless the question is about that side topic.
   if (comparison) {
     const overview =
       /\/hardware_introduction\/rdk_x[35](?:[#/?]|$)/.test(url) ||
@@ -257,6 +307,13 @@ function scoreDoc(doc: IndexedDoc, matchers: Matcher[], query: string, options: 
     );
     if (mine) score += 8;
     if (other) score -= 12;
+  } else if (mentioned.length === 0 && !options.board && boardsOn(doc).length === 0 && score > 0) {
+    score += 3;
+  }
+
+  if (requiredDistinctive.length > 0 && score > 0) {
+    const found = requiredDistinctive.some((item) => item.test(title) || item.test(url) || item.test(extra));
+    if (!found) score = Math.round(score * 0.25);
   }
 
   return score;
@@ -292,20 +349,65 @@ function aliasNote(query: string, hit: SearchHit): SearchHit {
   };
 }
 
+function literalTokens(query: string): string[] {
+  const seen = new Set<string>();
+  const lowered = query.trim().toLowerCase();
+  for (const match of lowered.matchAll(/[a-z][a-z0-9_.-]*|\d+[a-z][a-z0-9_.-]*|\d+/g)) seen.add(match[0]);
+  for (const gram of cjkPieces(lowered)) seen.add(gram);
+  return [...seen];
+}
+
+export function groupHits(hits: SearchHit[]): Array<{ board: ResultBoard; hits: SearchHit[] }> {
+  const order: ResultBoard[] = [];
+  const map = new Map<ResultBoard, SearchHit[]>();
+  for (const hit of hits) {
+    const board: ResultBoard = hit.board ?? "agnostic";
+    const list = map.get(board);
+    if (list) list.push(hit);
+    else {
+      map.set(board, [hit]);
+      order.push(board);
+    }
+  }
+  return order.map((board) => ({ board, hits: map.get(board) ?? [] }));
+}
+
+function diversifyByBoard(hits: SearchHit[]): SearchHit[] {
+  const groups = new Map<string, SearchHit[]>();
+  for (const hit of hits) {
+    const key = hit.board ?? "agnostic";
+    const list = groups.get(key);
+    if (list) list.push(hit);
+    else groups.set(key, [hit]);
+  }
+  if (groups.size <= 1) return hits;
+  const keys = [...groups.keys()].sort((a, b) => (groups.get(b)?.[0]?.score ?? 0) - (groups.get(a)?.[0]?.score ?? 0));
+  const seen = new Set<SearchHit>();
+  const first: SearchHit[] = [];
+  for (const key of keys) {
+    const hit = groups.get(key)?.[0];
+    if (!hit) continue;
+    first.push(hit);
+    seen.add(hit);
+  }
+  return [...first, ...hits.filter((hit) => !seen.has(hit))];
+}
+
 export function rankHits(docs: IndexedDoc[], query: string, limit: number, options: RankOptions = {}): SearchHit[] {
   const queryTokens = tokens(query);
   if (queryTokens.length === 0) return [];
   const matchers = queryTokens.map(buildMatcher);
-  const preferNewer = !soleBoard(query) && !options.board && mentionedBoards(query).length === 0;
+  const requiredDistinctive = literalTokens(query).filter(isDistinctive).map(buildMatcher);
+  const unscoped = mentionedBoards(query).length === 0 && !options.board;
 
-  const best = new Map<string, SearchHit & { newer: number }>();
+  const best = new Map<string, SearchHit>();
   const titleFromPage = new Map<string, boolean>();
   for (const doc of docs) {
-    const score = scoreDoc(doc, matchers, query, options);
+    const score = scoreDoc(doc, matchers, query, options, requiredDistinctive);
     if (score <= 0) continue;
     const base = canonicalUrl(doc.url);
     const boards = boardsOn(doc);
-    const hit: SearchHit & { newer: number } = {
+    const hit: SearchHit = {
       title: doc.title,
       url: doc.url,
       manual: doc.manualId,
@@ -314,7 +416,6 @@ export function rankHits(docs: IndexedDoc[], query: string, limit: number, optio
       source: doc.manualId === "forum" ? "forum" : "docs",
       board: boards.length === 1 ? boards[0] : boards.length > 1 ? "multiple" : undefined,
       quality: score >= 12 ? "good" : "weak",
-      newer: newerRank(doc),
     };
     const prev = best.get(base);
     if (!prev) {
@@ -336,10 +437,9 @@ export function rankHits(docs: IndexedDoc[], query: string, limit: number, optio
     titleFromPage.set(base, prevWasPage || nextIsPage);
   }
 
-  return [...best.values()]
-    .sort((a, b) => b.score - a.score || (preferNewer ? b.newer - a.newer : 0))
-    .slice(0, limit)
-    .map(({ newer: _newer, ...hit }) => aliasNote(query, hit));
+  const sorted = [...best.values()].sort((a, b) => b.score - a.score);
+  const ordered = unscoped ? diversifyByBoard(sorted) : sorted;
+  return ordered.slice(0, limit).map((hit) => aliasNote(query, hit));
 }
 
 export const GOOD_MATCH_SCORE = 12;

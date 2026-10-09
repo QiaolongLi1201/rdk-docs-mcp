@@ -82,7 +82,7 @@ export function createServer(options: { skillDeps?: SkillServiceDeps } = {}): Mc
     "search_docs",
     {
       description:
-        "Search RDK manuals. Each hit has title, url, manual, snippet, score, and board when known. noGoodMatch=true means do not answer from the hits. Pass board (x3|x5|s100|s600) when you know the board and the query does not name it; newer boards win ties. source=forum or manual=forum for community posts (promos are down-ranked); source=all only when the user asked for forum input. Keep models separate. Do not invent commands or pinouts.",
+        "Search RDK manuals. Each hit has title, url, manual, snippet, score, and board when known. groups clusters hits by board. ambiguousBoard=true means the query named no board: do not treat hits[0] as the user's board. Pass board (x3|x5|s100|s600) when you know it, including Moss on a detected board. noGoodMatch=true means do not answer from the hits. source=forum or manual=forum for community posts (promos are down-ranked); source=all only when the user asked for forum input. Keep models separate. Do not invent commands or pinouts.",
       inputSchema: {
         query: z.string().describe("Chinese or English keywords. Keep identifiers whole, e.g. hobot_dnn, hrt_model_exec"),
         manual: z

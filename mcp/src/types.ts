@@ -24,3 +24,10 @@ export type SearchHit = {
   /** Set when the hit came from an alias because the literal identifier is not indexed. */
   matchedVia?: "alias";
 };
+
+export type ResultBoard = "x3" | "x5" | "s100" | "s600" | "agnostic" | "multiple";
+
+export type BoardGroup = {
+  board: ResultBoard;
+  hits: SearchHit[];
+};

@@ -1,11 +1,12 @@
 {
-  "generatedAt": "2026-10-09T06:02:53.781Z",
-  "cacheDir": "/tmp/rdk-retrieval-eval-AK2WF1",
+  "generatedAt": "2026-10-09T06:15:42.214Z",
+  "cacheDir": "/tmp/rdk-retrieval-eval-j4hMdX",
   "prebuilt": "default",
+  "offline": false,
   "latency": {
-    "coldSearchMs": 145,
-    "warmSearchMs": 64,
-    "forumSearchMs": 1618,
+    "coldSearchMs": 185,
+    "warmSearchMs": 105,
+    "forumSearchMs": 2368,
     "coldTop": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/gpio",
     "forumTop": "跑用户手册中的使用USB摄像头发布图片时报错"
   },
@@ -14,7 +15,7 @@
     "hitAt1": 1,
     "hitAt3": 1,
     "mrr": 1,
-    "meanMs": 101
+    "meanMs": 175
   },
   "pages": {
     "n": 3,
@@ -32,7 +33,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/burn-sd-card",
       "topTitle": "烧录系统镜像",
-      "ms": 97
+      "ms": 207
     },
     {
       "id": "x3-flash",
@@ -44,7 +45,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/overview",
       "topTitle": "烧录概述",
-      "ms": 104
+      "ms": 195
     },
     {
       "id": "s100-flash",
@@ -56,7 +57,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_studio_doc/user-guide/system-flashing/s100-xburn",
       "topTitle": "3.7.4 S100 烧录",
-      "ms": 134
+      "ms": 191
     },
     {
       "id": "s600-flash",
@@ -68,7 +69,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_s_doc/Quick_start/install_os/rdk_s600/burn",
       "topTitle": "烧录步骤",
-      "ms": 93
+      "ms": 152
     },
     {
       "id": "en-flash-sd",
@@ -80,7 +81,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/overview",
       "topTitle": "烧录概述",
-      "ms": 146
+      "ms": 170
     },
     {
       "id": "xburn-boards",
@@ -104,7 +105,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_studio_doc/user-guide/system-flashing/",
       "topTitle": "3.7 烧录",
-      "ms": 7
+      "ms": 11
     },
     {
       "id": "x5-wifi",
@@ -116,7 +117,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/remote_login",
       "topTitle": "1.4 远程登录",
-      "ms": 83
+      "ms": 124
     },
     {
       "id": "s100-network",
@@ -128,7 +129,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_s_doc/System_configuration/network_bluetooth",
       "topTitle": "2.1 网络与蓝牙配置",
-      "ms": 94
+      "ms": 154
     },
     {
       "id": "x5-ssh",
@@ -140,7 +141,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/remote_login",
       "topTitle": "1.4 远程登录",
-      "ms": 74
+      "ms": 120
     },
     {
       "id": "x5-static-ip",
@@ -152,7 +153,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/hardware_introduction/rdk_x5",
       "topTitle": "硬件简介",
-      "ms": 115
+      "ms": 146
     },
     {
       "id": "hobot-dnn",
@@ -163,8 +164,8 @@
       "allInTop3": null,
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/multi_media_sp_dev_api/RDK_X5/pydev_multimedia_api_x5/ai-python-api#hb_hbmruntime",
-      "topTitle": "BPU 算法接口手册",
-      "ms": 62
+      "topTitle": "HB_HBMRuntime",
+      "ms": 85
     },
     {
       "id": "hobot-dnn-not-only-faq",
@@ -176,7 +177,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/multi_media_sp_dev_api/RDK_X5/pydev_multimedia_api_x5/ai-python-api#hb_hbmruntime",
       "topTitle": "BPU 算法接口手册",
-      "ms": 65
+      "ms": 93
     },
     {
       "id": "bpu-inference-newer",
@@ -184,11 +185,11 @@
       "hitAt1": true,
       "hitAt3": true,
       "reciprocalRank": 1,
-      "allInTop3": null,
+      "allInTop3": true,
       "noGoodMatch": false,
-      "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/multi_media_sp_dev_api/RDK_X5/cdev_multimedia_api_x5/bpu_api",
+      "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/multi_media_sp_dev_api/RDK_X3/cdev_multimedia_api_x3/bpu_api",
       "topTitle": "BPU（算法推理模块）API",
-      "ms": 44
+      "ms": 77
     },
     {
       "id": "bpu-inference-x5-context",
@@ -200,7 +201,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/multi_media_sp_dev_api/RDK_X5/cdev_multimedia_api_x5/bpu_api",
       "topTitle": "BPU（算法推理模块）API",
-      "ms": 69
+      "ms": 81
     },
     {
       "id": "bpu-inference-x3",
@@ -212,7 +213,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/multi_media_sp_dev_api/RDK_X3/cdev_multimedia_api_x3/bpu_api",
       "topTitle": "BPU（算法推理模块）API",
-      "ms": 67
+      "ms": 83
     },
     {
       "id": "bpu-cn",
@@ -224,7 +225,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/multi_media_sp_dev_api/RDK_X5/cdev_multimedia_api_x5/bpu_api",
       "topTitle": "BPU（算法推理模块）API",
-      "ms": 83
+      "ms": 130
     },
     {
       "id": "hbm-shell",
@@ -236,7 +237,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/oe_s_doc/en/guide/ptq/ptq_tool/hb_model_info",
       "topTitle": "The hb_model_info Tool",
-      "ms": 156
+      "ms": 243
     },
     {
       "id": "hrt-model-exec",
@@ -248,7 +249,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/oe_x5_doc/cn/runtime/source/tool_introduction/hrt_model_exec.html",
       "topTitle": "9.5.2. hrt_model_exec 工具介绍",
-      "ms": 0
+      "ms": 1
     },
     {
       "id": "hb-mapper",
@@ -260,7 +261,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/oe_x5_doc/cn/oe_mapper/source/ptq/ptq_tool/hb_mapper/hb_mapper_checker.html",
       "topTitle": "6.2.2.1. 模型检查命令（hb_mapper checker）",
-      "ms": 1
+      "ms": 0
     },
     {
       "id": "sun55iw3",
@@ -270,7 +271,7 @@
       "reciprocalRank": 1,
       "allInTop3": null,
       "noGoodMatch": true,
-      "ms": 77
+      "ms": 160
     },
     {
       "id": "x3-vs-x5",
@@ -282,7 +283,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/hardware_introduction/rdk_x5",
       "topTitle": "1.1.2 硬件简介",
-      "ms": 90
+      "ms": 99
     },
     {
       "id": "x3-x5-diff-cn",
@@ -294,7 +295,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/hardware_introduction/rdk_x5",
       "topTitle": "1.1.2 硬件简介",
-      "ms": 77
+      "ms": 142
     },
     {
       "id": "s100-vs-s600",
@@ -306,7 +307,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_s_doc/01_Quick_start/01_hardware_introduction/01_rdk_s100/01_rdk_s100_kit",
       "topTitle": "1.1.1 开发者套件",
-      "ms": 103
+      "ms": 120
     },
     {
       "id": "s100-hardware",
@@ -318,7 +319,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_s_doc/01_Quick_start/01_hardware_introduction/01_rdk_s100/01_rdk_s100_kit",
       "topTitle": "RDK S100 开发者套件",
-      "ms": 77
+      "ms": 131
     },
     {
       "id": "s600-hardware",
@@ -330,7 +331,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_s_doc/01_Quick_start/01_hardware_introduction/02_rdk_s600/01_rdk_s600_kit",
       "topTitle": "RDK S600 开发者套件",
-      "ms": 78
+      "ms": 133
     },
     {
       "id": "x5-hardware",
@@ -342,7 +343,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/hardware_introduction/rdk_x5",
       "topTitle": "硬件简介",
-      "ms": 109
+      "ms": 168
     },
     {
       "id": "x3-hardware",
@@ -354,7 +355,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/hardware_introduction/rdk_x3",
       "topTitle": "硬件简介",
-      "ms": 104
+      "ms": 142
     },
     {
       "id": "s100-usb-spec",
@@ -366,7 +367,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_s_doc/01_Quick_start/01_hardware_introduction/01_rdk_s100/01_rdk_s100_kit",
       "topTitle": "RDK S100 开发者套件",
-      "ms": 135
+      "ms": 198
     },
     {
       "id": "apt-source-cn",
@@ -378,7 +379,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system#1-软件源域名变更或-gpg-密钥问题",
       "topTitle": "8.1 硬件、系统与环境配置",
-      "ms": 60
+      "ms": 149
     },
     {
       "id": "apt-source-en",
@@ -388,9 +389,9 @@
       "reciprocalRank": 1,
       "allInTop3": null,
       "noGoodMatch": false,
-      "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/FAQ/hardware_and_system#q10-apt-update-命令执行失败或报错如何处理",
-      "topTitle": "8.1 硬件、系统与环境配置",
-      "ms": 53
+      "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Appendix/linux-command-manual/cmd_apt",
+      "topTitle": "apt",
+      "ms": 76
     },
     {
       "id": "s100-apt",
@@ -402,7 +403,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_s_doc/FAQ/hardware_and_system#1-软件源域名变更或-gpg-密钥问题",
       "topTitle": "8.1 硬件、系统与环境配置",
-      "ms": 84
+      "ms": 126
     },
     {
       "id": "x5-gpio",
@@ -414,7 +415,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/gpio",
       "topTitle": "GPIO 应用",
-      "ms": 66
+      "ms": 107
     },
     {
       "id": "s100-gpio",
@@ -426,7 +427,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_s_doc/Advanced_development/linux_development/driver_development_super/driver_gpio_dev",
       "topTitle": "GPIO 使用",
-      "ms": 77
+      "ms": 90
     },
     {
       "id": "s600-gpio",
@@ -438,7 +439,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/03_40pin_user_guide/s600/gpio",
       "topTitle": "3.3.2.2 GPIO 应用",
-      "ms": 81
+      "ms": 129
     },
     {
       "id": "x5-i2c",
@@ -450,7 +451,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/i2c",
       "topTitle": "I2C 应用",
-      "ms": 78
+      "ms": 87
     },
     {
       "id": "x5-spi",
@@ -462,7 +463,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/spi",
       "topTitle": "SPI 应用",
-      "ms": 78
+      "ms": 79
     },
     {
       "id": "x5-pinmap",
@@ -474,7 +475,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/40pin_define",
       "topTitle": "管脚定义与应用",
-      "ms": 76
+      "ms": 122
     },
     {
       "id": "x5-pinmap-en",
@@ -486,7 +487,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/01_40pin_user_sample/gpio",
       "topTitle": "GPIO 应用",
-      "ms": 76
+      "ms": 90
     },
     {
       "id": "s100-pinmap",
@@ -498,7 +499,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/03_40pin_user_guide/s100/01_40pin_define",
       "topTitle": "3.3.1.1 管脚定义与应用",
-      "ms": 87
+      "ms": 145
     },
     {
       "id": "x5-mipi",
@@ -510,7 +511,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/pydev_demo_sample/RDK_X5/mipi_camera_sample",
       "topTitle": "MIPI 摄像头实时检测",
-      "ms": 89
+      "ms": 141
     },
     {
       "id": "x3-mipi",
@@ -522,7 +523,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/pydev_demo_sample/RDK_X3/mipi_camera_sample",
       "topTitle": "mipi camera 示例",
-      "ms": 69
+      "ms": 86
     },
     {
       "id": "s100-mipi",
@@ -534,7 +535,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/Image/mipi_camera",
       "topTitle": "3.1.1 MIPI 摄像头使用",
-      "ms": 93
+      "ms": 151
     },
     {
       "id": "x5-v4l2",
@@ -544,9 +545,9 @@
       "reciprocalRank": 1,
       "allInTop3": null,
       "noGoodMatch": false,
-      "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/hardware_development/rdk_x5/V4l2#配置-camera",
+      "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/hardware_development/rdk_x5/V4l2",
       "topTitle": "V4L2 使用",
-      "ms": 95
+      "ms": 140
     },
     {
       "id": "x5-usb-camera",
@@ -558,7 +559,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/vision/RDK_X5/usb_camera",
       "topTitle": "USB 摄像头使用",
-      "ms": 86
+      "ms": 146
     },
     {
       "id": "tros-install",
@@ -570,7 +571,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/tros_doc/quick_start/install_tros",
       "topTitle": "安装 tros.b",
-      "ms": 6
+      "ms": 8
     },
     {
       "id": "tros-ros2",
@@ -582,7 +583,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/tros_doc/quick_start/install_tros",
       "topTitle": "安装 tros.b",
-      "ms": 3
+      "ms": 7
     },
     {
       "id": "x5-quant",
@@ -606,7 +607,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/oe_x3_doc/cn/oe_mapper/source/faststart/quickstart.html",
       "topTitle": "3.2. 算法模型 PTQ 量化+上板 快速上手",
-      "ms": 2
+      "ms": 1
     },
     {
       "id": "s100-hbm-runtime",
@@ -618,7 +619,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_s_doc/Algorithm_Application/python-api#hb_hbmruntime",
       "topTitle": "4.2 Python 接口",
-      "ms": 111
+      "ms": 153
     },
     {
       "id": "model-zoo-yolo",
@@ -630,7 +631,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/model_zoo_doc/model_zoo_intro",
       "topTitle": "4.1.1 Model Zoo 概述",
-      "ms": 1
+      "ms": 0
     },
     {
       "id": "oe-s-bev",
@@ -642,7 +643,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/oe_s_doc/guide/advanced_content/hat/examples/bev",
       "topTitle": "Bev多任务模型训练",
-      "ms": 20
+      "ms": 29
     },
     {
       "id": "s100-qwen",
@@ -666,7 +667,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/oe_llm_s600_doc/en/guide/quickstart/asr_model/whisper",
       "topTitle": "Whisper On-Device Execution",
-      "ms": 2
+      "ms": 3
     },
     {
       "id": "x5-poe",
@@ -678,7 +679,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/hardware_development/rdk_x5/POE",
       "topTitle": "PoE 供电使用",
-      "ms": 64
+      "ms": 130
     },
     {
       "id": "x5-miniboot",
@@ -690,7 +691,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Quick_start/system-burn/upgrade-miniboot",
       "topTitle": "升级 miniboot",
-      "ms": 61
+      "ms": 103
     },
     {
       "id": "x5-thermal",
@@ -702,7 +703,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/System_configuration/frequency_management",
       "topTitle": "2.4 Thermal 和 CPU 频率管理",
-      "ms": 59
+      "ms": 133
     },
     {
       "id": "x5-can",
@@ -714,7 +715,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Advanced_development/hardware_development/rdk_x5/can",
       "topTitle": "CAN 使用",
-      "ms": 65
+      "ms": 105
     },
     {
       "id": "stereo-camera",
@@ -726,7 +727,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/accessories_stereo_camera_doc/overview",
       "topTitle": "RDK 双目摄像头手册",
-      "ms": 1
+      "ms": 0
     },
     {
       "id": "rdkos-info",
@@ -738,7 +739,7 @@
       "noGoodMatch": false,
       "topUrl": "https://developer.d-robotics.cc/rdk_x_doc/Appendix/rdk-command-manual/cmd_rdkos_info",
       "topTitle": "rdkos_info",
-      "ms": 50
+      "ms": 145
     },
     {
       "id": "forum-camera-no-image",
@@ -750,7 +751,7 @@
       "noGoodMatch": false,
       "topUrl": "https://forum.d-robotics.cc/t/topic/26504",
       "topTitle": "跑用户手册中的使用USB摄像头发布图片时报错",
-      "ms": 5
+      "ms": 4
     },
     {
       "id": "forum-s100-wifi",
@@ -762,7 +763,7 @@
       "noGoodMatch": false,
       "topUrl": "https://forum.d-robotics.cc/t/topic/33210",
       "topTitle": "RDK S100没有wifi",
-      "ms": 742
+      "ms": 2653
     },
     {
       "id": "forum-mipi-black",
@@ -772,30 +773,30 @@
       "reciprocalRank": 1,
       "allInTop3": null,
       "noGoodMatch": false,
-      "topUrl": "https://forum.d-robotics.cc/t/topic/35716",
-      "topTitle": "S600上接GMSL摄像头用hobot-camera框架调试建链失败",
-      "ms": 1597
+      "topUrl": "https://forum.d-robotics.cc/t/topic/35506",
+      "topTitle": "rdk x5摄像头打不开",
+      "ms": 2121
     }
   ],
   "pageCases": [
     {
       "id": "apt-faq-section",
       "pass": true,
-      "ms": 1558,
+      "ms": 2061,
       "reason": "section contains the fact",
       "imageOnly": false
     },
     {
       "id": "apt-faq-anchor",
       "pass": true,
-      "ms": 1296,
+      "ms": 1482,
       "reason": "section contains the fact",
       "imageOnly": false
     },
     {
       "id": "x5-pinmap-image",
       "pass": true,
-      "ms": 1043,
+      "ms": 923,
       "reason": "section flagged image-only",
       "imageOnly": true
     }

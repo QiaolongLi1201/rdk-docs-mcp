@@ -7,12 +7,21 @@ import { FORUM_ID, getForumTopic, isForumRef, listForumTopics, searchForum } fro
 import type { HttpGet } from "./http.js";
 import { findRspressPage, isRspressShell, loadRspressDocs, normalizeDocPath } from "./rspress.js";
 import { applyOfficialPath, matchOfficialPath, searchGuidance } from "./routes.js";
-import { rankHits, matchQuality } from "./search.js";
+import { groupHits, matchQuality, rankHits } from "./search.js";
 import { selectSection } from "./sections.js";
 import { compactSphinxIndex } from "./sphinx.js";
-import { prebuiltEnabled, readPrebuilt, recallIndex, rememberIndex } from "./index-store.js";
+import {
+  drainIndexNotes,
+  noteIndex,
+  prebuiltEnabled,
+  prebuiltIsStale,
+  readPrebuiltSnapshot,
+  recallIndex,
+  rememberIndex,
+  staleIndexWarning,
+} from "./index-store.js";
 import type { BoardId } from "./products.js";
-import type { IndexedDoc, SearchHit } from "./types.js";
+import type { BoardGroup, IndexedDoc, SearchHit } from "./types.js";
 
 export type SearchSource = "docs" | "forum" | "all";
 
@@ -117,10 +126,24 @@ async function loadIndex(manual: Manual, http: HttpGet): Promise<IndexedDoc[]> {
   const cached = recallIndex(http, manual.id);
   if (cached) return cached;
   if (prebuiltEnabled(http)) {
-    const prebuilt = readPrebuilt(manual.id);
-    if (prebuilt) {
-      rememberIndex(http, manual.id, prebuilt);
-      return prebuilt;
+    const snapshot = readPrebuiltSnapshot(manual.id);
+    if (snapshot && !prebuiltIsStale(snapshot.builtAt)) {
+      rememberIndex(http, manual.id, snapshot.docs);
+      return snapshot.docs;
+    }
+    if (snapshot && prebuiltIsStale(snapshot.builtAt)) {
+      try {
+        const live = await loadIndexFromOrigin(manual, http);
+        rememberIndex(http, manual.id, live);
+        noteIndex(staleIndexWarning(manual.id, snapshot.builtAt, "live"));
+        return live;
+      } catch (error) {
+        rememberIndex(http, manual.id, snapshot.docs);
+        noteIndex(staleIndexWarning(manual.id, snapshot.builtAt, "snapshot"));
+        const message = error instanceof Error ? error.message : String(error);
+        noteIndex(`Live index for ${manual.id} failed: ${message}`);
+        return snapshot.docs;
+      }
     }
   }
   const docs = await loadIndexFromOrigin(manual, http);
@@ -149,6 +172,8 @@ export async function searchDocs(
   http: HttpGet,
 ): Promise<{
   hits: SearchHit[];
+  groups: BoardGroup[];
+  ambiguousBoard: boolean;
   warnings: string[];
   guidance: string;
   noGoodMatch: boolean;
@@ -187,6 +212,7 @@ export async function searchDocs(
       }),
     );
     warnings.push(...loaded.map((item) => item.warning).filter((item): item is string => Boolean(item)));
+    warnings.push(...drainIndexNotes());
     docHits = rankHits(loaded.flatMap((item) => item.docs), query, limit, { board: input.board }).map((hit) => ({
       ...hit,
       source: "docs" as const,
@@ -209,14 +235,24 @@ export async function searchDocs(
       warnings.push(`No retrieved hit is explicitly scoped to: ${missing.join(", ")}. Treat the comparison as incomplete.`);
   }
   const hits = applyOfficialPath(mergeHits(docHits, forumHits, limit), official, limit);
+  const groups = groupHits(hits);
+  const boardGroups = groups.filter((group) => group.board !== "agnostic" && group.board !== "multiple");
+  const ambiguousBoard = mentioned.length === 0 && !input.board && boardGroups.length > 1;
   const quality = matchQuality(hits);
   if (quality.noGoodMatch) {
     warnings.push(
       "noGoodMatch: no indexed page is a strong match. Do not guess commands, pin maps, or board facts from weak hits.",
     );
   }
+  if (ambiguousBoard) {
+    warnings.push(
+      "No board in the query. Hits are grouped by board. Pass board=x3|x5|s100|s600. Agents on a board, including Moss, should pass the detected board.",
+    );
+  }
   return {
     hits,
+    groups,
+    ambiguousBoard,
     warnings,
     guidance: quality.noGoodMatch
       ? "noGoodMatch. Do not answer from these hits. Say the manuals did not contain a strong page, and ask for the board or the exact tool name."

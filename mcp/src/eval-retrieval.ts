@@ -50,10 +50,16 @@ function pagePass(markdown: string, imageOnly: boolean | undefined, check: PageC
 }
 
 async function main() {
+  const offline = process.argv.includes("--offline") || process.env.RDK_DOCS_EVAL_OFFLINE === "1";
+  if (offline) process.env.RDK_DOCS_OFFLINE = "1";
+
   const here = dirname(fileURLToPath(import.meta.url));
   const suitePath = arg("--cases") ?? join(here, "..", "eval", "retrieval-cases.json");
   const outPath = arg("--out") ?? join(here, "..", "eval", "retrieval-report.json");
   const suite = JSON.parse(readFileSync(suitePath, "utf8")) as Suite;
+  const searchCases = offline
+    ? suite.search.filter((item) => item.source !== "forum" && item.manual !== "forum")
+    : suite.search;
 
   if (!process.env.RDK_DOCS_CACHE_DIR) {
     process.env.RDK_DOCS_CACHE_DIR = mkdtempSync(join(tmpdir(), "rdk-retrieval-eval-"));
@@ -61,10 +67,12 @@ async function main() {
 
   const cold = await time(() => searchDocs({ query: "X5 GPIO 怎么用", manual: "x5", limit: 5 }, fetchText));
   const warm = await time(() => searchDocs({ query: "X5 GPIO 怎么用", manual: "x5", limit: 5 }, fetchText));
-  const forum = await time(() => searchDocs({ query: "camera no image", source: "forum", limit: 5 }, fetchText));
+  const forum = offline
+    ? { value: { hits: [] as Array<{ title?: string }> }, ms: 0 }
+    : await time(() => searchDocs({ query: "camera no image", source: "forum", limit: 5 }, fetchText));
 
   const searchMetrics: CaseMetric[] = [];
-  for (const evalCase of suite.search) {
+  for (const evalCase of searchCases) {
     const { value, ms } = await time(() =>
       searchDocs(
         {
@@ -84,7 +92,8 @@ async function main() {
   }
 
   const pageMetrics: PageMetric[] = [];
-  for (const check of suite.pages) {
+  const pageCases = offline ? [] : suite.pages;
+  for (const check of pageCases) {
     const { value, ms } = await time(() =>
       getPage(
         {
@@ -108,10 +117,11 @@ async function main() {
     generatedAt: new Date().toISOString(),
     cacheDir: process.env.RDK_DOCS_CACHE_DIR,
     prebuilt: process.env.RDK_DOCS_PREBUILT ?? "default",
+    offline,
     latency: {
       coldSearchMs: cold.ms,
       warmSearchMs: warm.ms,
-      forumSearchMs: forum.ms,
+      forumSearchMs: offline ? null : forum.ms,
       coldTop: cold.value.hits[0]?.url ?? null,
       forumTop: forum.value.hits[0]?.title ?? null,
     },

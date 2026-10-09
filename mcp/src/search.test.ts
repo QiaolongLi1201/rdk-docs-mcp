@@ -475,23 +475,33 @@ describe("rankHits", () => {
     expect(x5?.score).toBeGreaterThan(0);
   });
 
-  it("prefers the BPU API page on the newer board when the query names neither", () => {
+  it("does not promote a newer board when the query names neither", () => {
     const docs: IndexedDoc[] = [
       {
         manualId: "rdk-x",
-        title: "BPU（算法推理模块）API",
+        title: "BPU（算法推理模块）API X3 接口说明",
         url: "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/multi_media_sp_dev_api/RDK_X3/cdev_multimedia_api_x3/bpu_api",
         kind: "page",
+        text: "BPU inference API",
       },
       {
         manualId: "rdk-x",
-        title: "BPU（算法推理模块）API",
+        title: "BPU API",
         url: "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/multi_media_sp_dev_api/RDK_X5/cdev_multimedia_api_x5/bpu_api",
         kind: "page",
+        text: "BPU inference API",
+      },
+      {
+        manualId: "rdk-x",
+        title: "BPU 内存",
+        url: "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/multi_media_sp_dev_api/RDK_X5/cdev_multimedia_api_x5/bpu_mem",
+        kind: "page",
+        text: "reserved memory",
       },
     ];
     const hits = rankHits(docs, "BPU inference", 5);
-    expect(hits[0]?.url).toContain("RDK_X5");
+    expect(hits[0]?.url).toContain("RDK_X3");
+    expect(hits[1]?.url).toContain("RDK_X5/cdev_multimedia_api_x5/bpu_api");
   });
 
   it("uses the board argument when the query does not name one", () => {

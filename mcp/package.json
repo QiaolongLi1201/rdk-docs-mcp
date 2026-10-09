@@ -21,12 +21,13 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "eval": "npm run build && node dist/eval-retrieval.js",
+    "eval:offline": "npm run build && node dist/eval-retrieval.js --offline",
     "build:index": "npm run build && node dist/build-prebuilt.js",
     "eval:live": "npm run build && node dist/eval-live.js",
     "eval:skills": "npm run build && node dist/eval-skills-live.js",
     "verify": "npm test && npm run eval:live",
     "prepack": "rm -rf ./skills && cp -R ../skills ./skills && cp ../skills/rdk-docs/SKILL.md ./SKILL.md",
-    "prepublishOnly": "npm test && npm run build && npm run prepack"
+    "prepublishOnly": "npm test && npm run build:index && npm run prepack"
   },
   "engines": {
     "node": ">=20"

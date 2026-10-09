@@ -7,7 +7,7 @@
 export const RETRIEVAL_ALIASES: Record<string, string[]> = {
   hbm_shell: ["hrt_model_exec", "hb_model_info"],
   hobot_dnn: ["pyeasy_dnn", "hbm_runtime"],
-  hbm_runtime: ["python-api", "hbm"],
+  hbm_runtime: ["hbm"],
   ptq: ["量化"],
   qat: ["量化"],
   量化: ["ptq", "qat"],
@@ -26,5 +26,4 @@ export const RETRIEVAL_ALIASES: Record<string, string[]> = {
   无线: ["wifi"],
   推理: ["inference"],
   inference: ["推理"],
-  v4l2: ["摄像头"],
 };
