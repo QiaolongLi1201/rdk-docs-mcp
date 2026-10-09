@@ -778,36 +778,4 @@ describe("rankHits", () => {
     );
     expect(hits[0]?.url).toContain("/t/topic/2");
   });
-
-  it("does not let one series fill an unscoped top-k when another series is close", () => {
-    const hits = rankHits(
-      [
-        {
-          manualId: "rdk-x",
-          title: "USB 摄像头使用",
-          url: "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/vision/RDK_X5/usb_camera",
-          kind: "page",
-          text: "采集 USB 摄像头的图像并预览",
-        },
-        {
-          manualId: "rdk-x",
-          title: "USB 摄像头示例",
-          url: "https://developer.d-robotics.cc/rdk_x_doc/Basic_Application/pydev_demo_sample/RDK_X5/usb_camera_sample",
-          kind: "page",
-          text: "USB 摄像头实时检测",
-        },
-        {
-          manualId: "rdk-s",
-          title: "USB 摄像头使用",
-          url: "https://developer.d-robotics.cc/rdk_s_doc/Basic_Application/Image/usb_camera",
-          kind: "page",
-          text: "采集 USB 摄像头的图像并预览",
-        },
-      ],
-      "USB 摄像头怎么预览画面",
-      3,
-    );
-    expect(hits.some((hit) => hit.manual === "rdk-s")).toBe(true);
-    expect(hits.some((hit) => hit.manual === "rdk-x")).toBe(true);
-  });
 });

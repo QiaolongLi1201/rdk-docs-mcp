@@ -14,13 +14,17 @@ async function main() {
   const server = createServer();
   const transport = new StdioServerTransport();
   const started = Date.now();
-  try {
-    await warmSearchIndex();
-    console.error(`rdk-docs index warm ${Date.now() - started}ms`);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(`rdk-docs index warm failed: ${message}`);
-  }
+  // Accept the MCP handshake immediately. Warm-up runs in the background;
+  // the first searchDocs call awaits this same promise.
+  void warmSearchIndex().then(
+    () => {
+      console.error(`rdk-docs index warm ${Date.now() - started}ms`);
+    },
+    (error: unknown) => {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`rdk-docs index warm failed: ${message}`);
+    },
+  );
   await server.connect(transport);
   // Skill refresh walks client config dirs. Do not block the MCP initialize handshake on it.
   setImmediate(() => refreshInstalledSkillsOnStart());

@@ -34,19 +34,10 @@ export function groupHits(hits: SearchHit[]): Array<{ board: ResultBoard; hits: 
   return order.map((board) => ({ board, hits: map.get(board) ?? [] }));
 }
 
-function diversityKey(hit: SearchHit): string {
-  return hit.board ?? "agnostic";
-}
-
-/**
- * When the query names no board, surface the best hit of each board first,
- * then the rest in score order. The global best stays first.
- */
 function diversifyByBoard(hits: SearchHit[]): SearchHit[] {
-  if (hits.length < 2) return hits;
   const groups = new Map<string, SearchHit[]>();
   for (const hit of hits) {
-    const key = diversityKey(hit);
+    const key = hit.board ?? "agnostic";
     const list = groups.get(key);
     if (list) list.push(hit);
     else groups.set(key, [hit]);
@@ -64,42 +55,10 @@ function diversifyByBoard(hits: SearchHit[]): SearchHit[] {
   return [...first, ...hits.filter((hit) => !seen.has(hit))];
 }
 
-/** In the top window, defer extras that share a key so one page cannot fill it. */
-function capRepeats(hits: SearchHit[], limit: number, keyOf: (hit: SearchHit) => string, maxPer: number): SearchHit[] {
-  const counts = new Map<string, number>();
-  const head: SearchHit[] = [];
-  const rest: SearchHit[] = [];
-  for (const hit of hits) {
-    const key = keyOf(hit);
-    const seen = counts.get(key) ?? 0;
-    if (head.length < limit && seen >= maxPer) {
-      rest.push(hit);
-      continue;
-    }
-    counts.set(key, seen + 1);
-    head.push(hit);
-  }
-  return [...head, ...rest];
-}
-
-function cjkChars(query: string): number {
-  let count = 0;
-  for (let i = 0; i < query.length; i += 1) {
-    const code = query.charCodeAt(i);
-    if (code >= 0x4e00 && code <= 0x9fff) count += 1;
-  }
-  return count;
-}
-
 function orderHits(docsGroups: IndexedDoc[][], query: string, limit: number, options: RankOptions): SearchHit[] {
   const ranked = rankCorpora(docsGroups, query, options);
   const unscoped = contextBoards(query, options).length === 0;
-  const longQuery = cjkChars(query) >= 24;
-  // Short queries keep one hit per board in front. A long question stays in
-  // score order and only defers a third section from the same page.
-  const diverse = unscoped && !longQuery ? diversifyByBoard(ranked) : ranked;
-  const ordered =
-    unscoped && longQuery ? capRepeats(diverse, limit, (hit) => hit.url.split("#")[0] ?? hit.url, 2) : diverse;
+  const ordered = unscoped ? diversifyByBoard(ranked) : ranked;
   return ordered.slice(0, limit).map((hit) => aliasNote(query, hit));
 }
 

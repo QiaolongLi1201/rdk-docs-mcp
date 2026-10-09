@@ -502,30 +502,6 @@ describe("bm25", () => {
     expect(matchQuality(rankHits(docs, query, 3), [docs], query).noGoodMatch).toBe(true);
   });
 
-  it("keeps two FAQ questions on the same page as separate hits", () => {
-    const hits = rankHits(
-      [
-        doc({
-          title: "Q8: 开发板接入 USB 摄像头后，默认的设备节点是什么？",
-          url: "https://developer.d-robotics.cc/rdk_x_doc/FAQ/interface#q8",
-          kind: "heading",
-          answer: "默认的设备节点一般是 /dev/video0，插入 USB 摄像头后可以在 /dev 下面看到。",
-        }),
-        doc({
-          title: "Q9: 开发板插入 USB 摄像头后，没有生成预期的设备节点，怎么办？",
-          url: "https://developer.d-robotics.cc/rdk_x_doc/FAQ/interface#q9",
-          kind: "heading",
-          answer: "没有生成设备节点时，先确认 USB 摄像头是否被系统识别。",
-        }),
-      ],
-      "开发板插入 USB 摄像头之后一直没有生成预期的设备节点，默认节点也看不到",
-      5,
-    );
-    const urls = hits.map((hit) => hit.url);
-    expect(urls.some((url) => url.includes("#q8"))).toBe(true);
-    expect(urls.some((url) => url.includes("#q9"))).toBe(true);
-  });
-
   it("blocks S-series manuals for an X-only board and the reverse", () => {
     expect(manualMatchesBoards("oe-s", ["x5"])).toBe(false);
     expect(manualMatchesBoards("oe-x5", ["x5"])).toBe(true);
