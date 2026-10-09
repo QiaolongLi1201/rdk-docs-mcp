@@ -13,10 +13,11 @@ import { searchDocs } from "./service.js";
  * Rank is computed on the docs search list (limit 8), the same call an agent makes
  * with no manual filter.
  *
- * noGoodMatch cases have no acceptable page. The system abstains when the hit list
- * is empty, or when the payload sets abstain / noMatch / no_good_match, or when
- * warnings/guidance explicitly say there is no matching document. Precision is
- * TP/(TP+FP) over abstentions. It is null when the system never abstains.
+ * noGoodMatch cases have no acceptable page. The system abstains when the result
+ * boolean noGoodMatch is true, when the hit list is empty, or when warnings or
+ * guidance say there is no matching document. Precision is TP/(TP+FP) over
+ * abstentions. It is null when the system never abstains. Per-hit confidence is
+ * recorded and is not itself an abstention threshold.
  */
 
 export type HoldoutCase = {
@@ -29,9 +30,12 @@ export type HoldoutCase = {
 };
 
 type SearchPayload = {
-  hits: Array<{ title: string; url: string; score: number; manual?: string }>;
+  hits: Array<{ title: string; url: string; score: number; manual?: string; confidence?: number }>;
   warnings?: string[];
   guidance?: string;
+  /** Result-level abstention. Weak hits may still be present. */
+  noGoodMatch?: boolean;
+  confidence?: number;
   abstain?: boolean;
   noMatch?: boolean;
   no_good_match?: boolean;
@@ -68,7 +72,7 @@ export function firstRank(hitUrls: string[], expectedUrls: string[]): number | n
 const ABSTAIN_TEXT = /没有(?:找到|检索到)?(?:合适|相关|匹配)的?(?:文档|页面|手册)|未找到相关|no good match|no relevant (?:document|page|hit)|nothing relevant/i;
 
 export function systemAbstained(payload: SearchPayload): boolean {
-  if (payload.abstain === true || payload.noMatch === true || payload.no_good_match === true) return true;
+  if (payload.noGoodMatch === true || payload.abstain === true || payload.noMatch === true || payload.no_good_match === true) return true;
   if (payload.hits.length === 0) return true;
   const text = [...(payload.warnings ?? []), payload.guidance ?? ""].join("\n");
   return ABSTAIN_TEXT.test(text);
@@ -120,11 +124,14 @@ async function main() {
       hitAt3: !item.noGoodMatch && rank !== null && rank <= 3,
       reciprocalRank: !item.noGoodMatch ? (rank === null ? 0 : 1 / rank) : null,
       abstained,
+      resultNoGoodMatch: search.noGoodMatch === true,
+      confidence: typeof search.confidence === "number" ? Math.round(search.confidence * 1000) / 1000 : undefined,
       latencyMs: Math.round(latencyMs * 10) / 10,
       top: search.hits.slice(0, 3).map((hit) => ({
         title: hit.title,
         url: hit.url,
         score: Math.round(hit.score * 100) / 100,
+        confidence: typeof hit.confidence === "number" ? Math.round(hit.confidence * 1000) / 1000 : undefined,
         manual: hit.manual,
       })),
       warnings: search.warnings ?? [],
